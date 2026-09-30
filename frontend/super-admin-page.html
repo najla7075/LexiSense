@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LexiSense — Super Admin Management Dashboard</title>
+    
+    <!-- Resource Hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Plus Jakarta Sans, Baloo 2, Nunito, Lexend -->
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Lexend:wght@300;400;500;600;700&family=Nunito:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            purple: '#7C3AED',
+                            'purple-dark': '#6D28D9',
+                            'purple-bright': '#9333EA',
+                            'purple-light': '#C084FC',
+                            'purple-soft': '#F5F3FF',
+                            'purple-deep': '#2E1065',
+                            cream: '#FAF8F5',
+                            card: '#FFFFFF',
+                            surface: '#FDFCFB',
+                            border: '#EDE9FE',
+                        }
+                    },
+                    fontFamily: {
+                        brand: ['"Baloo 2"', 'cursive', 'sans-serif'],
+                        heading: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        body: ['"Plus Jakarta Sans"', '"Nunito"', 'sans-serif'],
+                        dyslexic: ['"Lexend"', '"OpenDyslexic"', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'subtle': '0 2px 12px -2px rgba(124, 58, 237, 0.06), 0 1px 3px 0 rgba(0, 0, 0, 0.04)',
+                        'card': '0 4px 20px -4px rgba(124, 58, 237, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.03)',
+                        'hover': '0 12px 28px -6px rgba(124, 58, 237, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.04)',
+                        'dropdown': '0 16px 36px -8px rgba(30, 27, 75, 0.18)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', 'Nunito', sans-serif;
+            background-color: #FAF8F5;
+            color: #1E1B4B;
+        }
+        .sidebar-link {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sidebar-link.active {
+            background-color: #7C3AED;
+            color: #FFFFFF;
+            box-shadow: 0 4px 14px rgba(124, 58, 237, 0.25);
+        }
+        .sidebar-link.active i {
+            color: #FFFFFF !important;
+        }
+        .sidebar-link:not(.active):hover {
+            background-color: #F5F3FF;
+            color: #6D28D9;
+        }
+        .sidebar-link:not(.active):hover i {
+            color: #7C3AED;
+        }
+        /* Custom scrollbar for drawers and modals */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #F5F3FF;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #DDD6FE;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #C4B5FD;
+        }
+        /* Drawer transitions */
+        .drawer-backdrop {
+            transition: opacity 0.3s ease;
+        }
+        .drawer-content {
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .drawer-hidden {
+            display: none !important;
+        }
+    </style>
+    <!-- Supabase JS Client & Core Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/accessibility.js"></script>
+    <script src="js/auth-guard.js"></script>
+    <script src="js/super-admin.js"></script>
+</head>
+<body class="min-h-screen flex antialiased bg-[#FAF8F5] text-slate-800 selection:bg-purple-100 selection:text-purple-900">
+
+    <!-- ========================================================================= -->
+    <!-- 1. LEFT SIDEBAR NAVIGATION -->
+    <!-- ========================================================================= -->
+    <div id="mobile-sidebar-backdrop" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 lg:hidden hidden transition-opacity"></div>
+    
+    <aside id="sidebar-wrapper" class="fixed top-0 left-0 bottom-0 w-64 bg-white border-r border-purple-100/90 z-50 flex flex-col justify-between transition-transform duration-300 lg:translate-x-0 -translate-x-full no-print">
+        
+        <!-- Top: Brand Header -->
+        <div>
+            <div class="p-5 border-b border-purple-100 flex items-center justify-between">
+                <div class="flex items-center gap-3 cursor-pointer" onclick="switchSuperAdminView('overview')">
+                    <img src="assets/lexisense-logo.png" alt="LexiSense Logo" class="h-10 w-10 object-contain drop-shadow-xs">
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-brand text-2xl font-extrabold text-brand-purple-deep tracking-tight leading-none">LexiSense</span>
+                        </div>
+                        <span class="text-[11px] font-bold text-purple-700 tracking-wide uppercase">Super Admin</span>
+                    </div>
+                </div>
+                <button onclick="toggleMobileSidebar()" class="lg:hidden p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="p-3.5 space-y-6 overflow-y-auto max-h-[calc(100vh-210px)] custom-scrollbar">
+                
+                <!-- Group 1: MAIN -->
+                <div class="space-y-1">
+                    <p class="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Main</p>
+                    <button onclick="switchSuperAdminView('overview')" id="sa-nav-overview" class="sidebar-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs text-slate-700 active">
+                        <i class="fa-solid fa-house w-4 text-center text-sm"></i>
+                        <span>Dashboard</span>
+                    </button>
+                    <button onclick="switchSuperAdminView('users')" id="sa-nav-users" class="sidebar-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs text-slate-700">
+                        <i class="fa-solid fa-users w-4 text-center text-sm text-slate-500"></i>
+                        <span>Users & Roles</span>
+                    </button>
+                    <button onclick="switchSuperAdminView('screenings')" id="sa-nav-screenings" class="sidebar-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs text-slate-700">
+                        <i class="fa-solid fa-brain w-4 text-center text-sm text-slate-500"></i>
+                        <span>Screenings</span>
+                    </button>
+                    <button onclick="switchSuperAdminView('schools')" id="sa-nav-schools" class="sidebar-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs text-slate-700">
+                        <i class="fa-solid fa-school w-4 text-center text-sm text-slate-500"></i>
+                        <span>Schools</span>
+                    </button>
+                </div>
+
+                <!-- Group 2: INSIGHTS -->
+                <div class="space-y-1">
+                    <p class="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Insights</p>
+                    <button onclick="switchSuperAdminView('analytics')" id="sa-nav-analytics" class="sidebar-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs text-slate-700">
+                        <i class="fa-solid fa-chart-pie w-4 text-center text-sm text-slate-500"></i>
+                        <span>Analytics</span>
+                    </button>
+                    <button onclick="switchSuperAdminView('alerts')" id="sa-nav-alerts" class="sidebar-link w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-bold text-xs text-slate-700">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-bell w-4 text-center text-sm text-slate-500"></i>
+                            <span>Alerts</span>
+                        </div>
+                        <span id="sidebar-alert-badge" class="px-1.5 py-0.5 bg-rose-500 text-white rounded-full text-[10px] font-black leading-none">0</span>
+                    </button>
+                </div>
+
+                <!-- Group 3: SYSTEM -->
+                <div class="space-y-1">
+                    <p class="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">System</p>
+                    <button onclick="switchSuperAdminView('security')" id="sa-nav-security" class="sidebar-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs text-slate-700">
+                        <i class="fa-solid fa-shield-halved w-4 text-center text-sm text-slate-500"></i>
+                        <span>Security</span>
+                    </button>
+                    <button onclick="switchSuperAdminView('settings')" id="sa-nav-settings" class="sidebar-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs text-slate-700">
+                        <i class="fa-solid fa-sliders w-4 text-center text-sm text-slate-500"></i>
+                        <span>Settings</span>
+                    </button>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Bottom Sidebar: System Status & User Profile -->
+        <div class="p-3.5 border-t border-purple-100 bg-purple-50/40 space-y-3">
+            <!-- System Health Status -->
+            <div class="flex items-center gap-2 px-3 py-1.5 bg-white rounded-xl border border-purple-100 text-[11px] font-bold text-emerald-800 shadow-2xs">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>All Systems Operational</span>
+            </div>
+
+            <!-- Profile Info Bar -->
+            <div class="flex items-center justify-between p-2 rounded-xl bg-white border border-purple-100 shadow-2xs">
+                <div class="flex items-center gap-2.5 overflow-hidden">
+                    <div class="w-8 h-8 rounded-lg bg-amber-400 text-purple-950 flex items-center justify-center font-extrabold text-xs shrink-0 shadow-2xs border border-amber-300">
+                        <span id="sidebar-user-initials">FZ</span>
+                    </div>
+                    <div class="truncate text-left">
+                        <span class="text-xs font-bold text-slate-900 block truncate" id="sidebar-user-name">Faiz</span>
+                        <span class="text-[10px] text-purple-700 font-semibold block truncate">Super Administrator</span>
+                    </div>
+                </div>
+                <button onclick="logout()" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Sign Out">
+                    <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ========================================================================= -->
+    <!-- 2. MAIN CONTAINER (OFFSET BY SIDEBAR ON DESKTOP) -->
+    <!-- ========================================================================= -->
+    <div class="flex-1 flex flex-col min-h-screen lg:pl-64 w-full transition-all">
+
+        <!-- TOP BAR: SEARCH, NOTIFICATIONS, ACCESSIBILITY, PROFILE -->
+        <header class="sticky top-0 w-full bg-white/95 backdrop-blur-md border-b border-purple-100/90 z-30 px-4 sm:px-8 py-3 shadow-2xs no-print">
+            <div class="flex items-center justify-between gap-3">
+                
+                <!-- Left: Mobile Menu Toggle & Global Command Search -->
+                <div class="flex items-center gap-3 flex-1 max-w-xl">
+                    <button onclick="toggleMobileSidebar()" class="lg:hidden p-2 text-slate-600 hover:text-purple-700 hover:bg-purple-50 rounded-xl transition-colors">
+                        <i class="fa-solid fa-bars text-base"></i>
+                    </button>
+
+                    <!-- Global Search Field -->
+                    <div class="relative w-full">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+                        <input type="text" id="global-command-search" oninput="handleGlobalSearch(this.value)" placeholder="Search child ID (e.g. LX-8841), name, school, email, or dossier..." class="w-full pl-9 pr-12 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-purple-500 rounded-xl text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-purple-100 focus:outline-none transition-all">
+                        <div class="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] text-slate-400 font-bold bg-white px-1.5 py-0.5 rounded border border-slate-200 pointer-events-none">
+                            <span>⌘K</span>
+                        </div>
+
+                        <!-- Global Search Results Dropdown -->
+                        <div id="global-search-results" class="hidden absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl border border-purple-100 shadow-dropdown p-2 z-50 max-h-80 overflow-y-auto custom-scrollbar">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Controls: Notification Bell, Accessibility, Profile Dropdown -->
+                <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+                    
+                    <!-- Notification Centre Bell -->
+                    <div class="relative">
+                        <button onclick="toggleNotificationDropdown()" id="notification-bell-btn" class="relative p-2 text-slate-600 hover:text-purple-700 hover:bg-purple-50 rounded-xl transition-colors" title="Notification Centre">
+                            <i class="fa-regular fa-bell text-base"></i>
+                            <span id="notif-count-badge" class="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white rounded-full text-[9px] font-black flex items-center justify-center border-2 border-white">0</span>
+                        </button>
+
+                        <!-- Notification Dropdown Panel -->
+                        <div id="notification-dropdown" class="hidden absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white rounded-2xl border border-purple-100 shadow-dropdown p-3.5 z-50 animate-pop">
+                            <div class="flex items-center justify-between border-b border-purple-50 pb-2.5 mb-2">
+                                <div class="flex items-center gap-2">
+                                    <h4 class="font-heading font-bold text-sm text-slate-900">Notifications</h4>
+                                    <span id="notif-dropdown-badge" class="px-2 py-0.5 bg-purple-100 text-purple-800 text-[10px] font-black rounded-full">0 New</span>
+                                </div>
+                                <button onclick="markAllNotificationsRead()" class="text-[11px] font-bold text-purple-700 hover:text-purple-900">Mark all read</button>
+                            </div>
+                            <div id="notification-items-list" class="space-y-1.5 max-h-72 overflow-y-auto custom-scrollbar">
+                                <!-- Populated dynamically by JS -->
+                            </div>
+                            <div class="pt-2 border-t border-purple-50 mt-2 text-center">
+                                <button onclick="switchSuperAdminView('alerts'); toggleNotificationDropdown();" class="text-xs font-bold text-purple-700 hover:text-purple-900">View All System Alerts &rarr;</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Accessibility Controls Button -->
+                    <button onclick="openAccessibilityModal()" class="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-800 rounded-xl border border-purple-200 text-xs font-bold transition-all" title="Accessibility Settings">
+                        <i class="fa-solid fa-universal-access text-sm"></i>
+                        <span class="hidden md:inline">Accessibility</span>
+                    </button>
+
+                    <!-- User Profile Quick View / Logout -->
+                    <div class="flex items-center gap-2 pl-2 border-l border-slate-200" id="header-user-container">
+                        <div class="w-8 h-8 rounded-xl bg-amber-400 text-purple-950 flex items-center justify-center font-extrabold text-xs shadow-2xs border border-amber-300">
+                            <span id="header-user-initials">FZ</span>
+                        </div>
+                        <div class="hidden sm:block text-left text-xs leading-tight">
+                            <span class="font-bold text-slate-900 block" id="header-user-name">Faiz</span>
+                            <span class="text-[10px] text-slate-500 font-semibold">Super Admin</span>
+                        </div>
+                        <button onclick="logout()" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors ml-0.5" title="Sign Out">
+                            <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </header>
+
+        <!-- ========================================================================= -->
+        <!-- 3. MAIN DASHBOARD PANELS & VIEWS -->
+        <!-- ========================================================================= -->
+        <main class="w-full px-4 sm:px-8 py-6 flex-1 max-w-7xl mx-auto space-y-6">
+
+            <!-- ========================================================================= -->
+            <!-- VIEW 1: DASHBOARD (OVERVIEW) -->
+            <!-- ========================================================================= -->
+            <div id="sa-view-overview" class="superadmin-view-panel space-y-6">
+                
+                <!-- Personal Welcome Header + Quick Actions -->
+                <div class="bg-white rounded-3xl p-6 border border-purple-100/90 shadow-subtle flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <h2 class="font-heading text-2xl sm:text-3xl font-extrabold text-slate-900" id="welcome-greeting">
+                                Good afternoon, Faiz 👋
+                            </h2>
+                        </div>
+                        <p class="text-xs sm:text-sm text-slate-500 font-medium">
+                            Here's what's happening in LexiSense today across all schools and parent screening accounts.
+                        </p>
+                    </div>
+
+                    <!-- 3 Compact Quick Actions -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button onclick="openAddAdminModal()" class="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5">
+                            <i class="fa-solid fa-user-plus"></i>
+                            <span>+ Add Admin</span>
+                        </button>
+                        <button onclick="openAddSchoolModal()" class="px-3.5 py-2 bg-purple-50 hover:bg-purple-100 text-purple-900 font-bold text-xs rounded-xl border border-purple-200 transition-all flex items-center gap-1.5">
+                            <i class="fa-solid fa-school-flag"></i>
+                            <span>+ Register School</span>
+                        </button>
+                        <button onclick="switchSuperAdminView('alerts')" class="px-3.5 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 transition-all flex items-center gap-1.5">
+                            <i class="fa-solid fa-bell text-amber-500"></i>
+                            <span>View Alerts</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4 Top Executive KPI Stat Cards (Live Synchronized) -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Stat 1: Users -->
+                    <div onclick="switchSuperAdminView('users')" class="bg-white p-5 rounded-3xl border border-purple-100/90 shadow-subtle hover:shadow-card cursor-pointer transition-all space-y-2">
+                        <div class="flex items-center justify-between text-slate-500 text-xs font-bold uppercase tracking-wider">
+                            <span>Users</span>
+                            <div class="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center"><i class="fa-solid fa-users"></i></div>
+                        </div>
+                        <strong id="stat-total-users" class="font-heading text-3xl font-extrabold text-slate-900 block">0</strong>
+                        <span class="text-[11px] text-emerald-600 font-bold flex items-center gap-1"><i class="fa-solid fa-rotate text-xs"></i> Synced with Database</span>
+                    </div>
+
+                    <!-- Stat 2: Screenings -->
+                    <div onclick="switchSuperAdminView('screenings')" class="bg-white p-5 rounded-3xl border border-purple-100/90 shadow-subtle hover:shadow-card cursor-pointer transition-all space-y-2">
+                        <div class="flex items-center justify-between text-slate-500 text-xs font-bold uppercase tracking-wider">
+                            <span>Screenings</span>
+                            <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center"><i class="fa-solid fa-brain"></i></div>
+                        </div>
+                        <strong id="stat-total-screenings" class="font-heading text-3xl font-extrabold text-slate-900 block">0</strong>
+                        <span class="text-[11px] text-emerald-600 font-bold flex items-center gap-1"><i class="fa-solid fa-check text-xs"></i> Multimodal Validated</span>
+                    </div>
+
+                    <!-- Stat 3: Schools -->
+                    <div onclick="switchSuperAdminView('schools')" class="bg-white p-5 rounded-3xl border border-purple-100/90 shadow-subtle hover:shadow-card cursor-pointer transition-all space-y-2">
+                        <div class="flex items-center justify-between text-slate-500 text-xs font-bold uppercase tracking-wider">
+                            <span>Schools</span>
+                            <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center"><i class="fa-solid fa-school"></i></div>
+                        </div>
+                        <strong id="stat-total-schools" class="font-heading text-3xl font-extrabold text-slate-900 block">0</strong>
+                        <span class="text-[11px] text-purple-700 font-bold">Partner Institutions</span>
+                    </div>
+
+                    <!-- Stat 4: Alerts -->
+                    <div onclick="switchSuperAdminView('alerts')" class="bg-white p-5 rounded-3xl border border-purple-100/90 shadow-subtle hover:shadow-card cursor-pointer transition-all space-y-2">
+                        <div class="flex items-center justify-between text-slate-500 text-xs font-bold uppercase tracking-wider">
+                            <span>Alerts</span>
+                            <div class="w-8 h-8 rounded-xl bg-rose-50 text-rose-700 flex items-center justify-center"><i class="fa-solid fa-bell"></i></div>
+                        </div>
+                        <strong id="stat-high-risk" class="font-heading text-3xl font-extrabold text-rose-600 block">0</strong>
+                        <span class="text-[11px] text-rose-600 font-bold flex items-center gap-1">Action required</span>
+                    </div>
+                </div>
+
+                <!-- NEEDS YOUR ATTENTION SECTION (Live Synchronized) -->
+                <div class="bg-white rounded-3xl p-6 border border-purple-100/90 shadow-subtle space-y-4">
+                    <div class="flex items-center justify-between border-b border-purple-50 pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
+                            <h3 class="font-heading font-extrabold text-base text-slate-900">Needs Your Attention</h3>
+                        </div>
+                        <button onclick="switchSuperAdminView('alerts')" class="text-xs font-bold text-purple-700 hover:text-purple-900">View all &rarr;</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                        <!-- Action Item 1: High-Risk Screenings -->
+                        <div onclick="filterScreeningsByTier('tier3')" class="p-4 rounded-2xl bg-rose-50/60 hover:bg-rose-50 border border-rose-100 cursor-pointer transition-all space-y-1">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-rose-600"></span>
+                                <strong class="text-xs font-extrabold text-rose-950 block"><span id="overview-attention-tier3-count">0</span> High-Risk Screenings</strong>
+                            </div>
+                            <p class="text-[11px] text-rose-700 font-medium pl-4">Require specialist review (Tier 3)</p>
+                        </div>
+
+                        <!-- Action Item 2: Administrator Requests -->
+                        <div onclick="filterUsersByPending()" class="p-4 rounded-2xl bg-amber-50/60 hover:bg-amber-50 border border-amber-100 cursor-pointer transition-all space-y-1">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-amber-600"></span>
+                                <strong class="text-xs font-extrabold text-amber-950 block"><span id="overview-attention-admin-count">0</span> Administrator Requests</strong>
+                            </div>
+                            <p class="text-[11px] text-amber-700 font-medium pl-4">Waiting for account approval</p>
+                        </div>
+
+                        <!-- Action Item 3: Data Deletion Request -->
+                        <div onclick="switchSuperAdminView('security')" class="p-4 rounded-2xl bg-orange-50/60 hover:bg-orange-50 border border-orange-100 cursor-pointer transition-all space-y-1">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-orange-600"></span>
+                                <strong class="text-xs font-extrabold text-orange-950 block"><span id="overview-attention-purge-count">0</span> Data Deletions</strong>
+                            </div>
+                            <p class="text-[11px] text-orange-700 font-medium pl-4">Right-to-be-forgotten queue</p>
+                        </div>
+
+                        <!-- Action Item 4: New Schools -->
+                        <div onclick="switchSuperAdminView('schools')" class="p-4 rounded-2xl bg-blue-50/60 hover:bg-blue-50 border border-blue-100 cursor-pointer transition-all space-y-1">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                                <strong class="text-xs font-extrabold text-blue-950 block"><span id="overview-attention-schools-count">0</span> Active Institutions</strong>
+                            </div>
+                            <p class="text-[11px] text-blue-700 font-medium pl-4">View school network</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Middle Section: Screening Overview (Risk Chart) & Recent Activity -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    
+                    <!-- Left: Screening Overview & Risk Stratification -->
+                    <div class="lg:col-span-7 bg-white rounded-3xl p-6 border border-purple-100/90 shadow-subtle space-y-5">
+                        <div class="flex items-center justify-between border-b border-purple-50 pb-3">
+                            <div>
+                                <h3 class="font-heading font-extrabold text-base text-slate-900">Screening Overview</h3>
+                                <p class="text-xs text-slate-500 font-medium">Real-time risk distribution across all platform screenings</p>
+                            </div>
+                            <button onclick="switchSuperAdminView('analytics')" class="text-xs font-bold text-purple-700 hover:text-purple-900">Detailed Analytics &rarr;</button>
+                        </div>
+
+                        <!-- Risk Bar Distribution (Live Synchronized) -->
+                        <div class="space-y-3.5">
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-1.5">
+                                    <span class="text-emerald-800 flex items-center gap-1.5">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                                        Tier 1: Low Screening Concern (<span id="overview-tier1-pct">0%</span>)
+                                    </span>
+                                    <span class="text-slate-500 font-semibold">Typical Development</span>
+                                </div>
+                                <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                                    <div id="overview-tier1-bar" class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 0%;"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-1.5">
+                                    <span class="text-amber-800 flex items-center gap-1.5">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                                        Tier 2: Moderate Concern (<span id="overview-tier2-pct">0%</span>)
+                                    </span>
+                                    <span class="text-slate-500 font-semibold">60-Day Re-check</span>
+                                </div>
+                                <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                                    <div id="overview-tier2-bar" class="bg-amber-400 h-full rounded-full transition-all duration-500" style="width: 0%;"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-1.5">
+                                    <span class="text-rose-800 flex items-center gap-1.5">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                                        Tier 3: Specialist Referral (<span id="overview-tier3-pct">0%</span>)
+                                    </span>
+                                    <span class="text-slate-500 font-semibold">Clinical Review</span>
+                                </div>
+                                <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                                    <div id="overview-tier3-bar" class="bg-rose-500 h-full rounded-full transition-all duration-500" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3-Pillar Score Summary Cards (Live Synchronized) -->
+                        <div class="grid grid-cols-3 gap-3 pt-2 text-center">
+                            <div class="p-3 bg-purple-50/50 rounded-2xl border border-purple-100">
+                                <span class="text-[10px] text-slate-500 font-bold uppercase block">Pillar 1 Avg</span>
+                                <strong id="overview-p1-avg" class="font-heading text-lg font-extrabold text-slate-900">0%</strong>
+                                <span class="text-[10px] text-purple-700 font-medium block">Questionnaires</span>
+                            </div>
+                            <div class="p-3 bg-purple-50/50 rounded-2xl border border-purple-100">
+                                <span class="text-[10px] text-slate-500 font-bold uppercase block">Pillar 2 Avg</span>
+                                <strong id="overview-p2-avg" class="font-heading text-lg font-extrabold text-slate-900">0%</strong>
+                                <span class="text-[10px] text-purple-700 font-medium block">Speech WCPM</span>
+                            </div>
+                            <div class="p-3 bg-purple-50/50 rounded-2xl border border-purple-100">
+                                <span class="text-[10px] text-slate-500 font-bold uppercase block">Pillar 3 Avg</span>
+                                <strong id="overview-p3-avg" class="font-heading text-lg font-extrabold text-slate-900">0%</strong>
+                                <span class="text-[10px] text-purple-700 font-medium block">Gaze Saccades</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Recent Activity & System Health -->
+                    <div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-purple-100/90 shadow-subtle space-y-4">
+                        <div class="flex items-center justify-between border-b border-purple-50 pb-3">
+                            <h3 class="font-heading font-extrabold text-base text-slate-900">Recent Activity</h3>
+                            <button onclick="switchSuperAdminView('security')" class="text-xs font-bold text-purple-700 hover:text-purple-900">
+                                View Logs &rarr;
+                            </button>
+                        </div>
+
+                        <div id="sa-recent-activity-stream" class="space-y-2">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+
+                        <div class="pt-2 border-t border-purple-50">
+                            <button onclick="testSupabaseHealth()" class="w-full py-2 bg-purple-50 hover:bg-purple-100 text-purple-900 font-bold rounded-xl border border-purple-200 text-xs transition-colors flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-stethoscope text-purple-600"></i> Check Database Health & Sync
+                            </button>
+                            <div id="sa-db-health-status" class="mt-2 text-center text-xs"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ========================================================================= -->
+            <!-- VIEW 2: USERS & ROLES -->
+            <!-- ========================================================================= -->
+            <div id="sa-view-users" class="superadmin-view-panel space-y-5 hidden">
+                
+                <div class="bg-white rounded-3xl p-6 border border-purple-100/90 shadow-subtle space-y-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-purple-50 pb-4">
+                        <div>
+                            <h3 class="font-heading text-xl font-extrabold text-slate-900">Users & Roles</h3>
+                            <p class="text-xs text-slate-500 font-medium">Manage user permissions, approve educators, and inspect account activity</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="openAddAdminModal()" class="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5">
+                                <i class="fa-solid fa-plus"></i> Add Admin
+                            </button>
+                            <button onclick="syncAllSuperAdminData()" class="px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 transition-all flex items-center gap-1.5">
+                                <i class="fa-solid fa-rotate"></i> Sync Data
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Search & Filters -->
+                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                        <div class="sm:col-span-6 relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                            <input type="text" id="user-search-input" oninput="loadSuperAdminUserTable()" placeholder="Search by name, username, email, or school..." class="w-full pl-9 pr-4 py-2 bg-slate-50/60 border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-purple-500 focus:bg-white focus:outline-none">
+                        </div>
+                        <div class="sm:col-span-3">
+                            <select id="user-role-filter" onchange="loadSuperAdminUserTable()" class="w-full py-2 px-3 bg-slate-50/60 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none">
+                                <option value="all">All Roles</option>
+                                <option value="parent">Parents</option>
+                                <option value="admin">Educators / Admins</option>
+                                <option value="super_admin">Super Admins</option>
+                            </select>
+                        </div>
+                        <div class="sm:col-span-3">
+                            <select id="user-status-filter" onchange="loadSuperAdminUserTable()" class="w-full py-2 px-3 bg-slate-50/60 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none">
+                                <option value="all">All Statuses</option>
+                                <option value="active">Active Only</option>
+                                <option value="pending">Pending Approval</option>
+                                <option value="disabled">Suspended Only</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Users Table -->
+                    <div class="overflow-x-auto rounded-2xl border border-purple-100">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-purple-50/60 text-slate-700 text-xs font-extrabold border-b border-purple-100">
+                                    <th class="p-3.5">User Identity</th>
+                                    <th class="p-3.5">Email Address</th>
+                                    <th class="p-3.5">School / Affiliation</th>
+                                    <th class="p-3.5">Assigned Role</th>
+                                    <th class="p-3.5">Status</th>
+                                    <th class="p-3.5 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="superadmin-users-table-body" class="divide-y divide-purple-50/60">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ========================================================================= -->
+            <!-- VIEW 3: SCREENINGS -->
+            <!-- ========================================================================= -->
+            <div id="sa-view-screenings" class="superadmin-view-panel space-y-5 hidden">
+                
+                <div class="bg-white rounded-3xl p-6 border border-purple-100/90 shadow-subtle space-y-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-purple-50 pb-4">
+                        <div>
+                            <h3 class="font-heading text-xl font-extrabold text-slate-900">Screenings</h3>
+                            <p class="text-xs text-slate-500 font-medium">Inspect screening records from parent and school portals, view reports, and manage data consent</p>
+                        </div>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-50 text-purple-900 border border-purple-200 rounded-full text-xs font-bold">
+                            <i class="fa-solid fa-folder-open text-purple-600"></i> Dossier Records
+                        </span>
+                    </div>
+
+                    <!-- Screening Filters -->
+                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                        <div class="sm:col-span-8 relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                            <input type="text" id="screening-search-input" oninput="loadMasterScreeningsTable()" placeholder="Search student name, ID (e.g. LX-8841), school, or guardian..." class="w-full pl-9 pr-4 py-2 bg-slate-50/60 border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-purple-500 focus:bg-white focus:outline-none">
+                        </div>
+                        <div class="sm:col-span-4">
+                            <select id="screening-tier-filter" onchange="loadMasterScreeningsTable()" class="w-full py-2 px-3 bg-slate-50/60 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none">
+                                <option value="all">All Screening Tiers</option>
+                                <option value="tier1">Tier 1 · Low Concern (&lt;35%)</option>
+                                <option value="tier2">Tier 2 · Moderate Concern (35–64%)</option>
+                                <option value="tier3">Tier 3 · Specialist Referral (≥65%)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Screenings Table -->
+                    <div class="overflow-x-auto rounded-2xl border border-purple-100">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-purple-50/60 text-slate-700 text-xs font-extrabold border-b border-purple-100">
+                                    <th class="p-3.5">Learner & ID</th>
+                                    <th class="p-3.5">School / Center</th>
+                                    <th class="p-3.5">Guardian / Lead</th>
+                                    <th class="p-3.5">Risk Outcome</th>
+                                    <th class="p-3.5">3-Pillars</th>
+                                    <th class="p-3.5">Fluency</th>
+                                    <th class="p-3.5 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="master-screenings-table-body" class="divide-y divide-purple-50/60">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ========================================================================= -->
+            <!-- VIEW 4: SCHOOLS -->
+            <!-- ========================================================================= -->
+            <div id="sa-view-schools" class="superadmin-view-panel space-y-5 hidden">
+                
+                <div class="bg-white rounded-3xl p-6 border border-purple-100/90 shadow-subtle space-y-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-purple-50 pb-4">
+                        <div>
+                            <h3 class="font-heading text-xl font-extrabold text-slate-900">Schools</h3>
+                            <p class="text-xs text-slate-500 font-medium">Partner institutions, SEN units, and school coordinators across the network</p>
+                        </div>
+                        <button onclick="openAddSchoolModal()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Register School</span>
+                        </button>
+                    </div>
+
+                    <div id="sa-schools-card-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Populated dynamically by JS -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ========================================================================= -->
+            <!-- VIEW 5: ANALYTICS (DEDICATED SECTION) -->
+            <!-- ========================================================================= -->
+            <div id="sa-view-analytics" class="superadmin-view-panel space-y-5 hidden">
+                
+                <div class="bg-white rounded-3xl p-6 border border-purple-100/90 shadow-subtle space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-purple-50 pb-4">
+                        <div>
+                            <h3 class="font-heading text-xl font-extrabold text-slate-900">Analytics</h3>
+                            <p class="text-xs text-slate-500 font-medium">Platform-wide screening metrics, trends, and clinical indicator analysis</p>
+                        </div>
+                        <button onclick="exportAnalyticsCSV()" class="px-3.5 py-2 bg-purple-50 hover:bg-purple-100 text-purple-900 font-bold text-xs rounded-xl border border-purple-200 transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-file-arrow-down text-purple-600"></i>
+                            <span>Export CSV</span>
+                        </button>
+                    </div>
+
+                    <!-- 4 Analytics Highlights (Live Synchronized) -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div class="p-4 bg-purple-50/50 rounded-2xl border border-purple-100 space-y-1">
+                            <span class="text-[10.5px] font-bold text-slate-500 uppercase">Referral Rate</span>
+                            <strong id="analytics-referral-rate" class="text-2xl font-extrabold text-purple-950 block">0%</strong>
+                            <span class="text-[10px] text-slate-500 font-medium">Tier 3 clinical referrals</span>
+                        </div>
+                        <div class="p-4 bg-purple-50/50 rounded-2xl border border-purple-100 space-y-1">
+                            <span class="text-[10.5px] font-bold text-slate-500 uppercase">Completion Rate</span>
+                            <strong id="analytics-completion-rate" class="text-2xl font-extrabold text-emerald-600 block">0%</strong>
+                            <span class="text-[10px] text-emerald-600 font-medium">Full 3-Pillar tests</span>
+                        </div>
+                        <div class="p-4 bg-purple-50/50 rounded-2xl border border-purple-100 space-y-1">
+                            <span class="text-[10.5px] font-bold text-slate-500 uppercase">Avg Screening Time</span>
+                            <strong id="analytics-avg-time" class="text-2xl font-extrabold text-indigo-950 block">8.2 min</strong>
+                            <span class="text-[10px] text-slate-500 font-medium">Battery duration</span>
+                        </div>
+                        <div class="p-4 bg-purple-50/50 rounded-2xl border border-purple-100 space-y-1">
+                            <span class="text-[10.5px] font-bold text-slate-500 uppercase">Avg Reading WCPM</span>
+                            <strong id="analytics-avg-wcpm" class="text-2xl font-extrabold text-amber-700 block">0</strong>
+                            <span class="text-[10px] text-slate-500 font-medium">Words Correct / Min</span>
+                        </div>
+                    </div>
+
+                    <!-- 3-Pillar In-Depth Metrics Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <div class="p-5 rounded-2xl bg-white border border-purple-100 shadow-2xs space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-purple-900">Pillar 1: Observations</span>
+                                <span id="analytics-p1-avg" class="text-xs font-extrabold text-purple-700">0% Avg</span>
+                            </div>
+                            <p class="text-xs text-slate-500">Parent & educator behavioral survey scoring across phonological & working memory indicators.</p>
+                            <div class="w-full h-2 bg-purple-100 rounded-full overflow-hidden">
+                                <div id="analytics-p1-bar" class="bg-purple-600 h-full rounded-full transition-all duration-500" style="width: 0%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="p-5 rounded-2xl bg-white border border-purple-100 shadow-2xs space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-indigo-900">Pillar 2: Speech & Fluency</span>
+                                <span id="analytics-p2-avg" class="text-xs font-extrabold text-indigo-700">0% Avg</span>
+                            </div>
+                            <p class="text-xs text-slate-500">Oral reading fluency, miscue frequency, and speech-to-text pronunciation accuracy.</p>
+                            <div class="w-full h-2 bg-indigo-100 rounded-full overflow-hidden">
+                                <div id="analytics-p2-bar" class="bg-indigo-600 h-full rounded-full transition-all duration-500" style="width: 0%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="p-5 rounded-2xl bg-white border border-purple-100 shadow-2xs space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-amber-900">Pillar 3: Saccadic Gaze</span>
+                                <span id="analytics-p3-avg" class="text-xs font-extrabold text-amber-700">0% Avg</span>
+                            </div>
+                            <p class="text-xs text-slate-500">Fixation stability, regression saccades count, and line-tracking dwell patterns.</p>
+                            <div class="w-full h-2 bg-amber-100 rounded-full overflow-hidden">
+                                <div id="analytics-p3-bar" class="bg-amber-500 h-full rounded-full transition-all duration-500" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- School Comparison Table in Analytics -->
+                    <div class="space-y-3">
+                        <h4 class="font-heading font-extrabold text-sm text-slate-900">Screening Volumes by Institution</h4>
+                        <div class="overflow-x-auto rounded-2xl border border-purple-100">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-purple-50/60 text-slate-700 font-extrabold border-b border-purple-100">
+                                        <th class="p-3">School Name</th>
+                                        <th class="p-3">Total Screenings</th>
+                                        <th class="p-3">Tier 1 (Low)</th>
+                                        <th class="p-3">Tier 2 (Moderate)</th>
+                                        <th class="p-3">Tier 3 (Elevated)</th>
+                                        <th class="p-3">Avg Risk Index</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="analytics-schools-table-body" class="divide-y divide-purple-50/60 font-medium">
+                                    <!-- Populated dynamically by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ========================================================================= -->
+            <!-- VIEW 6: ALERTS (DEDICATED SECTION) -->
+            <!-- ========================================================================= -->
+            <div id="sa-view-alerts" class="superadmin-view-panel space-y-5 hidden">
+                
+                <div class="bg-white rounded-3xl p-6 border border-purple-100/90 shadow-subtle space-y-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-purple-50 pb-4">
+                        <div>
+                            <h3 class="font-heading text-xl font-extrabold text-slate-900">System Alerts & Notifications</h3>
+                            <p class="text-xs text-slate-500 font-medium">Real-time alerts requiring Super Admin review or operational response</p>
+                        </div>
+                        <span id="alerts-count-tag" class="px-3 py-1 bg-rose-50 text-rose-700 border border-rose-200 rounded-full text-xs font-bold">
+                            0 Unresolved Items
+                        </span>
+                    </div>
+
+                    <div class="space-y-3" id="alerts-list-container">
+                        <!-- Populated dynamically by JS -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ========================================================================= -->
+            <!-- VIEW 7: SECURITY & DATA CONSENT -->
+            <!-- ========================================================================= -->
+            <div id="sa-view-security" class="superadmin-view-panel space-y-5 hidden">
+                
+                <!-- Security Score & System Protection Status -->
+                <div class="bg-white rounded-3xl p-6 border border-purple-100/90 shadow-subtle space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-purple-50 pb-4">
+                        <div>
+                            <h3 class="font-heading text-xl font-extrabold text-slate-900">Security Centre</h3>
+                            <p class="text-xs text-slate-500 font-medium">Authentication protection, active sessions, biometric safeguards, and audit logs</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="px-3 py-1.5 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 text-xs font-extrabold flex items-center gap-1.5">
+                                <i class="fa-solid fa-shield-check text-emerald-600"></i>
+                                <span>Security Score: 94 / 100</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3 Security Safeguard Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="p-4 rounded-2xl bg-purple-50/40 border border-purple-100 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-xs text-slate-900 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-fingerprint text-purple-600"></i> Biometric Zero-Storage
+                                </span>
+                                <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-black rounded-full">Enforced</span>
+                            </div>
+                            <p class="text-[11px] text-slate-600">Camera gaze tracking frames process in client memory only and are discarded immediately after calculation.</p>
+                        </div>
+
+                        <div class="p-4 rounded-2xl bg-purple-50/40 border border-purple-100 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-xs text-slate-900 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-file-signature text-purple-600"></i> Guardian Consent
+                                </span>
+                                <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-black rounded-full">Configured</span>
+                            </div>
+                            <p class="text-[11px] text-slate-600">Parental consent required and timestamped before any camera or microphone capture is initialized.</p>
+                        </div>
+
+                        <div class="p-4 rounded-2xl bg-purple-50/40 border border-purple-100 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-xs text-slate-900 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-user-shield text-purple-600"></i> RBAC & Session Security
+                                </span>
+                                <span class="px-2 py-0.5 bg-purple-100 text-purple-900 text-[10px] font-black rounded-full">Active Control</span>
+                            </div>
+                            <p class="text-[11px] text-slate-600">Granular role-based access control with token expiration, rate-limiting, and instant account suspension.</p>
+                        </div>
+                    </div>
+
+                    <!-- Active Sessions & Security Controls -->
+                    <div class="pt-2">
+                        <h4 class="font-heading font-extrabold text-sm text-slate-900 mb-3">Active Administrative Sessions</h4>
+                        <div class="overflow-x-auto rounded-2xl border border-purple-100">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-purple-50/60 text-slate-700 font-extrabold border-b border-purple-100">
+                                        <th class="p-3">User</th>
+                                        <th class="p-3">IP Address</th>
+                                        <th class="p-3">Client / Browser</th>
+                                        <th class="p-3">Last Active</th>
+                                        <th class="p-3 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-purple-50/60 font-medium">
+                                    <tr>
+                                        <td class="p-3">
+                                            <span class="font-bold text-slate-900 block">Faiz (Current Session)</span>
+                                            <span class="text-[10px] text-purple-700 font-bold">@faiz_super</span>
+                                        </td>
+                                        <td class="p-3 font-mono text-slate-600">192.168.1.45 (Localhost)</td>
+                                        <td class="p-3 text-slate-600">Chrome 124 · Windows 11</td>
+                                        <td class="p-3 text-emerald-700 font-bold">Just now</td>
+                                        <td class="p-3 text-right">
+                                            <span class="text-[11px] text-slate-400 italic">Active</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3">
+                                            <span class="font-bold text-slate-900 block">Faiz Ikhwan</span>
+                                            <span class="text-[10px] text-slate-500 font-bold">@faizikhwan</span>
+                                        </td>
+                                        <td class="p-3 font-mono text-slate-600">10.20.4.12</td>
+                                        <td class="p-3 text-slate-600">Edge 123 · Windows</td>
+                                        <td class="p-3 text-slate-500">18 min ago</td>
+                                        <td class="p-3 text-right">
+                                            <button onclick="showToast('Session revoked successfully.');" class="px-2.5 py-1 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 rounded-lg text-[11px] font-bold transition-colors">Revoke</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Audit Trail Log Table -->
+                <div class="bg-white rounded-3xl p-6 border border-purple-100/90 shadow-subtle space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-purple-50 pb-4">
+                        <div>
+                            <h3 class="font-heading text-lg font-extrabold text-slate-900">Security Audit Trail</h3>
+                            <p class="text-xs text-slate-500 font-medium">Cryptographically timestamped log of logins, role elevation, data exports, and purges</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="exportAuditTrailCSV()" class="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 transition-all flex items-center gap-1.5">
+                                <i class="fa-solid fa-download"></i> Export CSV
+                            </button>
+                            <button onclick="loadAuditTrail()" class="px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-800 font-bold text-xs rounded-xl border border-purple-200 transition-all flex items-center gap-1.5">
+                                <i class="fa-solid fa-rotate"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-2xl border border-purple-100">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-purple-50/60 text-slate-700 text-xs font-extrabold border-b border-purple-100">
+                                    <th class="p-3">Timestamp (UTC+8)</th>
+                                    <th class="p-3">Actor</th>
+                                    <th class="p-3">Event Type</th>
+                                    <th class="p-3">Target Subject</th>
+                                    <th class="p-3">Client IP</th>
+                                    <th class="p-3">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sa-audit-logs-table-body" class="divide-y divide-purple-50/60">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ========================================================================= -->
+            <!-- VIEW 8: SETTINGS (SYSTEM & ALGORITHM CALIBRATION) -->
+            <!-- ========================================================================= -->
+            <div id="sa-view-settings" class="superadmin-view-panel space-y-5 hidden">
+                
+                <!-- General Platform Preferences -->
+                <div class="bg-white rounded-3xl p-6 border border-purple-100/90 shadow-subtle space-y-4">
+                    <div class="border-b border-purple-50 pb-4">
+                        <h3 class="font-heading text-xl font-extrabold text-slate-900">System Settings</h3>
+                        <p class="text-xs text-slate-500 font-medium">Platform parameters, diagnostic tools, and algorithm calibration</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                        <div>
+                            <label class="font-bold text-slate-900 block mb-1">Platform Instance Name</label>
+                            <input type="text" value="LexiSense Production Cluster (Malaysia Region)" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-semibold text-slate-800 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="font-bold text-slate-900 block mb-1">Administrator Inactivity Timeout</label>
+                            <select class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-semibold text-slate-800 focus:outline-none">
+                                <option>30 Minutes (Recommended)</option>
+                                <option>60 Minutes</option>
+                                <option>2 Hours</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Safe Algorithm Calibration (Advanced & Protected) -->
+                <div class="bg-white rounded-3xl p-6 border border-purple-100/90 shadow-subtle space-y-5">
+                    <div class="flex items-center justify-between border-b border-purple-50 pb-4">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h4 class="font-heading text-lg font-extrabold text-slate-900">Screening Algorithm Calibration</h4>
+                                <span class="px-2 py-0.5 bg-amber-100 text-amber-900 text-[10px] font-black rounded-full uppercase">Advanced / High-Risk</span>
+                            </div>
+                            <p class="text-xs text-slate-500 font-medium">Calibrate the 3-pillar triangulation weights with formula confirmation and version rollback</p>
+                        </div>
+                    </div>
+
+                    <!-- Live Formula Comparison -->
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs font-mono space-y-1">
+                        <span class="text-slate-400 font-bold block text-[10.5px]">CURRENT ACTIVE FORMULA:</span>
+                        <p class="font-bold text-purple-950 text-xs" id="active-formula-display">
+                            Risk Index = (40% × P1_Survey) + (40% × P2_Speech) + (20% × P3_Gaze)
+                        </p>
+                    </div>
+
+                    <!-- Sliders -->
+                    <div class="bg-purple-50/40 p-5 rounded-2xl border border-purple-100 space-y-4">
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between text-xs font-bold">
+                                <label class="text-slate-900">Pillar 1: Parent Behavioral Survey (w1)</label>
+                                <span id="weight-p1-val" class="text-purple-700 font-extrabold">40%</span>
+                            </div>
+                            <input type="range" id="weight-p1" min="10" max="80" value="40" oninput="updateWeightDisplays()" class="w-full accent-purple-600 cursor-pointer">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between text-xs font-bold">
+                                <label class="text-slate-900">Pillar 2: Speech-to-Text & Oral Reading Fluency (w2)</label>
+                                <span id="weight-p2-val" class="text-purple-700 font-extrabold">40%</span>
+                            </div>
+                            <input type="range" id="weight-p2" min="10" max="80" value="40" oninput="updateWeightDisplays()" class="w-full accent-purple-600 cursor-pointer">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between text-xs font-bold">
+                                <label class="text-slate-900">Pillar 3: Saccadic Reading Gaze Shifts & Dwell (w3)</label>
+                                <span id="weight-p3-val" class="text-purple-700 font-extrabold">20%</span>
+                            </div>
+                            <input type="range" id="weight-p3" min="5" max="50" value="20" oninput="updateWeightDisplays()" class="w-full accent-purple-600 cursor-pointer">
+                        </div>
+
+                        <div class="flex items-center justify-between pt-2 border-t border-purple-200">
+                            <span id="weight-total-val" class="font-extrabold text-emerald-600 text-xs">Total: 100%</span>
+                            <button onclick="openAlgorithmConfirmModal()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all">
+                                Review & Apply Changes
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Version History & Rollback -->
+                    <div class="space-y-3 pt-2">
+                        <h5 class="font-heading font-extrabold text-xs text-slate-900">Algorithm Version History & Rollback</h5>
+                        <div class="overflow-x-auto rounded-2xl border border-purple-100">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-purple-50/60 text-slate-700 font-extrabold border-b border-purple-100">
+                                        <th class="p-3">Version</th>
+                                        <th class="p-3">Formula Breakdown</th>
+                                        <th class="p-3">Author</th>
+                                        <th class="p-3">Date</th>
+                                        <th class="p-3">Reason</th>
+                                        <th class="p-3 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-purple-50/60 font-medium">
+                                    <tr>
+                                        <td class="p-3 font-bold text-purple-900">v1.2 (Active)</td>
+                                        <td class="p-3 font-mono text-[11px]">P1: 40% · P2: 40% · P3: 20%</td>
+                                        <td class="p-3">@faiz_super</td>
+                                        <td class="p-3 text-slate-500">2026-08-01</td>
+                                        <td class="p-3 text-slate-600">Default calibrated baseline</td>
+                                        <td class="p-3 text-right"><span class="text-[11px] text-emerald-600 font-bold">Current</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 font-bold text-slate-700">v1.1</td>
+                                        <td class="p-3 font-mono text-[11px]">P1: 50% · P2: 30% · P3: 20%</td>
+                                        <td class="p-3">@suzana_super</td>
+                                        <td class="p-3 text-slate-500">2026-07-15</td>
+                                        <td class="p-3 text-slate-600">Pilot trial observation weighting</td>
+                                        <td class="p-3 text-right">
+                                            <button onclick="rollbackAlgorithmWeights(50, 30, 20, 'v1.1')" class="px-2.5 py-1 bg-slate-100 hover:bg-purple-100 text-purple-800 rounded-lg font-bold text-[11px] transition-colors">Rollback</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Infrastructure Diagnostics -->
+                    <div class="border-t border-purple-50 pt-5 space-y-3">
+                        <h4 class="font-heading font-extrabold text-sm text-slate-900">Infrastructure Diagnostics</h4>
+                        <div class="flex items-center justify-between p-4 bg-purple-50/40 rounded-2xl border border-purple-100">
+                            <div>
+                                <span class="font-bold text-slate-900 block text-xs">Supabase Database Connection & Auth Status</span>
+                                <span id="sa-db-health-status" class="text-xs text-slate-500">Ready to test</span>
+                            </div>
+                            <button onclick="testSupabaseHealth()" class="px-3.5 py-2 bg-white hover:bg-purple-50 text-purple-800 font-bold rounded-xl border border-purple-200 text-xs transition-colors shadow-2xs">
+                                Ping Database
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 4. SLIDE-OVER USER PROFILE DRAWER -->
+    <!-- ========================================================================= -->
+    <div id="user-profile-drawer" class="fixed inset-0 z-50 overflow-hidden drawer-hidden">
+        <!-- Backdrop -->
+        <div onclick="closeUserProfileDrawer()" class="drawer-backdrop fixed inset-0 bg-slate-900/40 backdrop-blur-xs"></div>
+        
+        <div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
+            <div class="drawer-content w-screen max-w-md bg-white shadow-2xl border-l border-purple-100 flex flex-col justify-between">
+                
+                <!-- Drawer Header -->
+                <div class="p-6 border-b border-purple-100 flex items-center justify-between bg-purple-50/30">
+                    <div class="flex items-center gap-3">
+                        <div id="drawer-user-avatar" class="w-12 h-12 rounded-2xl bg-purple-100 text-purple-800 font-extrabold flex items-center justify-center text-lg shadow-xs">
+                            U
+                        </div>
+                        <div>
+                            <h3 id="drawer-user-name" class="font-heading font-extrabold text-lg text-slate-900">User Profile</h3>
+                            <p id="drawer-user-role-badge" class="text-xs text-purple-700 font-bold">Parent Account</p>
+                        </div>
+                    </div>
+                    <button onclick="closeUserProfileDrawer()" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <!-- Drawer Body / Details -->
+                <div class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-5 text-xs">
+                    
+                    <!-- Basic Information -->
+                    <div class="space-y-3">
+                        <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Account Information</span>
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2.5">
+                            <div class="flex justify-between">
+                                <span class="text-slate-500 font-semibold">User ID:</span>
+                                <span id="drawer-user-id" class="font-mono font-bold text-slate-800">usr-001</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-500 font-semibold">Email:</span>
+                                <span id="drawer-user-email" class="font-semibold text-slate-800">user@example.com</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-500 font-semibold">Affiliation:</span>
+                                <span id="drawer-user-school" class="font-bold text-purple-900">SK Taman Permata</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-500 font-semibold">Status:</span>
+                                <span id="drawer-user-status" class="font-black text-emerald-700">● Active</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-500 font-semibold">Created Date:</span>
+                                <span id="drawer-user-created" class="font-medium text-slate-600">2026-08-10</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Role & Permissions Management -->
+                    <div class="space-y-3">
+                        <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Role & Access Control</span>
+                        <div class="space-y-2">
+                            <label class="font-bold text-slate-900 block">Assigned Platform Role</label>
+                            <select id="drawer-role-select" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-bold text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <option value="parent">👧 Parent (Child Assessment & Home Report)</option>
+                                <option value="admin">🛡️ Educator / Admin (School Rosters & SEN Analytics)</option>
+                                <option value="super_admin">👑 Super Admin (Full Platform Governance)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Permission Summary -->
+                    <div class="space-y-2">
+                        <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Permission Matrix</span>
+                        <div id="drawer-permissions-list" class="bg-purple-50/40 p-3.5 rounded-2xl border border-purple-100 space-y-1.5 text-[11px] text-slate-700 font-medium">
+                            <div class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> Conduct screening assessments</div>
+                            <div class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> View personal child dossiers</div>
+                            <div class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> Export printable PDF reports</div>
+                        </div>
+                    </div>
+
+                    <!-- Associated Screenings / Activity -->
+                    <div class="space-y-2">
+                        <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Recent Screening Dossiers</span>
+                        <div id="drawer-screenings-list" class="space-y-2">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Drawer Footer Actions -->
+                <div class="p-6 border-t border-purple-100 bg-purple-50/20 space-y-2">
+                    <button onclick="saveDrawerUserRole()" class="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-xs transition-colors">
+                        Save Role & Status Changes
+                    </button>
+                    <div class="flex gap-2">
+                        <button onclick="handleDrawerPasswordReset()" class="flex-1 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-bold rounded-xl text-xs transition-colors">
+                            <i class="fa-solid fa-key mr-1 text-slate-400"></i> Reset Password
+                        </button>
+                        <button id="drawer-toggle-status-btn" onclick="handleDrawerStatusToggle()" class="flex-1 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold rounded-xl text-xs transition-colors">
+                            <i class="fa-solid fa-ban mr-1"></i> Suspend Account
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 5. MODALS: ADD ADMIN, ADD SCHOOL, ALGORITHM CONFIRM, ACCESSIBILITY -->
+    <!-- ========================================================================= -->
+    
+    <!-- ADD ADMIN MODAL -->
+    <div id="sa-add-admin-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5 border border-purple-100 animate-pop">
+            <div class="flex items-center justify-between border-b border-purple-50 pb-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-purple-100 text-purple-800 flex items-center justify-center text-sm font-bold">
+                        <i class="fa-solid fa-user-shield"></i>
+                    </div>
+                    <h3 class="font-heading text-lg font-extrabold text-slate-900">Provision Administrator</h3>
+                </div>
+                <button onclick="closeAddAdminModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="handleAddAdminSubmit(event)" class="space-y-3.5 text-xs">
+                <div>
+                    <label class="font-bold text-slate-900 block mb-1">Full Name</label>
+                    <input type="text" id="admin-input-name" required placeholder="e.g. Dr. Suzana Ahmad" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-semibold focus:ring-2 focus:ring-purple-500 focus:bg-white focus:outline-none">
+                </div>
+                <div>
+                    <label class="font-bold text-slate-900 block mb-1">Username</label>
+                    <input type="text" id="admin-input-username" required placeholder="e.g. suzana_admin" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-semibold focus:ring-2 focus:ring-purple-500 focus:bg-white focus:outline-none">
+                </div>
+                <div>
+                    <label class="font-bold text-slate-900 block mb-1">Email Address</label>
+                    <input type="email" id="admin-input-email" required placeholder="e.g. suzana@lexisense.ai" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-semibold focus:ring-2 focus:ring-purple-500 focus:bg-white focus:outline-none">
+                </div>
+                <div>
+                    <label class="font-bold text-slate-900 block mb-1">Assigned Institution / School</label>
+                    <select id="admin-input-school" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-semibold focus:outline-none">
+                        <option value="LexiSense HQ">LexiSense HQ</option>
+                        <option value="SK Taman Permata">SK Taman Permata</option>
+                        <option value="SK Sri Melati">SK Sri Melati</option>
+                        <option value="SJKC Chong Hwa">SJKC Chong Hwa</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="font-bold text-slate-900 block mb-1">Administrator Level</label>
+                    <select id="admin-input-role" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-semibold focus:outline-none">
+                        <option value="admin">Educator / School Admin</option>
+                        <option value="super_admin">Super Administrator (Full Governance)</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl shadow-xs transition-colors mt-2">
+                    Create Administrator Account
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- REGISTER SCHOOL MODAL -->
+    <div id="sa-add-school-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5 border border-purple-100 animate-pop">
+            <div class="flex items-center justify-between border-b border-purple-50 pb-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-purple-100 text-purple-800 flex items-center justify-center text-sm font-bold">
+                        <i class="fa-solid fa-school"></i>
+                    </div>
+                    <h3 class="font-heading text-lg font-extrabold text-slate-900">Register Partner School</h3>
+                </div>
+                <button onclick="closeAddSchoolModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="handleAddSchoolSubmit(event)" class="space-y-3.5 text-xs">
+                <div>
+                    <label class="font-bold text-slate-900 block mb-1">School / Center Name</label>
+                    <input type="text" id="school-input-name" required placeholder="e.g. SK Cyberjaya" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-semibold focus:ring-2 focus:ring-purple-500 focus:bg-white focus:outline-none">
+                </div>
+                <div>
+                    <label class="font-bold text-slate-900 block mb-1">MoE Institution Code</label>
+                    <input type="text" id="school-input-code" required placeholder="e.g. BBA8821" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-mono uppercase font-semibold focus:ring-2 focus:ring-purple-500 focus:bg-white focus:outline-none">
+                </div>
+                <div>
+                    <label class="font-bold text-slate-900 block mb-1">Lead SEN / Literacy Coordinator</label>
+                    <input type="text" id="school-input-sen" required placeholder="e.g. Pn. Zainab Ismail" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-semibold focus:ring-2 focus:ring-purple-500 focus:bg-white focus:outline-none">
+                </div>
+                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl shadow-xs transition-colors mt-2">
+                    Save & Issue School License
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ALGORITHM CHANGE CONFIRMATION MODAL -->
+    <div id="sa-algorithm-confirm-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5 border border-purple-100 animate-pop">
+            <div class="flex items-center justify-between border-b border-purple-50 pb-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center text-sm font-bold">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <h3 class="font-heading text-lg font-extrabold text-slate-900">Confirm Algorithm Calibration</h3>
+                </div>
+                <button onclick="closeAlgorithmConfirmModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <div class="space-y-3 text-xs">
+                <p class="text-slate-600">You are about to modify the 3-pillar weighting formula for all future screenings. Please review the change:</p>
+                
+                <div class="p-3 bg-purple-50/60 rounded-2xl border border-purple-100 space-y-1.5 font-mono">
+                    <div class="flex justify-between text-slate-500">
+                        <span>Current Weights:</span>
+                        <span id="modal-current-weights">P1: 40%, P2: 40%, P3: 20%</span>
+                    </div>
+                    <div class="flex justify-between text-purple-950 font-bold">
+                        <span>Proposed Weights:</span>
+                        <span id="modal-proposed-weights">P1: 40%, P2: 40%, P3: 20%</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="font-bold text-slate-900 block mb-1">Reason for Calibration (Mandatory)</label>
+                    <input type="text" id="algorithm-change-reason" required placeholder="e.g. Clinical validation adjustment for speech WCPM weighting" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-semibold focus:ring-2 focus:ring-purple-500 focus:bg-white focus:outline-none">
+                </div>
+
+                <div class="pt-2 flex gap-2">
+                    <button onclick="closeAlgorithmConfirmModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors">
+                        Cancel
+                    </button>
+                    <button onclick="applyAlgorithmWeightsWithReason()" class="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl transition-colors">
+                        Confirm & Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ACCESSIBILITY OPTIONS MODAL (STANDARDIZED) -->
+    <div id="accessibility-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-purple-100 animate-pop max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="flex items-center justify-between border-b border-purple-50 pb-4 shrink-0">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-2xl bg-purple-600 text-white flex items-center justify-center text-xl shadow-sm">
+                        <i class="fa-solid fa-universal-access"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-heading text-xl font-bold text-slate-900 leading-tight">Accessibility Controls</h3>
+                        <p class="text-xs text-purple-700 font-semibold">Reading comfort and visual display adjustments</p>
+                    </div>
+                </div>
+                <button onclick="closeAccessibilityModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4 text-xs sm:text-sm overflow-y-auto custom-scrollbar flex-1 pt-4 pr-1">
+                <!-- Dyslexia Font Toggle -->
+                <div class="flex items-center justify-between p-4 bg-purple-50/50 rounded-2xl border border-purple-100">
+                    <div>
+                        <span class="font-bold text-slate-900 block">Dyslexia-Friendly Font</span>
+                        <span class="text-slate-500 text-xs">Enables weighted letter shapes (Lexend & OpenDyslexic)</span>
+                    </div>
+                    <button onclick="toggleDyslexiaFont()" id="btn-font-toggle" class="bg-slate-300 text-slate-700 px-3.5 py-1.5 rounded-full font-bold transition-all text-xs">
+                        OFF
+                    </button>
+                </div>
+
+                <!-- Text Size Scaling -->
+                <div class="p-4 bg-purple-50/50 rounded-2xl border border-purple-100 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-slate-900 block">Text Size Scaling</span>
+                        <span id="font-size-display" class="font-extrabold text-purple-600 bg-white px-2.5 py-0.5 rounded-full border text-xs">100%</span>
+                    </div>
+                    <div class="flex gap-2 pt-1">
+                        <button onclick="changeFontSize(-1)" class="flex-1 py-1.5 bg-white border border-purple-200 rounded-xl font-bold text-slate-700 hover:bg-purple-100 transition-colors text-xs">A- Smaller</button>
+                        <button onclick="resetFontSize()" class="px-3 py-1.5 bg-white border border-purple-200 rounded-xl font-bold text-slate-700 hover:bg-purple-100 transition-colors text-xs">Reset</button>
+                        <button onclick="changeFontSize(1)" class="flex-1 py-1.5 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition-colors text-xs">A+ Larger</button>
+                    </div>
+                </div>
+
+                <!-- High Contrast Toggle -->
+                <div class="flex items-center justify-between p-4 bg-purple-50/50 rounded-2xl border border-purple-100">
+                    <div>
+                        <span class="font-bold text-slate-900 block">High Contrast Mode</span>
+                        <span class="text-slate-500 text-xs">Increases contrast for low-light reading</span>
+                    </div>
+                    <button onclick="toggleHighContrast()" id="btn-contrast-toggle" class="bg-slate-300 text-slate-700 px-3.5 py-1.5 rounded-full font-bold transition-all text-xs">
+                        OFF
+                    </button>
+                </div>
+
+                <!-- Reading Focus Ruler -->
+                <div class="flex items-center justify-between p-4 bg-purple-50/50 rounded-2xl border border-purple-100">
+                    <div>
+                        <span class="font-bold text-slate-900 block">Reading Focus Ruler 📏</span>
+                        <span class="text-slate-500 text-xs">Guides cursor overlay line for focus</span>
+                    </div>
+                    <button onclick="toggleReadingRuler()" class="bg-purple-600 text-white px-3.5 py-1.5 rounded-full font-bold transition-all text-xs">
+                        Toggle
+                    </button>
+                </div>
+            </div>
+
+            <button onclick="closeAccessibilityModal()" class="w-full bg-purple-600 text-white py-3 rounded-2xl font-bold text-xs shadow-md hover:bg-purple-700 transition-colors mt-2">
+                Apply Preferences
+            </button>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION POPUP -->
+    <div id="toast" class="fixed top-5 right-5 z-50 transform translate-y-[-100px] opacity-0 transition-all duration-300 bg-purple-900 text-white px-5 py-3 rounded-2xl shadow-floating text-xs font-bold flex items-center gap-3">
+        <i class="fa-solid fa-crown text-amber-400 text-base"></i>
+        <span id="toast-message">Notification message</span>
+    </div>
+
+</body>
+</html>

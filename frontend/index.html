@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LexiSense — AI Dyslexia Screening, Symptoms & Learning Companion</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="LexiSense is an AI-powered early dyslexia pre-diagnosis, eye-tracking screening, and multisensory phonics companion for parents, educators, and pediatric specialists.">
+    <meta name="keywords" content="dyslexia, dyslexia symptoms, dyslexia screening, dyslexia test, dyslexia font, reading ruler, phonics learning, child development, parent screening tool">
+
+    <!-- Performance Resource Hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+
+    <!-- Tailwind CSS CDN & Design System Config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/config.js"></script>
+    
+    <!-- Google Fonts: Baloo 2, Lexend, Nunito -->
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Lexend:wght@300;400;500;600;700&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- External Custom Stylesheet -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-purple-200 selection:text-purple-900 bg-[#FAF8F5] text-gray-800 relative">
+
+    <!-- TOP NAVIGATION BAR -->
+    <header class="sticky top-0 w-full bg-white/95 backdrop-blur-md border-b-2 border-purple-100 z-40 px-4 sm:px-8 py-3.5 shadow-sm">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            
+            <!-- Brand Logo -->
+            <a href="index.html" class="flex items-center gap-3 group">
+                <img src="assets/lexisense-logo.png" alt="LexiSense Logo" class="h-12 w-12 sm:h-14 sm:w-14 object-contain transform group-hover:scale-105 transition-transform duration-300 drop-shadow-sm">
+                <div>
+                    <span class="font-heading text-2xl sm:text-3xl font-extrabold text-brand-purple-deep tracking-tight block leading-tight">LexiSense</span>
+                    <p class="text-xs sm:text-sm text-purple-600 font-bold hidden sm:block mt-0.5">Early Pre-Diagnosis & Fun Multisensory Companion</p>
+                </div>
+            </a>
+
+            <!-- Action Controls: Accessibility & Auth -->
+            <div class="flex items-center gap-2.5" id="header-user-container">
+                
+                <!-- Accessibility Controls Pill Button -->
+                <button onclick="openAccessibilityModal()" class="flex items-center gap-2 bg-purple-50 hover:bg-amber-100 text-purple-800 px-3.5 py-2 rounded-2xl border-2 border-purple-200 shadow-sm transition-all transform hover:scale-105" title="Accessibility Controls">
+                    <div class="w-7 h-7 rounded-xl bg-purple-600 text-white flex items-center justify-center text-sm font-bold shadow-sm">
+                        <i class="fa-solid fa-universal-access"></i>
+                    </div>
+                    <span class="text-sm font-extrabold text-brand-purple-deep hidden sm:inline">Accessibility</span>
+                </button>
+
+                <!-- Log In Button -->
+                <button onclick="openAuthModal('login')" class="font-extrabold text-sm sm:text-base text-purple-700 hover:text-purple-900 px-4 py-2.5 rounded-2xl hover:bg-purple-50 transition-all border-2 border-transparent hover:border-purple-200">
+                    Log In
+                </button>
+
+                <!-- Register CTA Button -->
+                <button onclick="openAuthModal('register')" class="shimmer-btn bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-700 text-white font-extrabold text-sm sm:text-base px-4 sm:px-5 py-2.5 rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all flex items-center gap-2 border-2 border-purple-500">
+                    <span>Register Free</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO SECTION WITH WHIMSICAL KID-FRIENDLY GRAPHICS & DYSLEXIA SIMULATOR (COMPACT & ALIGNED) -->
+    <section id="hero" class="relative overflow-hidden py-10 md:py-16 px-4 sm:px-8 bg-cover bg-center bg-no-repeat min-h-[calc(100vh-80px)] flex items-center" style="background-image: url('assets/landing-hero-bg.png');">
+        
+        <!-- Playful Floating Background Stickers & Hand-drawn Doodles -->
+        <div class="absolute top-4 sm:top-6 left-6 sm:left-12 bg-white/90 backdrop-blur-sm border border-pink-200 text-pink-700 text-xs font-black px-4 py-1.5 rounded-full shadow-sm animate-sticker hidden sm:flex items-center gap-1.5 pointer-events-none z-10">
+            <span>💖</span> Small Steps Big Readers ↗
+        </div>
+        <div class="absolute top-4 sm:top-6 right-12 sm:right-24 bg-transparent text-amber-500 text-xs sm:text-sm font-black animate-float-slow hidden sm:flex items-center gap-1.5 pointer-events-none z-20 font-heading">
+            <span>✨ You can do this! ♡</span>
+        </div>
+
+        <!-- Floating Letters with Pastel Circles -->
+        <div class="absolute top-24 left-4 w-9 h-9 rounded-full bg-purple-200/50 text-purple-700 font-extrabold text-base flex items-center justify-center animate-float-letter pointer-events-none opacity-60">a</div>
+        <div class="absolute bottom-20 left-8 w-10 h-10 rounded-full bg-amber-200/50 text-amber-700 font-extrabold text-lg flex items-center justify-center animate-float-letter pointer-events-none opacity-60" style="animation-delay: -2.5s;">b</div>
+
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center relative z-10 w-full">
+            
+            <!-- LEFT HERO CONTENT -->
+            <div class="lg:col-span-6 xl:col-span-6 space-y-5 text-center lg:text-left">
+                
+                <!-- Playful Mascot Welcome Pill -->
+                <div class="inline-flex items-center gap-2 bg-white/95 px-4 py-1.5 rounded-full border-2 border-amber-300 shadow-sm transform hover:scale-105 transition-all">
+                    <span class="text-lg">☀️</span>
+                    <span class="text-xs sm:text-sm font-black text-purple-950">Early Support. Brighter Tomorrows.</span>
+                    <span class="bg-amber-100 text-amber-900 text-xs font-black px-2.5 py-0.5 rounded-full border border-amber-300">Ages 3–12</span>
+                </div>
+
+                <!-- Main Title -->
+                <h1 class="font-heading text-4xl sm:text-5xl lg:text-5xl font-black text-brand-purple-deep leading-[1.14] tracking-tight">
+                    Empowering Every <span class="bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-800 bg-clip-text text-transparent">Dyslexic Mind</span> to Read & Flourish! ✨
+                </h1>
+
+                <!-- Subtitle -->
+                <p class="text-gray-600 text-sm sm:text-base leading-relaxed font-semibold max-w-xl mx-auto lg:mx-0">
+                    LexiSense makes early dyslexia screening engaging and stress-free through interactive speech games and gentle visual tracking, empowering every child to read with confidence.
+                </p>
+
+                <!-- Hero Action Buttons -->
+                <div class="flex flex-wrap items-center justify-center lg:justify-start gap-3.5 pt-1">
+                    <button onclick="scrollToSection('screener')" class="shimmer-btn bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-700 hover:from-purple-700 hover:to-indigo-800 text-white font-heading font-black text-sm sm:text-base px-7 sm:px-8 py-3.5 sm:py-4 rounded-2xl shadow-xl shadow-purple-500/25 hover:shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 border border-purple-400/40 cursor-pointer">
+                        <span class="text-xl">🚀</span>
+                        <span>Start 3-Min Quick Screen</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+
+                    <button onclick="openAuthModal('register')" class="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 hover:from-amber-300 hover:to-yellow-200 text-purple-950 font-heading font-black text-sm sm:text-base px-6 sm:px-7 py-3.5 sm:py-4 rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2.5 border-2 border-white cursor-pointer">
+                        <span class="text-lg">✨</span>
+                        <span>Register Free</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+
+                <!-- Trust Badges Checkmarks -->
+                <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 sm:gap-6 pt-1 text-xs font-extrabold text-gray-600">
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-emerald-500 text-sm"></i> No credit card required</span>
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-emerald-500 text-sm"></i> Child-safe & secure</span>
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-emerald-500 text-sm"></i> Used by parents & educators</span>
+                </div>
+
+                <!-- Hand-drawn slogan bottom left -->
+                <div class="pt-1 hidden sm:block text-purple-600/80 font-heading font-extrabold text-xs sm:text-sm tracking-wide">
+                    <span>Brighter Readers • Brighter Tomorrows 💜</span>
+                </div>
+
+            </div>
+
+            <!-- RIGHT HERO COMPOSITION: FLYING OLLIE & READING DECODER CARD -->
+            <div class="lg:col-span-6 xl:col-span-6 relative flex flex-col items-center lg:items-end justify-center pt-8 sm:pt-10 lg:pt-0">
+                
+                <!-- Flying Ollie Mascot (Playfully positioned on top-left of Decoder Card) -->
+                <div class="absolute -top-12 sm:-top-16 left-2 sm:left-6 z-20 pointer-events-none animate-owl-mascot">
+                    <img src="assets/ollie-flying-mascot.png" alt="Flying Ollie Mascot" class="w-28 h-28 sm:w-36 sm:h-36 object-contain drop-shadow-2xl">
+                </div>
+
+                <!-- Interactive Ollie Reading Decoder Card -->
+                <div class="w-full max-w-lg kemas-card bg-white/95 backdrop-blur-xl rounded-3xl p-5 sm:p-6 border-2 border-purple-200/90 shadow-2xl relative z-10">
+                    
+                    <!-- Top Card Header -->
+                    <div class="flex items-center justify-between pb-3 border-b-2 border-purple-100 mb-3.5">
+                        <div class="flex items-center gap-3">
+                            <img src="assets/ollie-mascot.png" alt="Ollie Mascot" class="w-11 h-11 object-contain animate-owl-mascot drop-shadow-md">
+                            <div>
+                                <h3 class="font-heading font-black text-brand-purple-deep text-base sm:text-lg leading-tight">Ollie's Reading Decoder</h3>
+                                <p class="text-[11px] text-gray-500 font-bold leading-tight">Experience how letters feel & how LexiSense resolves them!</p>
+                            </div>
+                        </div>
+                        <span class="bg-purple-100 text-purple-800 text-[10px] sm:text-xs font-black px-2.5 py-1 rounded-full border border-purple-200 shadow-2xs">Interactive Demo</span>
+                    </div>
+
+                    <!-- Simulator Mode Switcher Buttons -->
+                    <div class="grid grid-cols-3 gap-1.5 p-1.5 bg-purple-50 rounded-2xl mb-3 text-xs font-bold border border-purple-100">
+                        <button onclick="setSimulatorMode('normal')" id="sim-btn-normal" class="py-2 px-2 rounded-xl transition-all bg-white text-purple-900 shadow-sm font-black text-xs text-center border border-purple-200 cursor-pointer">
+                            Standard 📖
+                        </button>
+                        <button onclick="setSimulatorMode('dyslexic')" id="sim-btn-dyslexic" class="py-2 px-2 rounded-xl transition-all text-gray-600 hover:text-purple-900 text-xs font-bold text-center cursor-pointer">
+                            Dyslexia View 🌀
+                        </button>
+                        <button onclick="setSimulatorMode('lexisense')" id="sim-btn-lexisense" class="py-2 px-2 rounded-xl transition-all text-gray-600 hover:text-purple-900 text-xs font-bold text-center flex items-center justify-center gap-1 cursor-pointer">
+                            <span>LexiSense</span> ✨
+                        </button>
+                    </div>
+
+                    <!-- Interactive Phonics Display Box -->
+                    <div id="sim-display-box" class="p-4 sm:p-5 rounded-2xl bg-purple-50/70 border-2 border-purple-200 min-h-[155px] flex flex-col justify-center transition-all duration-300 relative overflow-hidden">
+                        
+                        <!-- Word & Icon Top Bar -->
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2 bg-white/90 px-3 py-1 rounded-xl border border-purple-100 shadow-sm">
+                                <span id="decoder-word-icon" class="text-lg">🦇</span>
+                                <span id="decoder-word-label" class="font-black text-purple-950 text-xs sm:text-sm">Bat</span>
+                            </div>
+                            
+                            <!-- Sound It Out Button -->
+                            <button id="decoder-sound-btn" onclick="soundOutCurrentWord()" class="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs flex items-center gap-1.5 shadow-md hover:shadow-lg transition-all animate-sound-pulse cursor-pointer">
+                                <span>🔊</span>
+                                <span>Sound It Out</span>
+                            </button>
+                        </div>
+
+                        <!-- Letter Tiles Container -->
+                        <div id="decoder-letter-tiles" class="flex items-center justify-center gap-2.5 sm:gap-3 my-1.5">
+                            <!-- Injected by JavaScript -->
+                        </div>
+
+                        <!-- Phonics Feedback Bubble -->
+                        <div class="mt-2 p-2.5 bg-amber-50 rounded-xl border border-amber-200 flex items-start sm:items-center gap-2 text-xs shadow-2xs">
+                            <span class="text-sm leading-none">💡</span>
+                            <span id="decoder-phonics-note" class="text-amber-950 font-bold leading-tight">
+                                Great! You sounded it out! The letter B makes a /b/ sound!
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Decoder Controls & Word Switcher -->
+                    <div class="mt-3 flex items-center justify-between">
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="prevDecoderWord()" class="text-xs font-black text-purple-700 hover:text-purple-900 px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 border border-purple-200 transition-all cursor-pointer">
+                                ← Prev
+                            </button>
+                            <button onclick="nextDecoderWord()" class="text-xs font-black text-purple-700 hover:text-purple-900 px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 border border-purple-200 transition-all flex items-center gap-1 cursor-pointer">
+                                <span>Try Another Word</span>
+                                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                            </button>
+                        </div>
+                        <button onclick="openAuthModal('register')" class="text-xs font-black text-purple-700 hover:text-purple-900 flex items-center gap-1 hover:underline cursor-pointer">
+                            <span>Get Started</span>
+                            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                        </button>
+                    </div>
+
+                    <!-- Simulator Caption Description -->
+                    <div class="mt-2.5 pt-2 border-t border-purple-100 text-[11px] text-gray-500">
+                        <p id="sim-caption" class="font-semibold text-gray-600">
+                            <strong>Standard View:</strong> Regular text rendering without sensory decoding assistance.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- SECTION 1: INTRODUCTION OF LEXISENSE -->
+    <section id="intro" class="py-16 md:py-24 px-4 sm:px-8 bg-white border-y-2 border-purple-100 relative">
+        <div class="max-w-7xl mx-auto space-y-12">
+            
+            <div class="text-center max-w-3xl mx-auto space-y-3">
+                <span class="bg-purple-100 text-purple-800 text-xs font-extrabold px-3.5 py-1.5 rounded-full uppercase tracking-wider border border-purple-200">Meet LexiSense</span>
+                <h2 class="font-heading text-3xl sm:text-4xl lg:text-5xl font-extrabold text-brand-purple-deep">
+                    A Fun & Caring Bridge to Early Pre-Diagnosis
+                </h2>
+                <p class="text-gray-600 text-base font-semibold leading-relaxed">
+                    LexiSense removes reading stress with playful AI observation, multisensory phonics, and specialist reports ready for pediatric doctors!
+                </p>
+            </div>
+
+            <!-- 4 Pillar Feature Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <!-- Card 1 -->
+                <div class="kemas-card hover:-translate-y-2 transition-all duration-300">
+                    <div class="w-14 h-14 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center text-2xl font-bold mb-4 shadow-sm border border-purple-200">
+                        🎙️
+                    </div>
+                    <span class="text-xs font-extrabold text-purple-600 bg-purple-50 px-2.5 py-0.5 rounded-full uppercase">01. Smart Voice</span>
+                    <h3 class="font-heading text-xl font-bold text-purple-950 mt-1 mb-2">AI Speech & Phonics</h3>
+                    <p class="text-gray-600 text-xs leading-relaxed font-semibold">
+                        Listens to oral reading to notice sound substitutions, word pauses, and pronunciation stress patterns softly.
+                    </p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="kemas-card hover:-translate-y-2 transition-all duration-300">
+                    <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center text-2xl font-bold mb-4 shadow-sm border border-amber-200">
+                        👁️
+                    </div>
+                    <span class="text-xs font-extrabold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full uppercase">02. Eye Saccades</span>
+                    <h3 class="font-heading text-xl font-bold text-purple-950 mt-1 mb-2">Saccadic Eye Tracking</h3>
+                    <p class="text-gray-600 text-xs leading-relaxed font-semibold">
+                        Observes visual line jumps and backward re-reading pauses to spot visual decoding fatigue early.
+                    </p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="kemas-card hover:-translate-y-2 transition-all duration-300">
+                    <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl font-bold mb-4 shadow-sm border border-emerald-200">
+                        🪄
+                    </div>
+                    <span class="text-xs font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full uppercase">03. Tactile Fun</span>
+                    <h3 class="font-heading text-xl font-bold text-purple-950 mt-1 mb-2">Multisensory Magic</h3>
+                    <p class="text-gray-600 text-xs leading-relaxed font-semibold">
+                        Uses colorful focus line rulers, high-contrast typography, and tactile letter games to erase confusion.
+                    </p>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="kemas-card hover:-translate-y-2 transition-all duration-300">
+                    <div class="w-14 h-14 rounded-2xl bg-pink-100 text-pink-700 flex items-center justify-center text-2xl font-bold mb-4 shadow-sm border border-pink-200">
+                        📑
+                    </div>
+                    <span class="text-xs font-extrabold text-pink-700 bg-pink-50 px-2.5 py-0.5 rounded-full uppercase">04. Doctor Ready</span>
+                    <h3 class="font-heading text-xl font-bold text-purple-950 mt-1 mb-2">Specialist PDF Reports</h3>
+                    <p class="text-gray-600 text-xs leading-relaxed font-semibold">
+                        Generates pediatrician-ready PDF reports with clear risk charts and recommended classroom accommodations.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SECTION 2: WHAT IS DYSLEXIA -->
+    <section id="what-is-dyslexia" class="py-16 md:py-24 px-4 sm:px-8 bg-[#FAF8F5]">
+        <div class="max-w-7xl mx-auto space-y-14">
+            
+            <!-- What is Dyslexia Intro Header -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+                
+                <div class="lg:col-span-6 space-y-5">
+                    <span class="bg-amber-100 text-amber-900 text-xs font-extrabold px-3.5 py-1.5 rounded-full uppercase tracking-wider border border-amber-200">Learning Difference</span>
+                    <h2 class="font-heading text-3xl sm:text-4xl lg:text-5xl font-extrabold text-brand-purple-deep">
+                        What is Dyslexia? 🧠
+                    </h2>
+                    <p class="text-gray-700 text-base font-semibold leading-relaxed">
+                        Dyslexia is simply a <strong>neurodevelopmental learning difference</strong> that affects how the brain connects written letters to spoken sounds.
+                    </p>
+                    <div class="bg-white p-5 rounded-2xl border-2 border-purple-200 shadow-sm space-y-2.5">
+                        <div class="flex items-center gap-2.5 font-heading font-extrabold text-purple-900 text-lg">
+                            <span class="text-amber-500 text-2xl">💡</span>
+                            <span>Superpower Fact for Parents:</span>
+                        </div>
+                        <p class="text-gray-600 text-xs font-semibold leading-relaxed">
+                            Dyslexia has <strong>NOTHING</strong> to do with intelligence or eyesight! Dyslexic thinkers are gifted with incredible 3D spatial reasoning, creative storytelling, and big-picture problem solving!
+                        </p>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-6">
+                    <div class="bg-gradient-to-tr from-purple-950 via-purple-900 to-indigo-900 text-white rounded-3xl p-7 shadow-xl space-y-5 border-2 border-purple-800">
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl">✨</span>
+                            <h3 class="font-heading text-2xl font-bold text-amber-300">Famous Creative Minds with Dyslexia</h3>
+                        </div>
+                        <p class="text-purple-100 text-xs leading-relaxed font-medium">
+                            Dyslexia is just a unique brain wiring! Many history-making creators transformed the world with dyslexia:
+                        </p>
+                        <div class="grid grid-cols-2 gap-3 text-xs font-bold">
+                            <div class="bg-white/10 p-3 rounded-2xl border border-white/10 flex items-center gap-2">
+                                <span>💡</span> Albert Einstein
+                            </div>
+                            <div class="bg-white/10 p-3 rounded-2xl border border-white/10 flex items-center gap-2">
+                                <span>🎨</span> Leonardo da Vinci
+                            </div>
+                            <div class="bg-white/10 p-3 rounded-2xl border border-white/10 flex items-center gap-2">
+                                <span>🚀</span> Sir Richard Branson
+                            </div>
+                            <div class="bg-white/10 p-3 rounded-2xl border border-white/10 flex items-center gap-2">
+                                <span>🎬</span> Steven Spielberg
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Myth vs. Fact Cards -->
+            <div class="space-y-6">
+                <div class="text-center space-y-1">
+                    <h3 class="font-heading text-2xl sm:text-3xl font-extrabold text-purple-950">Dispelling Dyslexia Myths</h3>
+                    <p class="text-gray-500 text-xs font-bold">Discover the scientific facts behind reading differences:</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    
+                    <!-- Myth Card 1 -->
+                    <div class="bg-white rounded-3xl p-6 border-2 border-purple-100 shadow-sm hover:border-purple-300 transition-all space-y-3">
+                        <div class="flex items-center justify-between border-b border-purple-100 pb-2">
+                            <span class="text-xs font-extrabold text-rose-500 uppercase tracking-wide flex items-center gap-1.5">
+                                <i class="fa-solid fa-xmark"></i> Myth #1
+                            </span>
+                            <span class="text-xs bg-purple-100 text-purple-800 font-bold px-2.5 py-0.5 rounded-full">Vision</span>
+                        </div>
+                        <p class="font-heading font-extrabold text-base text-gray-800">"Dyslexia is just seeing letters backwards or upside down."</p>
+                        <div class="bg-emerald-50 p-3.5 rounded-2xl border border-emerald-200 text-emerald-950 text-xs font-semibold leading-relaxed">
+                            <strong class="text-emerald-900 block font-bold mb-1">✓ Scientific Fact:</strong>
+                            Dyslexia is phonological, not eyesight-related. Reversing letters (b/d) is normal for young kids; dyslexic minds struggle matching speech sounds to symbols.
+                        </div>
+                    </div>
+
+                    <!-- Myth Card 2 -->
+                    <div class="bg-white rounded-3xl p-6 border-2 border-purple-100 shadow-sm hover:border-purple-300 transition-all space-y-3">
+                        <div class="flex items-center justify-between border-b border-purple-100 pb-2">
+                            <span class="text-xs font-extrabold text-rose-500 uppercase tracking-wide flex items-center gap-1.5">
+                                <i class="fa-solid fa-xmark"></i> Myth #2
+                            </span>
+                            <span class="text-xs bg-purple-100 text-purple-800 font-bold px-2.5 py-0.5 rounded-full">Growth</span>
+                        </div>
+                        <p class="font-heading font-extrabold text-base text-gray-800">"Children will outgrow dyslexia automatically as they get older."</p>
+                        <div class="bg-emerald-50 p-3.5 rounded-2xl border border-emerald-200 text-emerald-950 text-xs font-semibold leading-relaxed">
+                            <strong class="text-emerald-900 block font-bold mb-1">✓ Scientific Fact:</strong>
+                            Dyslexia is lifelong, but early multisensory phonics before age 8 rewires neural pathways, creating confident readers!
+                        </div>
+                    </div>
+
+                    <!-- Myth Card 3 -->
+                    <div class="bg-white rounded-3xl p-6 border-2 border-purple-100 shadow-sm hover:border-purple-300 transition-all space-y-3">
+                        <div class="flex items-center justify-between border-b border-purple-100 pb-2">
+                            <span class="text-xs font-extrabold text-rose-500 uppercase tracking-wide flex items-center gap-1.5">
+                                <i class="fa-solid fa-xmark"></i> Myth #3
+                            </span>
+                            <span class="text-xs bg-purple-100 text-purple-800 font-bold px-2.5 py-0.5 rounded-full">IQ</span>
+                        </div>
+                        <p class="font-heading font-extrabold text-base text-gray-800">"Dyslexic children are less intelligent or just lazy."</p>
+                        <div class="bg-emerald-50 p-3.5 rounded-2xl border border-emerald-200 text-emerald-950 text-xs font-semibold leading-relaxed">
+                            <strong class="text-emerald-900 block font-bold mb-1">✓ Scientific Fact:</strong>
+                            Dyslexia has ZERO link to intelligence. Dyslexic kids expend 5x more mental energy decoding words while possessing gifted creative minds.
+                        </div>
+                    </div>
+
+                    <!-- Myth Card 4 -->
+                    <div class="bg-white rounded-3xl p-6 border-2 border-purple-100 shadow-sm hover:border-purple-300 transition-all space-y-3">
+                        <div class="flex items-center justify-between border-b border-purple-100 pb-2">
+                            <span class="text-xs font-extrabold text-rose-500 uppercase tracking-wide flex items-center gap-1.5">
+                                <i class="fa-solid fa-xmark"></i> Myth #4
+                            </span>
+                            <span class="text-xs bg-purple-100 text-purple-800 font-bold px-2.5 py-0.5 rounded-full">Practice</span>
+                        </div>
+                        <p class="font-heading font-extrabold text-base text-gray-800">"Just forcing them to read more books will fix dyslexia."</p>
+                        <div class="bg-emerald-50 p-3.5 rounded-2xl border border-emerald-200 text-emerald-950 text-xs font-semibold leading-relaxed">
+                            <strong class="text-emerald-900 block font-bold mb-1">✓ Scientific Fact:</strong>
+                            Forcing reading without decoding tools causes anxiety. Line rulers, high contrast, and structured phonics work best!
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SECTION 3: DYSLEXIA SYMPTOMS & AGE INDICATORS -->
+    <section id="symptoms" class="py-16 md:py-24 px-4 sm:px-8 bg-white border-y-2 border-purple-100">
+        <div class="max-w-7xl mx-auto space-y-12">
+            
+            <div class="text-center max-w-3xl mx-auto space-y-3">
+                <span class="bg-purple-100 text-purple-800 text-xs font-extrabold px-3.5 py-1.5 rounded-full uppercase tracking-wider border border-purple-200">Observational Signs</span>
+                <h2 class="font-heading text-3xl sm:text-4xl lg:text-5xl font-extrabold text-brand-purple-deep">
+                    Recognizing Indicators by Age 📌
+                </h2>
+                <p class="text-gray-600 text-base font-semibold leading-relaxed">
+                    Select an age group below to explore age-tailored reading behaviors:
+                </p>
+            </div>
+
+            <!-- Age Selector Tabs -->
+            <div class="flex flex-wrap justify-center gap-3">
+                <button onclick="selectSymptomAge('preschool')" id="tab-age-preschool" class="symptom-tab-btn bg-purple-600 text-white font-extrabold text-xs sm:text-sm px-5 py-3 rounded-2xl shadow-md transition-all flex items-center gap-2 border-2 border-purple-600">
+                    <span>👶 Preschool (Ages 3–5)</span>
+                </button>
+                <button onclick="selectSymptomAge('early')" id="tab-age-early" class="symptom-tab-btn bg-white text-gray-700 border-2 border-purple-200 font-extrabold text-xs sm:text-sm px-5 py-3 rounded-2xl hover:bg-purple-50 transition-all flex items-center gap-2">
+                    <span>👧 Early Primary (Ages 6–8)</span>
+                </button>
+                <button onclick="selectSymptomAge('upper')" id="tab-age-upper" class="symptom-tab-btn bg-white text-gray-700 border-2 border-purple-200 font-extrabold text-xs sm:text-sm px-5 py-3 rounded-2xl hover:bg-purple-50 transition-all flex items-center gap-2">
+                    <span>👦 Upper Primary (Ages 9–12)</span>
+                </button>
+                <button onclick="selectSymptomAge('teens')" id="tab-age-teens" class="symptom-tab-btn bg-white text-gray-700 border-2 border-purple-200 font-extrabold text-xs sm:text-sm px-5 py-3 rounded-2xl hover:bg-purple-50 transition-all flex items-center gap-2">
+                    <span>🧑 Teens & Adults</span>
+                </button>
+            </div>
+
+            <!-- Symptom Age Content Display -->
+            <div id="symptom-content-box" class="kemas-card bg-purple-50/40 p-7 sm:p-9 rounded-3xl border-2 border-purple-200">
+                <!-- Dynamic Content Rendered by JS -->
+            </div>
+
+            <!-- INTERACTIVE SYMPTOM CHECKLIST CALCULATOR WIDGET -->
+            <div id="screener" class="kemas-card bg-gradient-to-br from-white via-purple-50/50 to-amber-50/50 p-8 sm:p-10 rounded-3xl border-2 border-purple-200 shadow-xl space-y-7">
+                
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b-2 border-purple-100 pb-5">
+                    <div>
+                        <div class="flex items-center gap-2.5 mb-1">
+                            <span class="text-2xl">📋</span>
+                            <h3 class="font-heading text-2xl sm:text-3xl font-extrabold text-brand-purple-deep">Interactive Parent Quick Screener</h3>
+                        </div>
+                        <p class="text-sm text-gray-600 font-bold">Check any behaviors observed in your child over the last 3 months:</p>
+                    </div>
+                    <div class="bg-white px-4 py-2.5 rounded-2xl border-2 border-purple-200 shadow-sm flex items-center gap-3">
+                        <span class="text-sm font-bold text-gray-500">Live Risk Indicator:</span>
+                        <span id="screener-risk-badge" class="font-extrabold text-xs sm:text-sm text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full">
+                            Baseline / Low (0%)
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Screener Progress Bar -->
+                <div class="w-full bg-purple-100 rounded-full h-3 overflow-hidden border border-purple-200">
+                    <div id="screener-progress-bar" class="bg-gradient-to-r from-purple-600 to-indigo-600 h-3 rounded-full transition-all duration-300 w-0"></div>
+                </div>
+
+                <!-- Checklist Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    
+                    <label class="flex items-start gap-3.5 p-4 rounded-2xl bg-white border-2 border-purple-100 hover:border-purple-300 transition-all cursor-pointer shadow-sm group">
+                        <input type="checkbox" onchange="calculateSymptomScore()" class="screener-checkbox w-5 h-5 text-purple-600 rounded-lg border-purple-300 focus:ring-purple-500 mt-0.5">
+                        <div class="text-sm">
+                            <p class="font-bold text-purple-950 group-hover:text-purple-700 text-base">Frequent Letter Reversals</p>
+                            <p class="text-gray-500 text-xs sm:text-sm font-medium">Confuses letters like 'b' and 'd', or 'p' and 'q' past age 7.</p>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start gap-3.5 p-4 rounded-2xl bg-white border-2 border-purple-100 hover:border-purple-300 transition-all cursor-pointer shadow-sm group">
+                        <input type="checkbox" onchange="calculateSymptomScore()" class="screener-checkbox w-5 h-5 text-purple-600 rounded-lg border-purple-300 focus:ring-purple-500 mt-0.5">
+                        <div class="text-sm">
+                            <p class="font-bold text-purple-950 group-hover:text-purple-700 text-base">Slow Reading Fluency</p>
+                            <p class="text-gray-500 text-xs sm:text-sm font-medium">Sounds out basic words repeatedly without recognizing them sight-unseen.</p>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start gap-3.5 p-4 rounded-2xl bg-white border-2 border-purple-100 hover:border-purple-300 transition-all cursor-pointer shadow-sm group">
+                        <input type="checkbox" onchange="calculateSymptomScore()" class="screener-checkbox w-5 h-5 text-purple-600 rounded-lg border-purple-300 focus:ring-purple-500 mt-0.5">
+                        <div class="text-sm">
+                            <p class="font-bold text-purple-950 group-hover:text-purple-700 text-base">Skipping Lines or Words</p>
+                            <p class="text-gray-500 text-xs sm:text-sm font-medium">Loses place on line or skips small connector words ('and', 'the', 'in').</p>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start gap-3.5 p-4 rounded-2xl bg-white border-2 border-purple-100 hover:border-purple-300 transition-all cursor-pointer shadow-sm group">
+                        <input type="checkbox" onchange="calculateSymptomScore()" class="screener-checkbox w-5 h-5 text-purple-600 rounded-lg border-purple-300 focus:ring-purple-500 mt-0.5">
+                        <div class="text-sm">
+                            <p class="font-bold text-purple-950 group-hover:text-purple-700 text-base">Difficulty Rhyming Words</p>
+                            <p class="text-gray-500 text-xs sm:text-sm font-medium">Struggles to identify rhyming patterns (e.g. cat, hat, bat).</p>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start gap-3.5 p-4 rounded-2xl bg-white border-2 border-purple-100 hover:border-purple-300 transition-all cursor-pointer shadow-sm group">
+                        <input type="checkbox" onchange="calculateSymptomScore()" class="screener-checkbox w-5 h-5 text-purple-600 rounded-lg border-purple-300 focus:ring-purple-500 mt-0.5">
+                        <div class="text-sm">
+                            <p class="font-bold text-purple-950 group-hover:text-purple-700 text-base">Directional Left / Right Confusion</p>
+                            <p class="text-gray-500 text-xs sm:text-sm font-medium">Mixes up left and right, or sequence order of days/months.</p>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start gap-3.5 p-4 rounded-2xl bg-white border-2 border-purple-100 hover:border-purple-300 transition-all cursor-pointer shadow-sm group">
+                        <input type="checkbox" onchange="calculateSymptomScore()" class="screener-checkbox w-5 h-5 text-purple-600 rounded-lg border-purple-300 focus:ring-purple-500 mt-0.5">
+                        <div class="text-sm">
+                            <p class="font-bold text-purple-950 group-hover:text-purple-700 text-base">Reading Avoidance & Anxiety</p>
+                            <p class="text-gray-500 text-xs sm:text-sm font-medium">Expresses frustration, headaches, or anxiety before reading aloud.</p>
+                        </div>
+                    </label>
+
+                </div>
+
+                <!-- Screener Recommendation Output -->
+                <div class="pt-4 border-t-2 border-purple-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div id="screener-advice-text" class="text-sm font-semibold text-gray-700">
+                        Select checkboxes above to calculate an instant preliminary risk score.
+                    </div>
+                    <button onclick="openAuthModal('register')" class="shimmer-btn bg-gradient-to-r from-purple-600 to-indigo-700 text-white font-heading font-extrabold text-sm px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all shrink-0 border-2 border-purple-500">
+                        Generate Full Diagnostic Report →
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SECTION 4: FEATURES & HOW IT WORKS -->
+    <section id="features" class="py-16 md:py-24 px-4 sm:px-8 bg-[#FAF8F5]">
+        <div class="max-w-7xl mx-auto space-y-12">
+            
+            <div class="text-center max-w-3xl mx-auto space-y-3">
+                <span class="bg-amber-100 text-amber-900 text-xs font-extrabold px-3.5 py-1.5 rounded-full uppercase tracking-wider border border-amber-200">Simple Journey</span>
+                <h2 class="font-heading text-3xl sm:text-4xl lg:text-5xl font-extrabold text-brand-purple-deep">
+                    4 Simple Steps to Reading Joy ✨
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                
+                <!-- Step 1 -->
+                <div class="kemas-card bg-white p-6 rounded-3xl border-2 border-purple-100 shadow-sm relative space-y-3">
+                    <div class="w-10 h-10 rounded-2xl bg-purple-600 text-white font-heading font-extrabold text-lg flex items-center justify-center shadow-md">
+                        1
+                    </div>
+                    <h3 class="font-heading text-lg font-bold text-purple-950">Parent Quest</h3>
+                    <p class="text-gray-600 text-xs font-semibold leading-relaxed">
+                        Complete a 5-minute observational survey about reading habits, family history, and phonics behaviors.
+                    </p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="kemas-card bg-white p-6 rounded-3xl border-2 border-purple-100 shadow-sm relative space-y-3">
+                    <div class="w-10 h-10 rounded-2xl bg-amber-400 text-purple-950 font-heading font-extrabold text-lg flex items-center justify-center shadow-md">
+                        2
+                    </div>
+                    <h3 class="font-heading text-lg font-bold text-purple-950">Interactive AI Game</h3>
+                    <p class="text-gray-600 text-xs font-semibold leading-relaxed">
+                        Child reads story cards with Ollie Owl while AI listens for phoneme accuracy and saccadic eye pauses.
+                    </p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="kemas-card bg-white p-6 rounded-3xl border-2 border-purple-100 shadow-sm relative space-y-3">
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-500 text-white font-heading font-extrabold text-lg flex items-center justify-center shadow-md">
+                        3
+                    </div>
+                    <h3 class="font-heading text-lg font-bold text-purple-950">Instant PDF Report</h3>
+                    <p class="text-gray-600 text-xs font-semibold leading-relaxed">
+                        Receive a comprehensive screening score (Baseline, Moderate, High) with charts ready for doctors.
+                    </p>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="kemas-card bg-white p-6 rounded-3xl border-2 border-purple-100 shadow-sm relative space-y-3">
+                    <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white font-heading font-extrabold text-lg flex items-center justify-center shadow-md">
+                        4
+                    </div>
+                    <h3 class="font-heading text-lg font-bold text-purple-950">Custom Parent Tips</h3>
+                    <p class="text-gray-600 text-xs font-semibold leading-relaxed">
+                        Access line rulers, high-contrast reading templates, and daily 10-minute multisensory home activities.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t-2 border-purple-100 py-12 px-4 sm:px-8 text-xs font-semibold text-gray-600">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            
+            <div class="space-y-3">
+                <div class="flex items-center gap-2.5">
+                    <img src="assets/lexisense-logo.png" alt="LexiSense Logo" class="w-8 h-8 object-contain">
+                    <span class="font-heading text-xl font-extrabold text-brand-purple-deep">LexiSense</span>
+                </div>
+                <p class="text-gray-500 text-xs leading-relaxed">
+                    AI-powered early dyslexia screening, saccadic eye movement tracking, and multisensory phonics companion.
+                </p>
+            </div>
+
+            <div>
+                <h4 class="font-heading font-bold text-purple-950 mb-3 text-sm">Account & Tools</h4>
+                <ul class="space-y-2">
+                    <li><button onclick="openAuthModal('login')" class="hover:text-purple-700">Log In</button></li>
+                    <li><button onclick="openAuthModal('register')" class="hover:text-purple-700">Register Free Account</button></li>
+                    <li><button onclick="openAccessibilityModal()" class="hover:text-purple-700">Accessibility Tools</button></li>
+                    <li><a href="parent-page.html" class="hover:text-purple-700">Parent Dashboard</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-heading font-bold text-purple-950 mb-3 text-sm">Clinical Notice</h4>
+                <p class="text-gray-500 text-xs sm:text-sm leading-relaxed">
+                    LexiSense provides observational pre-diagnosis and screening indicators. It does not replace a comprehensive clinical diagnosis by a registered pediatric neuropsychologist.
+                </p>
+            </div>
+
+        </div>
+
+        <div class="max-w-7xl mx-auto border-t border-purple-100 pt-6 flex flex-col sm:flex-row items-center justify-between text-gray-500 text-xs sm:text-sm">
+            <p>© 2026 LexiSense AI Inc. All rights reserved.</p>
+            <div class="flex flex-wrap gap-4 mt-2 sm:mt-0 font-bold">
+                <a href="privacy-policy.html" onclick="openLegalModal('privacy', event)" class="hover:text-purple-700 transition-colors flex items-center gap-1.5 py-1">
+                    <i class="fa-solid fa-shield-halved text-purple-600 text-xs"></i>
+                    <span>Privacy Policy</span>
+                </a>
+                <a href="terms-of-service.html" onclick="openLegalModal('terms', event)" class="hover:text-purple-700 transition-colors flex items-center gap-1.5 py-1">
+                    <i class="fa-solid fa-file-contract text-amber-500 text-xs"></i>
+                    <span>Terms of Service</span>
+                </a>
+                <a href="accessibility-statement.html" onclick="openLegalModal('accessibility', event)" class="hover:text-purple-700 transition-colors flex items-center gap-1.5 py-1">
+                    <i class="fa-solid fa-universal-access text-sky-500 text-xs"></i>
+                    <span>Accessibility Statement</span>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ACCESSIBILITY OPTIONS MODAL (STANDARDIZED ACROSS INDEX & PORTALS) -->
+    <div id="accessibility-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-floating border border-purple-100 animate-pop max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="flex items-center justify-between border-b border-purple-50 pb-4 shrink-0">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-2xl bg-purple-600 text-white flex items-center justify-center text-xl shadow-sm">
+                        <i class="fa-solid fa-universal-access"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-heading text-xl font-bold text-brand-purple-deep leading-tight">Accessibility Controls</h3>
+                        <p class="text-xs sm:text-sm text-purple-600 font-medium">Personalize reading comfort for parent & child</p>
+                    </div>
+                </div>
+                <button onclick="closeAccessibilityModal()" class="text-gray-400 hover:text-brand-purple-deep">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4 text-sm overflow-y-auto custom-scrollbar flex-1 pt-4 pr-1">
+                <!-- Dyslexia Font Toggle -->
+                <div class="flex items-center justify-between p-4 bg-purple-50/50 rounded-2xl border border-purple-100">
+                    <div>
+                        <span class="font-bold text-brand-purple-deep block text-sm sm:text-base">Dyslexia-Friendly Font</span>
+                        <span class="text-gray-500 text-xs sm:text-sm">Enables weighted letter shapes (Lexend & OpenDyslexic)</span>
+                    </div>
+                    <button onclick="toggleDyslexiaFont()" id="btn-font-toggle" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-full font-bold transition-all text-sm">
+                        OFF
+                    </button>
+                </div>
+
+                <!-- Text Size Scaling -->
+                <div class="p-4 bg-purple-50/50 rounded-2xl border border-purple-100 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-brand-purple-deep text-sm sm:text-base">Text Size Scaling</span>
+                        <span id="font-size-display" class="font-extrabold text-purple-600 bg-white px-2.5 py-0.5 rounded-full border text-xs sm:text-sm">100%</span>
+                    </div>
+                    <div class="flex gap-2 pt-1 text-sm">
+                        <button onclick="changeFontSize(-1)" class="flex-1 py-2 bg-white border border-purple-200 rounded-xl font-bold text-gray-700 hover:bg-purple-100 transition-colors">A- Smaller</button>
+                        <button onclick="resetFontSize()" class="px-3 py-2 bg-white border border-purple-200 rounded-xl font-bold text-gray-700 hover:bg-purple-100 transition-colors">Reset</button>
+                        <button onclick="changeFontSize(1)" class="flex-1 py-2 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition-colors">A+ Larger</button>
+                    </div>
+                </div>
+
+                <!-- High Contrast Toggle -->
+                <div class="flex items-center justify-between p-4 bg-purple-50/50 rounded-2xl border border-purple-100">
+                    <div>
+                        <span class="font-bold text-brand-purple-deep block text-sm sm:text-base">High Contrast Mode</span>
+                        <span class="text-gray-500 text-xs sm:text-sm">Increases visual contrast for low-light reading</span>
+                    </div>
+                    <button onclick="toggleHighContrast()" id="btn-contrast-toggle" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-full font-bold transition-all text-sm">
+                        OFF
+                    </button>
+                </div>
+
+                <!-- Reading Focus Ruler -->
+                <div class="flex items-center justify-between p-4 bg-purple-50/50 rounded-2xl border border-purple-100">
+                    <div>
+                        <span class="font-bold text-brand-purple-deep block text-sm sm:text-base">Reading Focus Ruler 📏</span>
+                        <span class="text-gray-500 text-xs sm:text-sm">Guides mouse cursor line overlay for reading focus</span>
+                    </div>
+                    <button onclick="toggleReadingRuler()" class="bg-purple-600 text-white px-4 py-2 rounded-full font-bold transition-all shadow-sm text-sm">
+                        Toggle
+                    </button>
+                </div>
+
+                <!-- Visual Color Tint Filter -->
+                <div class="p-4 bg-purple-50/50 rounded-2xl border border-purple-100 space-y-2">
+                    <span class="font-bold text-brand-purple-deep block text-sm sm:text-base">Visual Color Tint Filter 🎨</span>
+                    <p class="text-xs sm:text-sm text-gray-500">Soft background tint to reduce visual glare</p>
+                    <div class="flex gap-2 pt-1">
+                        <button onclick="setColorTint('none')" class="flex-1 py-2 bg-white border border-gray-200 rounded-xl font-bold text-xs sm:text-sm">Default</button>
+                        <button onclick="setColorTint('blue')" class="flex-1 py-2 bg-sky-100 border border-sky-300 text-sky-900 rounded-xl font-bold text-xs sm:text-sm">Soft Blue</button>
+                        <button onclick="setColorTint('yellow')" class="flex-1 py-2 bg-yellow-100 border border-yellow-300 text-yellow-900 rounded-xl font-bold text-xs sm:text-sm">Warm Yellow</button>
+                        <button onclick="setColorTint('green')" class="flex-1 py-2 bg-emerald-100 border border-emerald-300 text-emerald-900 rounded-xl font-bold text-xs sm:text-sm">Soft Green</button>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="closeAccessibilityModal()" class="w-full bg-purple-600 text-white py-3.5 rounded-full font-bold text-sm sm:text-base shadow-md hover:bg-purple-700 transition-colors">
+                Apply Accessibility Preferences
+            </button>
+        </div>
+    </div>
+
+    <!-- OLLIE THE WISE OWL AI CHATBOT WIDGET -->
+    <div id="chatbot-widget" class="fixed bottom-6 right-4 sm:right-6 z-50">
+        
+        <!-- Floating Speech Tooltip -->
+        <div class="absolute -top-12 right-0 sm:right-1 bg-purple-950 text-amber-300 text-xs font-extrabold pl-4 pr-5 py-2 rounded-2xl shadow-xl border border-amber-300/40 whitespace-nowrap animate-bounce pointer-events-none flex items-center gap-2">
+            <span>Hoo-hoo!</span>
+            <img src="assets/ollie-mascot.png" alt="Ollie Mascot" class="w-5 h-5 object-contain inline-block shrink-0 drop-shadow-sm">
+            <span>Need help? Ask Ollie!</span>
+            <div class="absolute -bottom-1 right-7 sm:right-8 w-2.5 h-2.5 bg-purple-950 rotate-45 border-r border-b border-amber-300/40"></div>
+        </div>
+
+        <!-- Floating Owl Launcher Button -->
+        <button onclick="toggleChatbot()" class="w-18 h-18 sm:w-20 sm:h-20 bg-gradient-to-tr from-amber-300 via-yellow-300 to-amber-400 text-purple-950 rounded-full shadow-2xl flex items-center justify-center p-1.5 transform hover:scale-110 transition-all border-4 border-white relative group animate-aura-glow cursor-pointer" aria-label="Toggle Ollie Owl Assistant">
+            <img src="assets/ollie-mascot.png" alt="Ollie Mascot" class="w-15 h-15 sm:w-16 sm:h-16 object-contain animate-owl-mascot drop-shadow-md scale-110">
+            <span class="absolute -top-1 -right-1 w-6 h-6 bg-purple-600 rounded-full border-2 border-white flex items-center justify-center text-xs text-white font-bold animate-bounce shadow-md">!</span>
+        </button>
+
+        <!-- Floating Chat Drawer -->
+        <div id="chat-window" class="hidden absolute bottom-20 right-0 w-80 sm:w-96 bg-white rounded-3xl shadow-2xl border-2 border-purple-200 overflow-hidden flex flex-col h-[510px] animate-pop-in">
+            
+            <!-- Chat Drawer Header -->
+            <div class="bg-gradient-to-r from-purple-700 via-violet-600 to-purple-600 text-white p-4 flex items-center justify-between shadow-md">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 bg-amber-400/90 rounded-2xl flex items-center justify-center p-1 shadow-md animate-owl-mascot ring-2 ring-amber-200">
+                        <img src="assets/ollie-mascot.png" alt="Ollie Mascot" class="w-9 h-9 object-contain drop-shadow-sm">
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <h4 class="font-heading font-extrabold text-sm leading-tight">Ollie Wise Owl</h4>
+                            <span class="bg-amber-400 text-purple-950 text-xs font-extrabold px-1.5 py-0.2 rounded-full">AI</span>
+                        </div>
+                        <span class="text-xs text-purple-100 font-medium">Parent Screening Companion</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <button onclick="toggleChatSound()" id="chat-sound-btn" class="text-white/60 hover:text-white p-1 text-base transition-colors" title="Click to Enable Ollie Voice & Sound 🔇">
+                        <i class="fa-solid fa-volume-xmark"></i>
+                    </button>
+                    <button onclick="toggleChatbot()" class="text-white/80 hover:text-white p-1" aria-label="Close Chat">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Messages Area -->
+            <div id="chat-messages" class="flex-1 p-4 overflow-y-auto custom-scrollbar space-y-3.5 bg-purple-50/30 text-xs">
+                <div class="flex gap-2.5 items-start animate-fade-in">
+                    <div class="w-9 h-9 bg-amber-400/90 rounded-2xl flex items-center justify-center p-1 shrink-0 shadow-md animate-owl-mascot">
+                        <img src="assets/ollie-mascot.png" alt="Ollie Mascot" class="w-8 h-8 object-contain">
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm text-gray-800 space-y-1.5 border border-purple-100 max-w-[86%]">
+                        <p class="font-bold text-purple-700 font-heading text-sm">Hoo-hoo! 👋 Welcome to LexiSense!</p>
+                        <p>I'm <strong>Ollie the Wise Owl</strong>! Ask me anything about dyslexia symptoms, screening accuracy, or fun home reading exercises!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Suggestion Chips -->
+            <div class="p-2 bg-white border-t border-purple-50 flex gap-1.5 overflow-x-auto text-xs whitespace-nowrap no-scrollbar">
+                <button onclick="sendQuickMessage('What is Dyslexia?')" class="bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold px-3 py-1.5 rounded-full border border-purple-100 transition-colors flex items-center gap-1.5">
+                    <img src="assets/ollie-mascot.png" alt="Ollie" class="w-3.5 h-3.5 object-contain">
+                    <span>What is Dyslexia?</span>
+                </button>
+                <button onclick="sendQuickMessage('Suggest home reading exercises')" class="bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold px-3 py-1.5 rounded-full border border-purple-100 transition-colors">
+                    📖 Home Exercises
+                </button>
+                <button onclick="sendQuickMessage('What are symptoms in 7 year olds?')" class="bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold px-3 py-1.5 rounded-full border border-purple-100 transition-colors">
+                    📌 7 Yo Symptoms
+                </button>
+            </div>
+
+            <!-- Input Box -->
+            <div class="p-3 bg-white border-t border-purple-100 flex items-center gap-2">
+                <input id="chat-input" type="text" placeholder="Ask Ollie a question..." onkeypress="if(event.key==='Enter') sendChatMessage()" class="flex-1 bg-purple-50/50 border border-purple-200 rounded-full px-4 py-2.5 text-xs text-brand-purple-deep focus:outline-none focus:ring-2 focus:ring-purple-600 font-medium">
+                <button onclick="sendChatMessage()" class="w-10 h-10 bg-purple-600 hover:bg-purple-700 text-white rounded-full flex items-center justify-center text-xs transition-colors shadow-md" aria-label="Send Message">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CREATIVE ANIMATED AUTH MODAL FOR INDEX.HTML -->
+    <div id="auth-modal" class="hidden fixed inset-0 bg-purple-950/60 backdrop-blur-md z-50 flex items-center justify-center p-4" onclick="if(event.target === this) closeAuthModal(event)">
+        <div class="bg-white rounded-[32px] max-w-md w-full shadow-2xl border-2 border-purple-200 animate-pop relative max-h-[90vh] flex flex-col overflow-hidden">
+            
+            <!-- Whimsical Mascot Header Card (Pinned Header) -->
+            <div class="relative bg-gradient-to-r from-purple-700 via-violet-600 to-indigo-700 p-6 text-white overflow-hidden shadow-sm shrink-0">
+                <!-- Floating Alphabet Bubbles -->
+                <div class="absolute -top-2 left-6 bg-white/20 backdrop-blur-md px-2.5 py-1 rounded-xl text-amber-300 font-extrabold text-sm animate-bounce-subtle pointer-events-none">b</div>
+                <div class="absolute top-4 right-12 bg-white/20 backdrop-blur-md px-2.5 py-1 rounded-xl text-purple-200 font-extrabold text-xs animate-float-slow pointer-events-none">d</div>
+                <div class="absolute -bottom-2 left-28 bg-white/20 backdrop-blur-md px-2.5 py-1 rounded-xl text-amber-200 font-extrabold text-xs animate-pulse-glow pointer-events-none">p</div>
+
+                <button type="button" onclick="closeAuthModal(event)" class="absolute top-4 right-4 w-9 h-9 rounded-2xl bg-white/10 hover:bg-white/20 active:scale-95 text-white flex items-center justify-center transition-all border border-white/20 z-30 cursor-pointer pointer-events-auto shadow-sm" title="Close Modal" aria-label="Close Modal">
+                    <i class="fa-solid fa-xmark text-base pointer-events-none"></i>
+                </button>
+
+                <div class="flex items-center gap-3.5 relative z-10">
+                    <img src="assets/lexisense-logo.png" alt="LexiSense Logo" class="w-14 h-14 object-contain shrink-0 drop-shadow-md">
+                    <div>
+                        <h3 class="font-heading text-2xl font-extrabold text-white leading-tight">
+                            Welcome to LexiSense!
+                        </h3>
+                        <p class="text-xs sm:text-sm text-purple-100 font-semibold">Empowering every child to read & flourish 🎈</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scrollable Body Content (Scrollbar inside the box) -->
+            <div class="p-6 sm:p-7 space-y-5 overflow-y-auto custom-scrollbar flex-1">
+                
+                <!-- CREATIVE SEGMENTED TAB CONTROLS -->
+                <div class="flex gap-2 p-1.5 bg-purple-50 rounded-2xl border border-purple-100">
+                    <button id="tab-btn-login" onclick="switchAuthTab('login')" class="flex-1 py-3 font-extrabold text-xs text-white bg-gradient-to-r from-purple-600 to-indigo-600 shadow-md rounded-2xl border-2 border-purple-400 transition-all transform scale-[1.02]">
+                        <i class="fa-solid fa-right-to-bracket mr-1"></i> Log In
+                    </button>
+                    <button id="tab-btn-register" onclick="switchAuthTab('register')" class="flex-1 py-3 font-extrabold text-xs text-gray-500 hover:text-purple-600 transition-all rounded-2xl border-2 border-transparent">
+                        <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Join Free ✨
+                    </button>
+                </div>
+
+                <!-- DYNAMIC ALERT MESSAGES -->
+                <div id="auth-error-msg" class="hidden p-3.5 bg-red-50 border-2 border-red-200 text-red-700 rounded-2xl text-xs font-bold flex items-center gap-2.5 shadow-sm animate-pop-in">
+                    <i class="fa-solid fa-circle-exclamation text-lg text-red-500 shrink-0"></i>
+                    <span id="auth-error-text">An error occurred.</span>
+                </div>
+
+                <div id="auth-success-msg" class="hidden p-3.5 bg-emerald-50 border-2 border-emerald-200 text-emerald-800 rounded-2xl text-xs font-bold flex items-center gap-2.5 shadow-sm animate-pop-in">
+                    <i class="fa-solid fa-circle-check text-lg text-emerald-500 shrink-0"></i>
+                    <span id="auth-success-text">Action successful.</span>
+                </div>
+
+                <!-- FORM 1: LOGIN -->
+                <form id="auth-form-login" onsubmit="handleLoginSubmit(event)" class="space-y-4 text-xs">
+                    <div>
+                        <label class="font-extrabold text-brand-purple-deep block mb-1">Username or Email</label>
+                        <div class="relative">
+                            <input id="login-username" type="text" required placeholder="e.g. sarah_jenkins or email@domain.com" class="w-full bg-purple-50/50 border-2 border-purple-100 rounded-2xl p-3.5 pl-10 focus:ring-2 focus:ring-purple-600 focus:border-purple-600 focus:outline-none font-semibold transition-all">
+                            <i class="fa-solid fa-user absolute left-3.5 top-4 text-purple-400 text-sm"></i>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="font-extrabold text-brand-purple-deep block">Password</label>
+                            <button type="button" onclick="switchAuthTab('forgot')" class="text-xs sm:text-sm text-purple-600 font-extrabold hover:underline">
+                                Forgot password?
+                            </button>
+                        </div>
+                        <div class="relative">
+                            <input id="login-password" type="password" required placeholder="••••••••" class="w-full bg-purple-50/50 border-2 border-purple-100 rounded-2xl p-3.5 pl-10 pr-10 focus:ring-2 focus:ring-purple-600 focus:border-purple-600 focus:outline-none font-semibold transition-all">
+                            <i class="fa-solid fa-lock absolute left-3.5 top-4 text-purple-400 text-sm"></i>
+                            <button type="button" onclick="togglePasswordVisibility('login-password', 'login-eye-icon')" class="absolute right-3.5 top-3.5 text-gray-400 hover:text-purple-600 p-1">
+                                <i id="login-eye-icon" class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btn-submit-login" class="w-full py-4 bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-700 hover:from-purple-700 hover:to-indigo-800 text-white font-extrabold text-xs sm:text-sm rounded-2xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 border-2 border-purple-500 flex items-center justify-center gap-2">
+                        <span>Log In to Account</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+
+                    <!-- DEMO ACCOUNTS QUICK-ACCESS BAR -->
+                    <div class="pt-3 border-t border-purple-100 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-extrabold text-purple-900 flex items-center gap-1.5">
+                                <span>⚡</span> Quick Demo Portals:
+                            </span>
+                            <span class="text-[11px] text-purple-600 font-bold">1-Click Instant Access</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button type="button" onclick="loginAsDemo('admin')" class="p-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 rounded-2xl text-center font-extrabold text-xs transition-all transform hover:scale-[1.02] shadow-sm flex flex-col items-center gap-1">
+                                <span class="text-base">🛡️</span>
+                                <span>Specialist</span>
+                                <span class="text-[10px] text-indigo-600 font-bold bg-indigo-200/60 px-1.5 py-0.5 rounded-full">Admin</span>
+                            </button>
+                            <button type="button" onclick="loginAsDemo('parent')" class="p-2.5 bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200 rounded-2xl text-center font-extrabold text-xs transition-all transform hover:scale-[1.02] shadow-sm flex flex-col items-center gap-1">
+                                <span class="text-base">👧</span>
+                                <span>Parent</span>
+                                <span class="text-[10px] text-purple-600 font-bold bg-purple-200/60 px-1.5 py-0.5 rounded-full">Portal</span>
+                            </button>
+                            <button type="button" onclick="loginAsDemo('super_admin')" class="p-2.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-2xl text-center font-extrabold text-xs transition-all transform hover:scale-[1.02] shadow-sm flex flex-col items-center gap-1">
+                                <span class="text-base">👑</span>
+                                <span>Super</span>
+                                <span class="text-[10px] text-amber-800 font-bold bg-amber-200/60 px-1.5 py-0.5 rounded-full">Admin</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- FORM 2: REGISTER (WITH PARENT vs TEACHER ROLE SELECTOR & SCHOOL FIELD) -->
+                <form id="auth-form-register" onsubmit="handleRegisterSubmit(event)" class="hidden space-y-4 text-xs">
+                    
+                    <!-- Role Selector Cards (Parent vs Educator/Teacher) -->
+                    <div>
+                        <label class="font-extrabold text-brand-purple-deep block mb-1.5">I am registering as a:</label>
+                        <div class="flex gap-2.5">
+                            <button type="button" onclick="selectRegisterRole('parent')" id="role-btn-parent" class="role-card flex-1 p-3 rounded-2xl border-2 border-purple-600 bg-purple-50 text-purple-950 font-extrabold text-xs text-center shadow-md transform scale-[1.02] transition-all flex items-center justify-center gap-2 cursor-pointer">
+                                <span>👧 Parent / Guardian</span>
+                            </button>
+                            <button type="button" onclick="selectRegisterRole('teacher')" id="role-btn-teacher" class="role-card flex-1 p-3 rounded-2xl border-2 border-gray-200 bg-white text-gray-600 font-bold text-xs text-center hover:border-purple-300 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                                <span>🏫 Educator / Teacher</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Conditional School / Branch Field (Appears when Educator/Teacher is chosen) -->
+                    <div id="reg-school-group" class="hidden space-y-1 animate-pop-in">
+                        <label class="font-extrabold text-brand-purple-deep block">School Name or Branch Location <span class="text-rose-500">*</span></label>
+                        <div class="relative">
+                            <input id="reg-school" type="text" placeholder="e.g. SK Taman Primary School (Branch A)" class="w-full bg-amber-50/60 border-2 border-amber-300 rounded-2xl p-3.5 pl-10 focus:ring-2 focus:ring-amber-500 focus:outline-none font-extrabold text-purple-950 transition-all">
+                            <i class="fa-solid fa-school absolute left-3.5 top-4 text-amber-500 text-sm"></i>
+                        </div>
+                        <span class="text-xs text-amber-700 font-bold block">✓ Teachers receive school-wide screening tracking tools.</span>
+                    </div>
+
+                    <div>
+                        <label class="font-extrabold text-brand-purple-deep block mb-1">Full Name</label>
+                        <div class="relative">
+                            <input id="reg-name" type="text" required placeholder="e.g. Hanis Jenkins" class="w-full bg-purple-50/50 border-2 border-purple-100 rounded-2xl p-3.5 pl-10 focus:ring-2 focus:ring-purple-600 focus:border-purple-600 focus:outline-none font-semibold transition-all">
+                            <i class="fa-solid fa-id-card absolute left-3.5 top-4 text-purple-400 text-sm"></i>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="font-extrabold text-brand-purple-deep block mb-1">Email Address</label>
+                        <div class="relative">
+                            <input id="reg-email" type="email" required placeholder="hanis@example.com" class="w-full bg-purple-50/50 border-2 border-purple-100 rounded-2xl p-3.5 pl-10 focus:ring-2 focus:ring-purple-600 focus:border-purple-600 focus:outline-none font-semibold transition-all">
+                            <i class="fa-solid fa-envelope absolute left-3.5 top-4 text-purple-400 text-sm"></i>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="font-extrabold text-brand-purple-deep block mb-1">Choose Username</label>
+                        <div class="relative">
+                            <input id="reg-username" type="text" required placeholder="e.g. hanis_j" class="w-full bg-purple-50/50 border-2 border-purple-100 rounded-2xl p-3.5 pl-10 focus:ring-2 focus:ring-purple-600 focus:border-purple-600 focus:outline-none font-semibold transition-all">
+                            <i class="fa-solid fa-at absolute left-3.5 top-4 text-purple-400 text-sm"></i>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="font-extrabold text-brand-purple-deep block mb-1">Create Password</label>
+                        <div class="relative">
+                            <input id="reg-password" type="password" required oninput="updatePasswordStrengthUI()" placeholder="Minimum 8 characters" class="w-full bg-purple-50/50 border-2 border-purple-100 rounded-2xl p-3.5 pl-10 pr-10 focus:ring-2 focus:ring-purple-600 focus:border-purple-600 focus:outline-none font-semibold transition-all">
+                            <i class="fa-solid fa-key absolute left-3.5 top-4 text-purple-400 text-sm"></i>
+                            <button type="button" onclick="togglePasswordVisibility('reg-password', 'reg-eye-icon')" class="absolute right-3.5 top-3.5 text-gray-400 hover:text-purple-600 p-1">
+                                <i id="reg-eye-icon" class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                        <!-- Whimsical Password Strength Meter -->
+                        <div class="mt-2">
+                            <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden border border-purple-100">
+                                <div id="pwd-strength-bar" class="h-2 rounded-full bg-gray-200 transition-all duration-300 w-0"></div>
+                            </div>
+                            <span id="pwd-strength-text" class="text-xs font-extrabold mt-1 block text-gray-500"></span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="font-extrabold text-brand-purple-deep block mb-1">Confirm Password</label>
+                        <div class="relative">
+                            <input id="reg-confirm-password" type="password" required placeholder="Re-enter password" class="w-full bg-purple-50/50 border-2 border-purple-100 rounded-2xl p-3.5 pl-10 pr-10 focus:ring-2 focus:ring-purple-600 focus:border-purple-600 focus:outline-none font-semibold transition-all">
+                            <i class="fa-solid fa-shield-check absolute left-3.5 top-4 text-purple-400 text-sm"></i>
+                            <button type="button" onclick="togglePasswordVisibility('reg-confirm-password', 'confirm-eye-icon')" class="absolute right-3.5 top-3.5 text-gray-400 hover:text-purple-600 p-1">
+                                <i id="confirm-eye-icon" class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-purple-50 rounded-2xl border border-purple-100 text-xs text-purple-800 font-semibold flex items-center gap-2.5">
+                        <i class="fa-solid fa-shield-halved text-purple-600 text-base shrink-0"></i>
+                        <span>Self-registrations receive active portal access. Administrative roles are elevated by Super Admin.</span>
+                    </div>
+
+                    <button type="submit" id="btn-submit-register" class="w-full py-4 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-300 hover:from-amber-300 hover:to-yellow-200 text-purple-950 font-extrabold text-xs sm:text-sm rounded-2xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 border-2 border-amber-300 flex items-center justify-center gap-2">
+                        <span>Create Account & Start Screening</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                </form>
+
+                <!-- FORM 3: FORGOT PASSWORD -->
+                <form id="auth-form-forgot" onsubmit="handleForgotPasswordSubmit(event)" class="hidden space-y-4 text-xs">
+                    <div class="text-center space-y-1">
+                        <h4 class="font-heading font-extrabold text-purple-950 text-lg">Reset Password</h4>
+                        <p class="text-xs sm:text-sm text-gray-500 font-semibold">Enter your email and we'll send password reset instructions & 6-digit code.</p>
+                    </div>
+
+                    <div>
+                        <label class="font-extrabold text-brand-purple-deep block mb-1">Email Address</label>
+                        <div class="relative">
+                            <input id="forgot-email" type="email" required placeholder="your.email@example.com" class="w-full bg-purple-50/50 border-2 border-purple-100 rounded-2xl p-3.5 pl-10 focus:ring-2 focus:ring-purple-600 focus:outline-none font-semibold transition-all">
+                            <i class="fa-solid fa-envelope absolute left-3.5 top-4 text-purple-400 text-sm"></i>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btn-submit-forgot" class="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-700 hover:to-indigo-800 text-white font-extrabold text-xs sm:text-sm rounded-2xl shadow-md hover:shadow-lg transition-all border-2 border-purple-500 flex items-center justify-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-paper-plane text-xs"></i>
+                        <span>Send Password Reset Link & Code →</span>
+                    </button>
+
+                    <!-- OR HAVE A 6-DIGIT CODE DIRECT ACTION -->
+                    <div class="p-3 bg-purple-50/80 rounded-2xl border border-purple-100 text-center space-y-2">
+                        <span class="text-[11px] text-gray-600 font-bold block">Already received a 6-digit code in your email?</span>
+                        <button type="button" onclick="closeAuthModal(); openPasswordRecoveryModal({ mode: 'otp' });" class="w-full py-2.5 bg-white hover:bg-purple-100 text-purple-900 font-extrabold text-xs rounded-xl border border-purple-200 transition-all shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid fa-key text-purple-600"></i>
+                            <span>Enter 6-Digit OTP Code Directly</span>
+                        </button>
+                    </div>
+
+                    <div class="text-center pt-1">
+                        <button type="button" onclick="switchAuthTab('login')" class="text-xs font-extrabold text-purple-700 hover:underline cursor-pointer">
+                            ← Back to Login
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- CREATIVE LOGIN / SIGN-IN WELCOME EXPERIENCE MODAL WITH MASCOT OLLIE -->
+    <div id="loginWelcomeModalOverlay" class="fixed inset-0 z-50 hidden bg-purple-950/75 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-300 opacity-0 pointer-events-none">
+        
+        <!-- Welcome Card -->
+        <div id="loginWelcomeCard" class="relative w-full max-w-md bg-white/95 backdrop-blur-2xl rounded-[2.5rem] p-6 sm:p-8 shadow-2xl border-2 border-purple-200/90 overflow-hidden transform scale-90 opacity-0 transition-all duration-300 text-center">
+            
+            <!-- Ambient Decorative Glows -->
+            <div class="absolute -top-16 -right-16 w-40 h-40 bg-amber-400/25 rounded-full blur-2xl pointer-events-none"></div>
+            <div class="absolute -bottom-16 -left-16 w-40 h-40 bg-purple-600/25 rounded-full blur-2xl pointer-events-none"></div>
+
+            <!-- Top Sparkle Tag -->
+            <div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-purple-100 via-pink-50 to-amber-100 border border-purple-200 text-purple-900 text-[11px] font-black uppercase tracking-wider mb-2 shadow-xs">
+                <span>✨</span>
+                <span>Portal Access Granted</span>
+                <span>✨</span>
+            </div>
+
+            <!-- Mascot Stage with Ollie & Speech Bubble -->
+            <div class="relative mx-auto w-28 h-28 my-2 flex items-center justify-center">
+                <div class="absolute inset-0 bg-gradient-to-tr from-amber-300 via-pink-200 to-purple-400 rounded-3xl blur-md opacity-70 animate-pulse"></div>
+                <div class="relative w-full h-full bg-gradient-to-tr from-purple-100 via-white to-amber-50 rounded-3xl border-2 border-purple-200 flex items-center justify-center shadow-lg p-2 overflow-visible">
+                    <img id="loginWelcomeMascotImg" src="assets/ollie-grad-mascot.png" alt="Ollie Mascot" class="w-20 h-20 object-contain animate-mascot-cheer drop-shadow-md">
+                    <span class="absolute -bottom-1.5 -right-1.5 text-base bg-white rounded-full p-1 shadow-xs border border-purple-100">🎉</span>
+                </div>
+            </div>
+
+            <!-- Ollie Speech Bubble -->
+            <div class="animate-speech-float inline-block bg-purple-50 border border-purple-200 text-purple-900 text-xs font-black px-3.5 py-1.5 rounded-2xl shadow-xs mt-1 mb-2">
+                <span id="loginWelcomeSpeech">🦉 "Hai! Jom kita mulakan sesi pembelajaran!"</span>
+            </div>
+
+            <!-- User Greeting & Name -->
+            <h3 class="font-heading text-2xl sm:text-3xl font-black text-brand-purple-deep leading-tight mt-1">
+                Selamat Datang, <br class="sm:hidden"><span id="loginWelcomeUserName" class="text-transparent bg-clip-text bg-gradient-to-r from-purple-700 via-indigo-600 to-pink-600">User</span>!
+            </h3>
+
+            <!-- Dynamic Role & School Pill -->
+            <div class="mt-2.5 flex flex-wrap items-center justify-center gap-2">
+                <span id="loginWelcomeRoleBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-purple-100 text-purple-900 text-xs font-black border border-purple-200">
+                    <i class="fa-solid fa-chalkboard-user text-purple-600"></i>
+                    <span id="loginWelcomeRoleText">Educator Account</span>
+                </span>
+                <span id="loginWelcomeSchoolBadge" class="inline-flex items-center gap-1 px-3 py-1 rounded-xl bg-amber-50 text-amber-900 text-xs font-bold border border-amber-200">
+                    <i class="fa-solid fa-school text-amber-600 text-[10px]"></i>
+                    <span id="loginWelcomeSchoolText">SK Taman Ria</span>
+                </span>
+            </div>
+
+            <!-- Status Indicator -->
+            <div class="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-black">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Cloud Workspace Synchronized ☁️</span>
+            </div>
+
+            <!-- Loading Progress Bar & Status -->
+            <div class="mt-5 space-y-2 max-w-xs mx-auto text-center">
+                <div class="h-2.5 w-full bg-purple-100 rounded-full overflow-hidden p-0.5 border border-purple-200 shadow-inner">
+                    <div id="loginWelcomeProgressBar" class="h-full bg-gradient-to-r from-amber-400 via-pink-400 to-purple-600 rounded-full transition-all duration-300 ease-out" style="width: 0%"></div>
+                </div>
+                <p id="loginWelcomeProgressLabel" class="text-[11px] text-purple-700 font-extrabold flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-spinner fa-spin text-purple-500"></i>
+                    <span>Mengesahkan sesi & memuatkan profil...</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast" class="fixed top-5 right-5 z-50 transform translate-y-[-100px] opacity-0 transition-all duration-300 bg-purple-900 text-white px-5 py-3 rounded-2xl shadow-floating text-xs font-bold flex items-center gap-3">
+        <img src="assets/ollie-mascot.png" alt="Ollie Mascot" class="w-6 h-6 object-contain animate-owl-mascot">
+        <span id="toast-message">Notification message</span>
+    </div>
+    <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+    <!-- MODULAR DEFERRED JAVASCRIPT LOGIC ENGINE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="js/supabase.js" defer></script>
+    <script src="js/auth.js" defer></script>
+    <script src="js/accessibility.js" defer></script>
+    <script src="js/chatbot.js" defer></script>
+    <script src="js/landing.js" defer></script>
+    <script src="js/legal-modal.js" defer></script>
+</body>
+</html>
+

@@ -1,0 +1,812 @@
+/* ==========================================================================
+   LexiSense Design System — Seamless Full-Bleed & Parent-Friendly Theme
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Lexend:wght@300;400;500;600;700&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+@font-face {
+    font-family: 'OpenDyslexic';
+    src: url('https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/alt/OpenDyslexic-Regular.otf') format('opentype');
+    font-display: swap;
+}
+
+/* --------------------------------------------------------------------------
+   1. Design Tokens — Electric Violet, Amber Gold & Kid-Friendly Pastels
+   -------------------------------------------------------------------------- */
+:root {
+    --font-scale: 1;
+    --color-purple-main: #7C3AED;
+    --color-purple-bright: #9333EA;
+    --color-purple-light: #C084FC;
+    --color-purple-pastel: #F3E8FF;
+    --color-purple-deep: #3B0764;
+
+    --color-amber-gold: #F59E0B;
+    --color-yellow-sun: #FBBF24;
+    --color-emerald-mint: #10B981;
+    --color-coral-pink: #FB7185;
+
+    --color-bg-page: #FAF8F5;
+
+    --font-heading: 'Baloo 2', cursive, sans-serif;
+    --font-body: 'Plus Jakarta Sans', 'Nunito', sans-serif;
+    --font-dyslexic: 'Lexend', 'OpenDyslexic', sans-serif;
+
+    --shadow-subtle: 0 4px 20px rgba(124, 58, 237, 0.06);
+    --shadow-floating: 0 16px 36px -8px rgba(124, 58, 237, 0.18);
+}
+
+/* Hide WebGazer Video Feedback Overlays */
+#webgazerVideoFeed, #webgazerVideoCanvas, #webgazerFaceOverlay, #webgazerFaceFeedbackBox, #webgazerTargetDot {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. Reset & Core Surfaces — Open Full-Bleed Page
+   -------------------------------------------------------------------------- */
+*, ::before, ::after {
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-body);
+    background-color: var(--color-bg-page);
+    color: #2D1B4E;
+    font-size: calc(15px * var(--font-scale));
+    line-height: 1.6;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.2s ease, font-size 0.2s ease;
+}
+
+h1, h2, h3, h4, h5, h6, .font-heading {
+    font-family: var(--font-heading);
+}
+
+.glass-panel {
+    background: #FFFFFF;
+    border: 1px solid rgba(233, 213, 255, 0.7);
+}
+
+/* ==========================================================================
+   Admin & Navigation Sidebar Creative Design System
+   ========================================================================== */
+.nav-link {
+    position: relative;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform-origin: left center;
+}
+
+.nav-link i {
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.nav-link:not(.active):hover {
+    background: linear-gradient(135deg, rgba(250, 245, 255, 0.9) 0%, rgba(243, 232, 255, 0.7) 100%) !important;
+    color: #6B21A8 !important;
+    transform: translateX(4px);
+    box-shadow: 0 4px 14px rgba(147, 51, 234, 0.08);
+}
+
+.nav-link:not(.active):hover i {
+    color: #9333EA !important;
+    transform: scale(1.15) rotate(4deg);
+}
+
+@keyframes activeNavPop {
+    0% {
+        transform: scale(0.96) translateX(0);
+    }
+    60% {
+        transform: scale(1.03) translateX(6px);
+    }
+    100% {
+        transform: scale(1) translateX(4px);
+    }
+}
+
+.nav-link.active,
+.active-tab-nav {
+    background: linear-gradient(135deg, #FAF5FF 0%, #F3E8FF 50%, #EDE9FE 100%) !important;
+    color: #4C1D95 !important;
+    font-weight: 800 !important;
+    border: 1.5px solid #A855F7 !important;
+    box-shadow: 0 8px 24px -4px rgba(124, 58, 237, 0.22), 
+                inset 0 1px 2px rgba(255, 255, 255, 0.8),
+                0 0 0 1px rgba(168, 85, 247, 0.3) !important;
+    transform: translateX(4px);
+    animation: activeNavPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.nav-link.active::before,
+.active-tab-nav::before {
+    content: '';
+    position: absolute;
+    left: -2px;
+    top: 20%;
+    height: 60%;
+    width: 4px;
+    background: linear-gradient(180deg, #9333EA 0%, #6366F1 100%);
+    border-radius: 9999px;
+    box-shadow: 0 0 8px #9333EA;
+}
+
+.nav-link.active i,
+.active-tab-nav i {
+    color: #7C3AED !important;
+    transform: scale(1.12);
+    filter: drop-shadow(0 2px 4px rgba(124, 58, 237, 0.25));
+}
+
+/* Screener Creative Animations */
+@keyframes brainGlowPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 12px 3px rgba(245, 158, 11, 0.3);
+        transform: scale(1.06);
+    }
+}
+
+.screener-brain-icon {
+    animation: brainGlowPulse 2.8s infinite ease-in-out;
+}
+
+@keyframes shimmerSlide {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(250%); }
+}
+
+.screener-shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.screener-shimmer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.2), transparent);
+    transform: translateX(-100%);
+    animation: shimmerSlide 3.6s infinite ease-in-out;
+    pointer-events: none;
+}
+
+/* Whimsical Kid-Friendly & Open Card Layouts */
+@keyframes floatSticker {
+    0%, 100% { transform: translateY(0px) rotate(-2deg); }
+    50% { transform: translateY(-8px) rotate(2deg); }
+}
+
+@keyframes floatLetter3D {
+    0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
+    50% { transform: translateY(-12px) rotate(6deg) scale(1.05); }
+}
+
+@keyframes owlMascotBob {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    25% { transform: translateY(-4px) rotate(-4deg); }
+    75% { transform: translateY(-2px) rotate(4deg); }
+}
+
+@keyframes soundPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); box-shadow: 0 0 15px rgba(124, 58, 237, 0.4); }
+}
+
+.animate-sticker {
+    animation: floatSticker 4s ease-in-out infinite;
+}
+
+.animate-float-letter {
+    animation: floatLetter3D 5s ease-in-out infinite;
+}
+
+.animate-owl-mascot {
+    animation: owlMascotBob 3s ease-in-out infinite;
+}
+
+.animate-sound-pulse {
+    animation: soundPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes floatGlider {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(2deg); }
+}
+
+@keyframes handWave {
+    0%, 100% { transform: rotate(0deg); }
+    20%, 60% { transform: rotate(14deg); }
+    40%, 80% { transform: rotate(-14deg); }
+}
+
+@keyframes sparkTwinkle {
+    0%, 100% { opacity: 0.3; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.2); }
+}
+
+.animate-float-glider {
+    animation: floatGlider 4s ease-in-out infinite;
+}
+
+.animate-hand-wave {
+    display: inline-block;
+    transform-origin: 70% 70%;
+    animation: handWave 2s infinite ease-in-out;
+}
+
+.animate-spark-twinkle {
+    animation: sparkTwinkle 2.5s ease-in-out infinite;
+}
+
+.kemas-card {
+    background: #FFFFFF;
+    border-radius: 1.75rem;
+    padding: 2rem;
+    box-shadow: 0 8px 30px rgba(124, 58, 237, 0.06);
+    border: 2px solid rgba(243, 232, 255, 0.9);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.kemas-card:hover {
+    box-shadow: 0 18px 40px -8px rgba(124, 58, 237, 0.15);
+    border-color: rgba(192, 132, 252, 0.8);
+    transform: translateY(-4px);
+}
+
+.open-section {
+    background: #FFFFFF;
+    border-radius: 1.5rem;
+    padding: 2rem;
+    box-shadow: var(--shadow-subtle);
+    border: 1px solid rgba(243, 232, 255, 0.8);
+    width: 100%;
+}
+
+.glass-card {
+    background: #FFFFFF;
+    border-radius: 1.5rem;
+    padding: 2rem;
+    border: 1px solid rgba(233, 213, 255, 0.6);
+    box-shadow: var(--shadow-subtle);
+    width: 100%;
+}
+
+.kid-badge {
+    background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+    border: 2px solid #F59E0B;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+}
+
+/* --------------------------------------------------------------------------
+   3. Accessibility Overlays
+   -------------------------------------------------------------------------- */
+body.dyslexia-font,
+body.dyslexia-font * {
+    font-family: 'Lexend', system-ui, sans-serif !important;
+    letter-spacing: 0.03em !important;
+    word-spacing: 0.06em !important;
+    line-height: 1.75 !important;
+}
+
+body.high-contrast {
+    background-color: #0F0A1C !important;
+    color: #F8FAFC !important;
+}
+
+body.high-contrast .bg-white,
+body.high-contrast .glass-panel,
+body.high-contrast .kemas-card,
+body.high-contrast .open-section,
+body.high-contrast .glass-card,
+body.high-contrast header,
+body.high-contrast aside {
+    background-color: #1A102F !important;
+    border-color: #4C1D95 !important;
+    color: #F8FAFC !important;
+}
+
+body.high-contrast .text-gray-400,
+body.high-contrast .text-gray-500,
+body.high-contrast .text-gray-600,
+body.high-contrast .text-brand-900,
+body.high-contrast .text-brand-950,
+body.high-contrast .text-purple-600,
+body.high-contrast .text-purple-700,
+body.high-contrast .text-purple-900,
+body.high-contrast .text-purple-950 {
+    color: #DDD6FE !important;
+}
+
+body.high-contrast .bg-brand-50,
+body.high-contrast .bg-purple-50 {
+    background-color: #2D1B4E !important;
+    color: #EDE9FE !important;
+}
+
+body.tint-yellow { background-color: #FEF9C3 !important; }
+body.tint-blue   { background-color: #E0F2FE !important; }
+body.tint-green  { background-color: #DCFCE7 !important; }
+
+#reading-ruler,
+#reading-ruler-overlay {
+    display: none;
+    position: fixed;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: rgba(254, 240, 138, 0.55);
+    border-top: 3px solid #D97706;
+    border-bottom: 3px solid #D97706;
+    pointer-events: none;
+    z-index: 99999;
+    box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.35);
+    transform: translateY(-50%);
+    transition: top 0.04s linear;
+}
+
+/* --------------------------------------------------------------------------
+   4. Animations & Keyframes
+   -------------------------------------------------------------------------- */
+@keyframes floatLetter3D {
+    0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+    50% { transform: translate3d(0, -12px, 0) rotate(8deg); }
+}
+
+@keyframes floatOwlMascot {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(0, -8px, 0); }
+}
+
+@keyframes auraPulse {
+    0%, 100% { box-shadow: 0 0 18px rgba(245, 158, 11, 0.35); }
+    50% { box-shadow: 0 0 36px rgba(245, 158, 11, 0.75); }
+}
+
+@keyframes lightShimmer {
+    0% { transform: translateX(-150%); }
+    100% { transform: translateX(150%); }
+}
+
+@keyframes typingBounce {
+    0%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-6px); }
+}
+
+@keyframes waveHand {
+    0%, 100% { transform: rotate(0deg); }
+    20% { transform: rotate(14deg); }
+    40% { transform: rotate(-8deg); }
+    60% { transform: rotate(14deg); }
+    80% { transform: rotate(-4deg); }
+}
+
+@keyframes popIn {
+    0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes bounceSoft {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+@keyframes wiggle {
+    0%, 100% { transform: rotate(-3deg); }
+    50% { transform: rotate(3deg); }
+}
+
+@keyframes cloudFloat {
+    0% { transform: translateX(-10%); }
+    50% { transform: translateX(10%); }
+    100% { transform: translateX(-10%); }
+}
+
+.animate-wave-hand {
+    display: inline-block;
+    animation: waveHand 2.2s ease-in-out infinite;
+    transform-origin: 70% 70%;
+}
+
+.animate-float-letter {
+    animation: floatLetter3D 4.5s ease-in-out infinite;
+}
+
+.animate-owl-mascot {
+    animation: floatOwlMascot 3.5s ease-in-out infinite;
+}
+
+.animate-aura-glow {
+    animation: auraPulse 2.8s ease-in-out infinite;
+}
+
+.animate-pop-in {
+    animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.shimmer-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.shimmer-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%);
+    transform: translateX(-150%);
+    animation: lightShimmer 3.2s infinite;
+}
+
+.typing-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #7C3AED;
+    animation: typingBounce 1.4s infinite ease-in-out both;
+}
+
+.typing-dot:nth-child(1) { animation-delay: -0.32s; }
+.typing-dot:nth-child(2) { animation-delay: -0.16s; }
+.typing-dot:nth-child(3) { animation-delay: 0s; }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.card-hover-effect:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(124, 58, 237, 0.12);
+}
+
+/* Custom Sleek Scrollbar for Modals & Inner Scroll Containers */
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #C084FC rgba(243, 232, 255, 0.4);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(243, 232, 255, 0.4);
+    border-radius: 9999px;
+    margin: 8px 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #C084FC;
+    border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #9333EA;
+}
+
+/* --------------------------------------------------------------------------
+   5. Navigation Bar — Active Pill States & Transitions
+   -------------------------------------------------------------------------- */
+.nav-item {
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+}
+
+.nav-item.active,
+.nav-item.active *,
+.nav-item.active span,
+.nav-item.active i,
+.nav-item[aria-current="page"],
+.nav-item[aria-current="page"] *,
+.nav-item[aria-current="page"] span,
+.nav-item[aria-current="page"] i {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+}
+
+.nav-item.active,
+.nav-item[aria-current="page"] {
+    background: linear-gradient(135deg, #7e22ce 0%, #4f46e5 100%) !important;
+    font-weight: 800 !important;
+    box-shadow: 0 4px 14px rgba(126, 34, 206, 0.35);
+    border-radius: 9999px;
+}
+
+.nav-item:not(.active) {
+    color: #3b0764;
+}
+
+.nav-item:not(.active) span {
+    color: inherit;
+}
+
+.nav-item:not(.active):hover {
+    background: rgba(243, 232, 255, 0.9);
+    color: #6b21a8;
+}
+
+/* --------------------------------------------------------------------------
+   6. Mobile Framework Optimization
+   -------------------------------------------------------------------------- */
+@media (max-width: 767px) {
+    .view-panel {
+        padding-bottom: 2.5rem;
+    }
+    .mobile-nav-bar {
+        background: rgba(255, 255, 255, 0.98);
+        border-top: 1px solid rgba(192, 132, 252, 0.3);
+        box-shadow: 0 -6px 20px rgba(124, 58, 237, 0.1);
+    }
+}
+
+/* --------------------------------------------------------------------------
+   6. Admin Portal Sidebar & Screening Specific Animations
+   -------------------------------------------------------------------------- */
+
+@keyframes eyeTargetMove {
+    0% { top: 20%; left: 20%; }
+    25% { top: 20%; left: 80%; }
+    50% { top: 80%; left: 80%; }
+    75% { top: 80%; left: 20%; }
+    100% { top: 50%; left: 50%; }
+}
+
+.moving-eye-target {
+    position: absolute;
+    animation: eyeTargetMove 8s infinite ease-in-out;
+}
+
+/* No Scrollbar Utility */
+.no-scrollbar {
+    -ms-overflow-style: none !important; /* IE and Edge */
+    scrollbar-width: none !important; /* Firefox */
+}
+.no-scrollbar::-webkit-scrollbar {
+    display: none !important; /* Chrome, Safari and Opera */
+    width: 0 !important;
+    height: 0 !important;
+}
+
+/* ==========================================================================
+   7. Creative Logout Experience & Farewell Animations
+   ========================================================================== */
+
+/* Shimmer Sheen on Logout Button */
+.logout-creative-btn {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.logout-creative-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -120%;
+    width: 80%;
+    height: 100%;
+    background: linear-gradient(
+        90deg, 
+        transparent 0%, 
+        rgba(255, 255, 255, 0.45) 50%, 
+        transparent 100%
+    );
+    transform: skewX(-25deg);
+    transition: none;
+    pointer-events: none;
+}
+
+.logout-creative-btn:hover::after {
+    left: 140%;
+    transition: all 0.85s ease-in-out;
+}
+
+.logout-creative-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   Modern Quick Action Hub Tile Styling
+   ========================================================================== */
+.quick-action-tile {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.quick-action-tile::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    width: 100%;
+    background: radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.8), transparent 55%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.quick-action-tile:hover::before {
+    opacity: 1;
+}
+
+.quick-action-tile:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 26px -6px rgba(124, 58, 237, 0.14);
+}
+
+/* Ollie Gentle Waving in Modal */
+@keyframes ollieWaving {
+    0%, 100% {
+        transform: rotate(0deg) translateY(0);
+    }
+    20% {
+        transform: rotate(-10deg) translateY(-5px);
+    }
+    40% {
+        transform: rotate(8deg) translateY(-2px);
+    }
+    60% {
+        transform: rotate(-8deg) translateY(-4px);
+    }
+    80% {
+        transform: rotate(5deg) translateY(-1px);
+    }
+}
+
+.animate-ollie-waving {
+    animation: ollieWaving 2.6s ease-in-out infinite;
+    transform-origin: bottom center;
+}
+
+/* Ollie Airplane Flight Across Screen */
+@keyframes ollieFlyDeparture {
+    0% {
+        transform: translateX(-160px) translateY(12px) rotate(-8deg) scale(0.85);
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-60px) translateY(2px) rotate(-3deg) scale(0.95);
+    }
+    50% {
+        transform: translateX(20px) translateY(-8px) rotate(4deg) scale(1.08);
+    }
+    75% {
+        transform: translateX(90px) translateY(0px) rotate(-2deg) scale(1.02);
+    }
+    100% {
+        transform: translateX(180px) translateY(-14px) rotate(6deg) scale(0.9);
+        opacity: 0.9;
+    }
+}
+
+.animate-ollie-fly-across {
+    animation: ollieFlyDeparture 2.2s cubic-bezier(0.25, 1, 0.5, 1) infinite alternate;
+}
+
+/* Starry particle twinkles */
+@keyframes starTwinkle {
+    0%, 100% { opacity: 0.35; transform: scale(0.9); }
+    50% { opacity: 0.9; transform: scale(1.15); }
+}
+
+.farewell-stars {
+    background-image: 
+        radial-gradient(2px 2px at 20px 30px, #ffd700, rgba(0,0,0,0)),
+        radial-gradient(2.5px 2.5px at 70px 60px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(1.5px 1.5px at 120px 25px, #f472b6, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 180px 90px, #38bdf8, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 240px 40px, #ffd700, rgba(0,0,0,0)),
+        radial-gradient(1.5px 1.5px at 300px 75px, #ffffff, rgba(0,0,0,0));
+    background-repeat: repeat;
+    background-size: 320px 120px;
+    animation: starTwinkle 3s ease-in-out infinite;
+}
+
+/* Smoke trail shimmer behind airplane */
+@keyframes trailPulse {
+    0%, 100% { opacity: 0.4; transform: scaleY(0.8); }
+    50% { opacity: 0.8; transform: scaleY(1.2); }
+}
+
+.flight-smoke-trail {
+    animation: trailPulse 1.8s ease-in-out infinite;
+}
+
+/* ==========================================================================
+   Login Welcome Experience Animations
+   ========================================================================== */
+@keyframes welcomePopGlow {
+    0% {
+        transform: scale(0.85);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.03);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.animate-welcome-card {
+    animation: welcomePopGlow 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes mascotCheer {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg) scale(1);
+    }
+    25% {
+        transform: translateY(-8px) rotate(-6deg) scale(1.05);
+    }
+    50% {
+        transform: translateY(-2px) rotate(4deg) scale(1);
+    }
+    75% {
+        transform: translateY(-10px) rotate(-4deg) scale(1.08);
+    }
+}
+
+.animate-mascot-cheer {
+    animation: mascotCheer 2s ease-in-out infinite;
+    transform-origin: bottom center;
+}
+
+@keyframes speechBubbleFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-4px);
+    }
+}
+
+.animate-speech-float {
+    animation: speechBubbleFloat 2.4s ease-in-out infinite;
+}
+
+/* Specialist Referral Dossier Enhancements */
+@keyframes dossierGlow {
+    0%, 100% {
+        box-shadow: 0 10px 25px -5px rgba(124, 58, 237, 0.08), 0 8px 10px -6px rgba(124, 58, 237, 0.04);
+    }
+    50% {
+        box-shadow: 0 20px 35px -5px rgba(124, 58, 237, 0.16), 0 12px 16px -6px rgba(124, 58, 237, 0.08);
+    }
+}
+
+.dossier-card-glow {
+    animation: dossierGlow 4s ease-in-out infinite;
+}
+
+@keyframes pulsePillBadge {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.9; }
+}
+
+.badge-pulse-subtle {
+    animation: pulsePillBadge 2.5s ease-in-out infinite;
+}

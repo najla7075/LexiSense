@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LexiSense — Early Dyslexia Risk Screening Wizard</title>
+    
+    <!-- Resource Hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Baloo 2, Lexend, Nunito, Plus Jakarta Sans, Noto Sans SC, Noto Sans Tamil -->
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Lexend:wght@300;400;500;600;700&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;700&family=Noto+Sans+Tamil:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Chart.js for Visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+
+    <!-- WebGazer.js Real-time Gaze Tracking Library -->
+    <script src="https://cdn.jsdelivr.net/npm/webgazer@2.1.0/dist/webgazer.min.js"></script>
+
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            purple: '#7C3AED',
+                            'purple-dark': '#6D28D9',
+                            'purple-bright': '#9333EA',
+                            'purple-light': '#C084FC',
+                            'purple-soft': '#F3E8FF',
+                            'purple-deep': '#3B0764',
+                            yellow: '#F59E0B',
+                            'yellow-sun': '#FBBF24',
+                            'yellow-light': '#FEF3C7',
+                            cream: '#FAF8F5',
+                            mint: '#10B981',
+                            coral: '#F43F5E'
+                        }
+                    },
+                    fontFamily: {
+                        heading: ['"Baloo 2"', 'cursive', 'sans-serif'],
+                        body: ['"Plus Jakarta Sans"', '"Nunito"', 'sans-serif'],
+                        dyslexic: ['"Lexend"', '"OpenDyslexic"', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'glow-purple': '0 0 25px -5px rgba(124, 58, 237, 0.3)',
+                        'glow-amber': '0 0 25px -5px rgba(245, 158, 11, 0.35)',
+                        'subtle-card': '0 8px 30px rgba(124, 58, 237, 0.05)',
+                        'floating-card': '0 16px 40px -10px rgba(124, 58, 237, 0.12)'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Supabase JS Client & Auth Guard -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/auth-guard.js"></script>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-purple-100 selection:text-purple-900 pb-24 md:pb-10 w-full bg-[#FAF8F5] pt-[76px]">
+
+    <!-- FIXED TOP NAVIGATION BAR -->
+    <header class="fixed top-0 left-0 right-0 w-full bg-white/95 backdrop-blur-md border-b border-purple-100 z-40 px-4 sm:px-8 lg:px-12 py-3 shadow-xs no-print">
+        <div class="max-w-7xl mx-auto w-full flex items-center justify-between">
+            
+            <!-- Brand Logo -->
+            <a href="index.html" class="flex items-center gap-3 group">
+                <div class="relative">
+                    <img src="assets/lexisense-logo.png" alt="LexiSense Logo" class="h-10 w-10 sm:h-12 sm:w-12 object-contain transform group-hover:scale-105 transition-transform duration-300 drop-shadow-xs">
+                    <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                    </span>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-heading text-xl sm:text-2xl font-black text-brand-purple-deep tracking-tight leading-tight">LexiSense</span>
+                        <span class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[10px] sm:text-xs font-black px-2.5 py-0.5 rounded-full shadow-xs">Screening Gateway</span>
+                    </div>
+                    <p id="top-header-subtitle" class="text-[11px] sm:text-xs text-gray-500 font-bold hidden sm:block">3-Pillar Multimodal Dyslexia Risk Screening Engine</p>
+                </div>
+            </a>
+
+            <!-- Right Controls: EXIT & ACCESSIBILITY -->
+            <div class="flex items-center gap-2.5">
+                <a id="top-exit-btn" href="parent-page.html" class="px-4 py-2 rounded-2xl bg-purple-50/80 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 text-purple-900 font-extrabold text-xs sm:text-sm transition-all border border-purple-200/80 flex items-center gap-2 shadow-xs group">
+                    <i class="fa-solid fa-arrow-left group-hover:-translate-x-0.5 transition-transform text-xs"></i>
+                    <span id="top-exit-text">Exit Screening</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="w-full px-4 sm:px-8 lg:px-12 py-6 sm:py-8 flex-1 max-w-7xl mx-auto space-y-6 sm:space-y-8">
+        
+        <!-- PRE-DIAGNOSIS STEPPER WIZARD -->
+        <div id="view-prediagnosis" class="view-panel animate-fade-in space-y-6 w-full">
+            
+            <!-- MODERN STEPPER STATUS HEADER -->
+            <div class="open-section w-full bg-white rounded-3xl p-5 sm:p-7 border border-purple-100/90 shadow-subtle-card">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+                    <div>
+                        <div class="flex items-center gap-2 text-xs font-extrabold text-purple-600 uppercase tracking-wider mb-1">
+                            <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i>
+                            <span>Multimodal Screening Workflow</span>
+                        </div>
+                        <h2 class="font-heading text-xl sm:text-2xl font-black text-brand-purple-deep tracking-tight" id="step-title-header">Step 1: Select Child Profile</h2>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <span id="step-badge" class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-black px-4 py-1.5 rounded-full shadow-xs flex items-center gap-1.5">
+                            <i class="fa-solid fa-list-check"></i>
+                            <span>Step 1 of 5</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 5 Step Milestones Bar -->
+                <div class="grid grid-cols-5 gap-2 sm:gap-3">
+                    <div class="space-y-1.5">
+                        <div id="step-bar-1" class="h-2.5 rounded-full bg-purple-600 transition-all duration-500 shadow-xs"></div>
+                        <span class="text-[10px] sm:text-[11px] font-extrabold text-purple-900 hidden sm:block truncate">1. Profile</span>
+                    </div>
+                    <div class="space-y-1.5">
+                        <div id="step-bar-2" class="h-2.5 rounded-full bg-purple-100 transition-all duration-500"></div>
+                        <span class="text-[10px] sm:text-[11px] font-bold text-gray-400 hidden sm:block truncate">2. Guidelines</span>
+                    </div>
+                    <div class="space-y-1.5">
+                        <div id="step-bar-3" class="h-2.5 rounded-full bg-purple-100 transition-all duration-500"></div>
+                        <span class="text-[10px] sm:text-[11px] font-bold text-gray-400 hidden sm:block truncate">3. Questions</span>
+                    </div>
+                    <div class="space-y-1.5">
+                        <div id="step-bar-4" class="h-2.5 rounded-full bg-purple-100 transition-all duration-500"></div>
+                        <span class="text-[10px] sm:text-[11px] font-bold text-gray-400 hidden sm:block truncate">4. Eye Gaze</span>
+                    </div>
+                    <div class="space-y-1.5">
+                        <div id="step-bar-5" class="h-2.5 rounded-full bg-purple-100 transition-all duration-500"></div>
+                        <span class="text-[10px] sm:text-[11px] font-bold text-gray-400 hidden sm:block truncate">5. Analysis</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 1: SELECT PROFILE -->
+            <div id="wizard-step-1" class="wizard-step open-section space-y-6 w-full bg-white rounded-3xl p-6 sm:p-8 border border-purple-100 shadow-subtle-card">
+                <div class="text-center w-full space-y-2 max-w-2xl mx-auto">
+                    <div class="w-20 h-16 rounded-3xl bg-purple-100/90 text-purple-600 flex flex-row items-center justify-center gap-1.5 text-2xl mx-auto shadow-inner border border-purple-200/80 leading-none whitespace-nowrap" id="step-1-icon">
+                        <span>👧</span><span>👦</span>
+                    </div>
+                    <h3 class="font-heading text-2xl sm:text-3xl font-black text-brand-purple-deep tracking-tight" id="step-1-heading">Who is taking the screening today?</h3>
+                    <p class="text-xs sm:text-sm text-gray-600 font-medium" id="step-1-subheading">Select your child's profile to calibrate age-normed reading fluency thresholds and 30-item observation metrics.</p>
+                </div>
+
+                <!-- ADMIN ROSTER CONTROLS (Displayed only when in Admin / Educator Mode) -->
+                <div id="admin-roster-controls" class="hidden flex flex-col sm:flex-row items-center justify-between gap-3 bg-purple-50/80 p-4 rounded-3xl border border-purple-200/90 w-full shadow-xs">
+                    <div class="flex items-center gap-2.5 w-full sm:w-auto">
+                        <span class="text-xs font-extrabold text-purple-900 shrink-0"><i class="fa-solid fa-filter text-purple-600"></i> Cohort:</span>
+                        <select id="admin-cohort-filter" onchange="filterAdminStudentsRoster()" class="px-3.5 py-2 bg-white border border-purple-200 rounded-xl text-xs font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 w-full sm:w-44 shadow-xs cursor-pointer">
+                            <option value="all">All Classes</option>
+                            <option value="Class 1A">Class 1A (Year 1)</option>
+                            <option value="Class 1B">Class 1B (Year 1)</option>
+                            <option value="Class 2A">Class 2A (Year 2)</option>
+                            <option value="Class 2B">Class 2B (Year 2)</option>
+                            <option value="Class 3A">Class 3A (Year 3)</option>
+                            <option value="Class 3B">Class 3B (Year 3)</option>
+                        </select>
+                    </div>
+                    <div class="relative w-full sm:w-80">
+                        <i class="fa-solid fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                        <input type="text" id="admin-student-search" oninput="filterAdminStudentsRoster()" placeholder="Search student name or ID..." class="w-full pl-9 pr-4 py-2 bg-white border border-purple-200 rounded-xl text-xs font-medium text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-xs">
+                    </div>
+                    <div class="text-[11px] font-extrabold text-purple-800 shrink-0 hidden md:block" id="admin-roster-count">
+                        Showing students
+                    </div>
+                </div>
+
+                <div id="wizard-children-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 w-full">
+                    <!-- Dynamically rendered children or student cards -->
+                </div>
+
+                <div class="flex justify-between items-center pt-5 border-t border-purple-100">
+                    <button id="step-1-exit-btn" onclick="exitToSourcePortal()" class="px-5 py-2.5 rounded-2xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-extrabold flex items-center gap-2 transition cursor-pointer">
+                        <i class="fa-solid fa-arrow-left text-xs"></i> Return to Portal
+                    </button>
+                    <button onclick="goToWizardStep(2)" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-8 py-3.5 rounded-2xl text-xs sm:text-sm font-black shadow-md hover:shadow-lg transition-all transform hover:scale-[1.02] flex items-center gap-2 cursor-pointer">
+                        <span>Next: Guidelines & Preparation</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 2: ENHANCED SCREENING GUIDELINES & DISCLAIMER -->
+            <div id="wizard-step-2" class="wizard-step hidden open-section space-y-7 w-full bg-white rounded-3xl p-6 sm:p-9 border border-purple-100 shadow-subtle-card">
+                
+                <!-- HERO MASCOT & GUIDELINES BANNER -->
+                <div class="relative overflow-hidden bg-gradient-to-br from-amber-50/90 via-orange-50/50 to-purple-50/60 border-2 border-amber-200/90 rounded-3xl p-6 sm:p-8 shadow-xs">
+                    <!-- Decorative background glow -->
+                    <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-amber-300/20 rounded-full blur-2xl pointer-events-none"></div>
+                    
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5 relative z-10">
+                        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-br from-amber-400 to-amber-500 text-purple-950 flex items-center justify-center p-1.5 shrink-0 shadow-md border-2 border-amber-300 animate-owl-mascot">
+                            <img src="assets/ollie-mascot.png" alt="Ollie Mascot" class="w-14 h-14 sm:w-16 sm:h-16 object-contain drop-shadow-md">
+                        </div>
+                        <div class="space-y-2 flex-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="bg-amber-200 text-amber-900 text-[11px] font-extrabold px-3 py-0.5 rounded-full border border-amber-300 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-sparkles text-amber-700"></i> Ollie Owl's Screening Coach
+                                </span>
+                                <span class="bg-purple-100 text-purple-800 text-[11px] font-extrabold px-3 py-0.5 rounded-full border border-purple-200 flex items-center gap-1.5">
+                                    <i class="fa-regular fa-clock text-purple-600"></i> ~10–12 Minutes Total
+                                </span>
+                            </div>
+                            <h4 class="font-heading font-black text-brand-purple-deep text-xl sm:text-2xl tracking-tight" id="step-2-guide-title">
+                                Ollie Owl's Screening Guidelines
+                            </h4>
+                            <p class="text-xs sm:text-sm text-amber-950/90 font-medium leading-relaxed" id="step-2-guide-text">
+                                Ensure your child sits comfortably in a brightly lit room facing the screen with the webcam enabled. This session takes about 10 minutes.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4 PREPARATION PROTOCOL CARDS -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h5 class="font-heading font-black text-brand-purple-deep text-base sm:text-lg flex items-center gap-2">
+                            <i class="fa-solid fa-circle-check text-purple-600 text-sm"></i>
+                            <span>4 Simple Preparation Steps for Best Accuracy</span>
+                        </h5>
+                        <span class="text-[11px] font-bold text-gray-400">Preparation Checklist</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Card 1: Bright Lighting -->
+                        <div class="p-5 rounded-2xl bg-gradient-to-br from-purple-50/50 to-white border border-purple-100/90 shadow-xs hover:border-purple-300 transition-all space-y-2.5">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg font-bold shrink-0">
+                                    💡
+                                </div>
+                                <div>
+                                    <h6 class="font-heading font-bold text-brand-purple-deep text-sm sm:text-base">1. Bright, Even Lighting</h6>
+                                    <span class="text-[11px] font-extrabold text-amber-600 uppercase tracking-wider">Face Sensor Precision</span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-600 font-medium leading-relaxed">
+                                Ensure the room is well-lit with light in front of your child, avoiding strong backlights or dark shadows for 95%+ eye gaze accuracy.
+                            </p>
+                        </div>
+
+                        <!-- Card 2: Quiet & Calm -->
+                        <div class="p-5 rounded-2xl bg-gradient-to-br from-purple-50/50 to-white border border-purple-100/90 shadow-xs hover:border-purple-300 transition-all space-y-2.5">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center text-lg font-bold shrink-0">
+                                    🤫
+                                </div>
+                                <div>
+                                    <h6 class="font-heading font-bold text-brand-purple-deep text-sm sm:text-base">2. Calm & Quiet Space</h6>
+                                    <span class="text-[11px] font-extrabold text-purple-600 uppercase tracking-wider">Zero Distractions</span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-600 font-medium leading-relaxed">
+                                Choose a comfortable, quiet room without loud TV or background noise so your child can read and focus naturally.
+                            </p>
+                        </div>
+
+                        <!-- Card 3: Camera & Eye Level -->
+                        <div class="p-5 rounded-2xl bg-gradient-to-br from-purple-50/50 to-white border border-purple-100/90 shadow-xs hover:border-purple-300 transition-all space-y-2.5">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg font-bold shrink-0">
+                                    📷
+                                </div>
+                                <div>
+                                    <h6 class="font-heading font-bold text-brand-purple-deep text-sm sm:text-base">3. Eye-Level Webcam</h6>
+                                    <span class="text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider">Comfortable Posture</span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-600 font-medium leading-relaxed">
+                                Position the screen at comfortable arm's length (50–60 cm) with webcam centered at eye level.
+                            </p>
+                        </div>
+
+                        <!-- Card 4: Encouraging & Stress-Free -->
+                        <div class="p-5 rounded-2xl bg-gradient-to-br from-purple-50/50 to-white border border-purple-100/90 shadow-xs hover:border-purple-300 transition-all space-y-2.5">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center text-lg font-bold shrink-0">
+                                    🤝
+                                </div>
+                                <div>
+                                    <h6 class="font-heading font-bold text-brand-purple-deep text-sm sm:text-base">4. Reassuring Guidance</h6>
+                                    <span class="text-[11px] font-extrabold text-rose-600 uppercase tracking-wider">No Pressure / Not a Test</span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-600 font-medium leading-relaxed">
+                                Remind your child this is an exploratory activity, not an exam. Encourage them to read naturally without coaching answers.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CLINICAL & PARENT SCREENING DISCLAIMER CARD -->
+                <div class="p-6 bg-gradient-to-br from-purple-50/90 via-indigo-50/60 to-purple-50/80 border border-purple-200/90 rounded-3xl space-y-3.5 shadow-xs relative overflow-hidden">
+                    <div class="flex items-start gap-3.5">
+                        <div class="w-10 h-10 rounded-2xl bg-purple-600 text-white flex items-center justify-center text-lg shrink-0 shadow-sm mt-0.5">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+                        <div class="space-y-1.5 flex-1">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <span class="font-heading font-black text-purple-900 text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2" id="step-2-disclaimer-title">
+                                    Parent Screening Disclaimer
+                                </span>
+                                <div class="flex items-center gap-2">
+                                    <span class="bg-white/80 text-purple-700 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-purple-200">
+                                        <i class="fa-solid fa-lock text-[9px]"></i> Private & Secure
+                                    </span>
+                                    <span class="bg-white/80 text-purple-700 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-purple-200">
+                                        <i class="fa-solid fa-stethoscope text-[9px]"></i> Non-Clinical Screener
+                                    </span>
+                                </div>
+                            </div>
+                            <p class="text-xs sm:text-sm text-purple-950 font-medium leading-relaxed" id="step-2-disclaimer-text">
+                                LexiSense is an early dyslexia risk-screening and child literacy support tool. It does not replace formal clinical, medical, or psychological diagnostic evaluations by qualified specialists.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOTTOM ACTIONS -->
+                <div class="flex justify-between items-center pt-5 border-t border-purple-100">
+                    <button onclick="goToWizardStep(1)" class="px-5 py-2.5 rounded-2xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-extrabold flex items-center gap-2 transition cursor-pointer">
+                        <i class="fa-solid fa-arrow-left text-xs"></i> Back to Profile Selection
+                    </button>
+                    <button onclick="goToWizardStep(3)" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-8 py-3.5 rounded-2xl text-xs sm:text-sm font-black shadow-md hover:shadow-lg transition-all transform hover:scale-[1.02] flex items-center gap-2.5 cursor-pointer">
+                        <span>Proceed to 30-Question Questionnaire</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 3: 30-QUESTION QUESTIONNAIRE -->
+            <div id="wizard-step-3" class="wizard-step hidden open-section space-y-6 w-full bg-white rounded-3xl p-6 sm:p-9 border border-purple-100 shadow-subtle-card">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-purple-100 pb-4 gap-3">
+                    <div>
+                        <span id="question-section-title" class="text-xs font-extrabold text-purple-600 uppercase tracking-wider block mb-1">Section A: Phonological & Language</span>
+                        <h3 class="font-heading text-2xl sm:text-3xl font-black text-brand-purple-deep tracking-tight">30-Item Behavioral Risk Screener</h3>
+                    </div>
+                    <span id="question-number-badge" class="bg-purple-100 text-purple-700 font-extrabold text-xs px-4 py-1.5 rounded-full border border-purple-200 shadow-xs self-start sm:self-auto">
+                        Item 1 of 30
+                    </span>
+                </div>
+
+                <!-- Progress Tracker -->
+                <div class="space-y-1.5">
+                    <div class="w-full bg-purple-100 rounded-full h-3 overflow-hidden p-0.5 shadow-inner">
+                        <div id="question-progress-bar" class="bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 h-full rounded-full transition-all duration-300" style="width: 3%;"></div>
+                    </div>
+                    <div class="flex justify-between items-center text-[11px] text-gray-500 font-bold px-1">
+                        <span>Rate recent behaviors observed over the past 3–6 months</span>
+                        <span id="question-progress-text" class="text-purple-700 font-extrabold">3% Completed (1/30 answered)</span>
+                    </div>
+                </div>
+
+                <div class="p-6 sm:p-8 bg-gradient-to-br from-purple-50/60 to-indigo-50/30 rounded-3xl border border-purple-200/90 space-y-6 shadow-xs">
+                    <div class="flex items-start gap-3">
+                        <span class="text-2xl sm:text-3xl text-purple-400 font-serif leading-none select-none">“</span>
+                        <p id="question-display-box" class="font-heading text-xl sm:text-2xl font-black text-brand-purple-deep leading-relaxed flex-1">
+                            My child has difficulty recognizing or producing rhyming words.
+                        </p>
+                    </div>
+
+                    <div id="questionnaire-warning-box" class="hidden p-3.5 bg-amber-100 border border-amber-300 rounded-2xl text-xs font-bold text-amber-900 animate-bounce">
+                    </div>
+
+                    <div class="space-y-3 w-full">
+                        <span class="text-xs font-extrabold text-purple-800 uppercase tracking-wider block">Select Behavioral Observation Frequency:</span>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                            <button type="button" data-val="0" onclick="handleQuestionAnswerSelect(0)" class="question-option-btn p-4 rounded-2xl border-2 border-gray-200 bg-white hover:border-purple-300 text-center transition-all flex flex-col items-center justify-center cursor-pointer shadow-xs">
+                                <span class="font-black text-gray-900 text-sm">0 · Never</span>
+                                <span class="text-xs text-gray-500 mt-0.5 font-medium">Rarely / Not observed</span>
+                                <i class="fa-solid fa-check text-purple-600 mt-1 option-check hidden"></i>
+                            </button>
+
+                            <button type="button" data-val="1" onclick="handleQuestionAnswerSelect(1)" class="question-option-btn p-4 rounded-2xl border-2 border-gray-200 bg-white hover:border-purple-300 text-center transition-all flex flex-col items-center justify-center cursor-pointer shadow-xs">
+                                <span class="font-black text-gray-900 text-sm">1 · Mild</span>
+                                <span class="text-xs text-gray-500 mt-0.5 font-medium">Occasional difficulty</span>
+                                <i class="fa-solid fa-check text-purple-600 mt-1 option-check hidden"></i>
+                            </button>
+
+                            <button type="button" data-val="2" onclick="handleQuestionAnswerSelect(2)" class="question-option-btn p-4 rounded-2xl border-2 border-gray-200 bg-white hover:border-purple-300 text-center transition-all flex flex-col items-center justify-center cursor-pointer shadow-xs">
+                                <span class="font-black text-gray-900 text-sm">2 · Moderate</span>
+                                <span class="text-xs text-gray-500 mt-0.5 font-medium">Frequent difficulty</span>
+                                <i class="fa-solid fa-check text-purple-600 mt-1 option-check hidden"></i>
+                            </button>
+
+                            <button type="button" data-val="3" onclick="handleQuestionAnswerSelect(3)" class="question-option-btn p-4 rounded-2xl border-2 border-gray-200 bg-white hover:border-purple-300 text-center transition-all flex flex-col items-center justify-center cursor-pointer shadow-xs">
+                                <span class="font-black text-gray-900 text-sm">3 · Severe</span>
+                                <span class="text-xs text-gray-500 mt-0.5 font-medium">Persistent struggle</span>
+                                <i class="fa-solid fa-check text-purple-600 mt-1 option-check hidden"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center pt-5 border-t border-purple-100">
+                    <button id="q-prev-btn" onclick="prevQuestion()" class="px-5 py-2.5 bg-gray-100 text-gray-700 font-extrabold text-xs rounded-2xl hover:bg-gray-200 disabled:opacity-40 transition cursor-pointer">
+                        ← Previous Item
+                    </button>
+                    <button id="q-next-btn" onclick="nextQuestion()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-8 py-3.5 rounded-2xl text-xs sm:text-sm font-black shadow-md hover:shadow-lg transition-all transform hover:scale-[1.02] cursor-pointer">
+                        Next Item →
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 4: EYE TRACKING LANGUAGE GATEWAY & WEBCAM CAMERA CHECK -->
+            <div id="wizard-step-4" class="wizard-step hidden open-section space-y-6 w-full bg-white rounded-3xl p-6 sm:p-9 border border-purple-100 shadow-subtle-card">
+                
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-purple-100 pb-4 gap-3">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs sm:text-sm font-extrabold text-purple-600 uppercase tracking-wider">LexiSense AI 2-Phase Eye Tracking</span>
+                            <span id="phase-indicator-badge" class="text-xs font-extrabold px-3 py-0.5 rounded-full bg-purple-600 text-white shadow-xs">
+                                Camera & Position Check
+                            </span>
+                        </div>
+                        <h3 class="font-heading text-2xl sm:text-3xl font-black text-brand-purple-deep tracking-tight">Webcam Eye-Tracking Setup & Language Selection</h3>
+                    </div>
+
+                    <div id="camera-status-badge" class="px-4 py-1.5 bg-emerald-50 text-emerald-700 font-extrabold text-xs sm:text-sm rounded-full border border-emerald-200 flex items-center gap-2 shadow-xs">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span> Camera Active
+                    </div>
+                </div>
+
+                <!-- LANGUAGE SELECTION & LIVE CAMERA CHECK GATEWAY -->
+                <div id="language-gateway-phase" class="space-y-6">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                        
+                        <!-- LIVE WEBCAM FEED WITH DYNAMIC RED/GREEN FACE OVAL FRAME -->
+                        <div class="relative w-full h-80 bg-gray-900 rounded-3xl overflow-hidden shadow-lg border-4 border-purple-600 flex items-center justify-center">
+                            <video id="eye-webcam-preview" class="w-full h-full object-cover transform -scale-x-100" autoplay playsinline muted></video>
+
+                            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <div id="face-oval-guide" class="w-52 h-64 border-4 border-dashed border-emerald-400 rounded-full bg-emerald-500/10 shadow-glow-gold flex items-center justify-center transition-all duration-300">
+                                    <span id="face-oval-label" class="text-white text-xs font-bold bg-black/60 px-3.5 py-1 rounded-full backdrop-blur-md">🟢 Face Aligned</span>
+                                </div>
+                            </div>
+
+                            <div class="absolute top-3 left-3 bg-black/70 text-white text-xs px-3 py-1 rounded-full flex items-center gap-2 backdrop-blur-md">
+                                <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                                <span>Sensor: Active</span>
+                            </div>
+
+                            <div class="absolute bottom-3 left-3 right-3 flex justify-between text-xs">
+                                <button id="btn-toggle-face" onclick="toggleFaceAlignmentSimulation()" class="px-3 py-1 bg-emerald-600 text-white rounded-lg font-bold text-xs shadow backdrop-blur-md cursor-pointer">
+                                    🟢 Face: Aligned
+                                </button>
+                                <button id="btn-toggle-light" onclick="toggleLightingSimulation()" class="px-3 py-1 bg-emerald-600 text-white rounded-lg font-bold text-xs shadow backdrop-blur-md cursor-pointer">
+                                    💡 Light: Good
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- LANGUAGE SELECTION & POSITIONING CHECKLIST -->
+                        <div class="space-y-4">
+                            <div>
+                                <span class="text-xs font-extrabold text-purple-700 uppercase tracking-wider block">Step 1: Choose Reading Language</span>
+                                <h4 class="font-heading text-xl font-bold text-brand-purple-deep">Reading Language & Positioning</h4>
+                            </div>
+
+                            <div id="face-position-notice" class="text-xs sm:text-sm text-emerald-700 bg-emerald-50 p-3.5 rounded-2xl border border-emerald-200 font-bold flex items-center gap-2">
+                                🟢 <strong>Face Aligned & Good Lighting:</strong> Ready for maximum 95%+ precision
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div onclick="chooseInitialLanguage('english')" id="gateway-card-english" class="gateway-lang-card p-3.5 rounded-2xl border-2 border-purple-600 bg-purple-50 ring-2 ring-purple-400 cursor-pointer transition-all flex items-center gap-2.5">
+                                    <span class="text-2xl">🇬🇧</span>
+                                    <div>
+                                        <h5 class="font-heading font-bold text-brand-purple-deep text-sm sm:text-base">English</h5>
+                                        <span class="text-xs text-purple-700 font-semibold block">Passage</span>
+                                    </div>
+                                </div>
+
+                                <div onclick="chooseInitialLanguage('malay')" id="gateway-card-malay" class="gateway-lang-card p-3.5 rounded-2xl border-2 border-gray-200 bg-white cursor-pointer transition-all flex items-center gap-2.5 hover:border-purple-400">
+                                    <span class="text-2xl">🇲🇾</span>
+                                    <div>
+                                        <h5 class="font-heading font-bold text-brand-purple-deep text-sm sm:text-base">BM</h5>
+                                        <span class="text-xs text-purple-700 font-semibold block">Bahasa Melayu</span>
+                                    </div>
+                                </div>
+
+                                <div onclick="chooseInitialLanguage('mandarin')" id="gateway-card-mandarin" class="gateway-lang-card p-3.5 rounded-2xl border-2 border-gray-200 bg-white cursor-pointer transition-all flex items-center gap-2.5 hover:border-purple-400">
+                                    <span class="text-2xl">🇨🇳</span>
+                                    <div>
+                                        <h5 class="font-heading font-bold text-brand-purple-deep text-sm sm:text-base">中文</h5>
+                                        <span class="text-xs text-purple-700 font-semibold block">Chinese</span>
+                                    </div>
+                                </div>
+
+                                <div onclick="chooseInitialLanguage('tamil')" id="gateway-card-tamil" class="gateway-lang-card p-3.5 rounded-2xl border-2 border-gray-200 bg-white cursor-pointer transition-all flex items-center gap-2.5 hover:border-purple-400">
+                                    <span class="text-2xl">🇮🇳</span>
+                                    <div>
+                                        <h5 class="font-heading font-bold text-brand-purple-deep text-sm sm:text-base">தமிழ்</h5>
+                                        <span class="text-xs text-purple-700 font-semibold block">Tamil</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="accuracy-warning-banner" class="hidden p-3.5 bg-amber-100/90 border border-amber-300 rounded-2xl text-xs sm:text-sm text-amber-950 space-y-1.5 shadow-xs">
+                                <p class="font-extrabold text-amber-900 flex items-center gap-1.5 text-sm">
+                                    <i class="fa-solid fa-triangle-exclamation text-amber-600"></i> Peringatan Ketepatan / Accuracy Warning:
+                                </p>
+                                <p class="leading-relaxed text-xs sm:text-sm font-medium">
+                                    For optimal screening reliability, please center your child's face in the oval frame with bright lighting. You may still proceed now, but results will include a technical variance note.
+                                </p>
+                            </div>
+
+                            <button id="btn-start-eyetracking-session" onclick="proceedToCalibrationWithWarningCheck()" class="w-full py-4 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-purple-950 font-black text-sm sm:text-base rounded-2xl shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 cursor-pointer transform hover:scale-[1.01]">
+                                <span>🚀 Start 2-Phase Eye Tracking (English 🇬🇧)</span>
+                                <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PHASE B: 9-POINT INTERACTIVE CALIBRATION & INDEPENDENT VALIDATION -->
+                <div id="calibration-active-phase" class="hidden relative w-full h-96 bg-gradient-to-b from-purple-950 to-indigo-950 rounded-3xl overflow-hidden shadow-inner flex items-center justify-center border-4 border-amber-400">
+                    <div class="absolute top-4 left-4 bg-black/60 text-white text-xs px-4 py-1.5 rounded-full backdrop-blur-md flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                        <span id="calibration-point-label" class="font-bold text-amber-300">Training Point: Top Left</span>
+                    </div>
+
+                    <div class="absolute top-4 right-4 bg-black/60 text-white text-xs px-4 py-1.5 rounded-full backdrop-blur-md">
+                        Checkpoints: <span id="calibration-point-count" class="font-black text-amber-300">1 / 9</span>
+                    </div>
+
+                    <div id="calibration-target-dot" class="absolute w-14 h-14 bg-amber-400 text-purple-950 rounded-full flex items-center justify-center text-2xl shadow-floating transition-all duration-500">
+                        ⭐
+                        <div class="absolute inset-0 rounded-full border-4 border-white pointer-events-none">
+                            <div id="calibration-progress-ring" class="h-full bg-purple-600/40 rounded-full" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom helper guidance -->
+                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white text-xs px-5 py-2 rounded-full backdrop-blur-md flex items-center gap-2 pointer-events-none shadow-md">
+                        <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                        <span class="font-bold text-amber-200">Keep your head steady and follow the star with your eyes</span>
+                    </div>
+
+                    <button type="button" onclick="returnToLanguageGateway()" class="absolute bottom-4 right-4 bg-white/15 hover:bg-white/25 text-white text-[11px] font-extrabold px-3.5 py-1.5 rounded-xl backdrop-blur-md transition cursor-pointer border border-white/20">
+                        <i class="fa-solid fa-xmark text-[10px]"></i> Cancel
+                    </button>
+                </div>
+
+                <!-- PHASE C: CALIBRATION RESULT & QUALITY GATE -->
+                <div id="calibration-result-phase" class="hidden p-6 sm:p-9 bg-gradient-to-br from-purple-50/80 via-white to-indigo-50/50 rounded-3xl border border-purple-200/90 text-center space-y-6 shadow-subtle-card">
+                    <div class="space-y-2">
+                        <div class="w-16 h-16 rounded-3xl bg-purple-100 text-purple-600 flex items-center justify-center text-3xl mx-auto shadow-inner border border-purple-200 animate-bounce">
+                            🎯
+                        </div>
+                        <h4 class="font-heading font-black text-brand-purple-deep text-2xl sm:text-3xl tracking-tight">
+                            Independent Calibration Validation Complete
+                        </h4>
+                        <p class="text-xs sm:text-sm text-gray-600 font-medium max-w-md mx-auto">
+                            Webcam focal plane and corneal gaze tracking calibrated successfully across all 9 checkpoints.
+                        </p>
+                    </div>
+
+                    <!-- Dynamic Score & Metrics HUD -->
+                    <div id="calibration-accuracy-score" class="text-xs text-purple-900 font-extrabold">
+                        Evaluating independent test points...
+                    </div>
+
+                    <!-- User Action Controls: Recalibrate or Proceed (No Auto Transition) -->
+                    <div class="pt-4 border-t border-purple-100 flex flex-col sm:flex-row items-center justify-center gap-3.5">
+                        <button type="button" onclick="start9PointCalibration()" class="w-full sm:w-auto px-6 py-3.5 bg-purple-100 hover:bg-purple-200 text-purple-800 font-extrabold text-xs sm:text-sm rounded-2xl border border-purple-200 shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-rotate-right text-purple-600 text-xs"></i>
+                            <span>Recalibrate (Uji Semula)</span>
+                        </button>
+                        <button type="button" onclick="proceedFromCalibrationToReading()" class="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-black text-xs sm:text-sm rounded-2xl shadow-md hover:shadow-lg transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 cursor-pointer">
+                            <span>Proceed to Oral Reading Task</span>
+                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </button>
+                    </div>
+
+                    <div>
+                        <button type="button" onclick="returnToLanguageGateway()" class="text-xs font-bold text-gray-400 hover:text-purple-700 transition inline-flex items-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid fa-arrow-left text-[10px]"></i>
+                            <span>Back to Language & Camera Setup</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PHASE D: LIVE ORAL READING & WCPM FLUENCY TASK -->
+                <div id="eye-reading-task-phase" class="hidden space-y-6">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-purple-50 p-4 rounded-2xl border border-purple-100 gap-3">
+                        <div>
+                            <span class="text-xs font-extrabold text-purple-700 uppercase tracking-wider block">Oral Reading Fluency (WCPM)</span>
+                            <h4 id="reading-passage-title" class="font-heading text-lg font-bold text-brand-purple-deep">Grade-Aligned Controlled Reading Task</h4>
+                        </div>
+
+                        <div class="flex items-center flex-wrap gap-2 text-xs">
+                            <div class="bg-white px-3 py-1.5 rounded-xl border border-purple-200 shadow-xs">
+                                Fluency: <span id="live-wpm-stat" class="font-bold text-purple-700">0 WCPM</span>
+                            </div>
+                            <div class="bg-white px-3 py-1.5 rounded-xl border border-purple-200 shadow-xs">
+                                Duration: <strong id="live-duration-stat" class="text-purple-600">0s</strong>
+                            </div>
+                            <div class="bg-white px-3 py-1.5 rounded-xl border border-purple-200 shadow-xs">
+                                Stability: <strong id="live-fixation-stat" class="text-emerald-600">85%</strong>
+                            </div>
+                            <div class="bg-white px-3 py-1.5 rounded-xl border border-purple-200 shadow-xs">
+                                Regressions: <strong id="live-regression-stat" class="text-red-500">0 valid</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="phase-notice-box" class="text-xs text-purple-900 bg-purple-50 p-3.5 rounded-2xl border border-purple-200 font-bold flex items-center gap-2">
+                        🔬 <strong>Phase 1 Active:</strong> Baseline fixation sweep (12s). Look at the passage words naturally.
+                    </div>
+
+                    <div class="relative p-6 sm:p-10 bg-white rounded-3xl border-2 border-purple-300 shadow-inner space-y-4">
+                        <p class="text-xs text-gray-500 italic pb-1">💡 Assessor Tip: Have your child read aloud. Tap any misread, omitted, or substituted word to mark it as an oral error.</p>
+                        <div id="reading-words-container" class="leading-relaxed tracking-wide space-x-1.5 space-y-2">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+                        <button onclick="playGazeReadingReplay()" class="px-5 py-3 bg-purple-100 hover:bg-purple-200 text-purple-700 font-bold text-xs rounded-2xl transition flex items-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-play text-purple-600"></i> Replay Recorded Gaze Trail
+                        </button>
+                        <button onclick="runAnalysisSimulation()" class="px-8 py-3.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-purple-950 font-black text-xs rounded-2xl shadow-md transition cursor-pointer">
+                            Complete Screening & Calculate Multimodal Risk →
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center pt-2 border-t border-purple-100">
+                    <button onclick="goToWizardStep(3)" class="text-xs font-bold text-gray-500 hover:text-brand-purple-deep cursor-pointer">
+                        ← Back
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 5: 3-PILLAR SCREENING ANALYSIS & DETAILED RESULT BREAKDOWN -->
+            <div id="wizard-step-5" class="wizard-step hidden open-section p-6 sm:p-10 text-center space-y-6 w-full bg-white rounded-3xl border border-purple-100 shadow-subtle-card">
+                <div id="analysis-loading" class="space-y-5 py-10">
+                    <div class="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto animate-spin shadow-inner">
+                        <i class="fa-solid fa-gear text-3xl text-purple-600"></i>
+                    </div>
+                    <h3 class="font-heading text-2xl sm:text-3xl font-black text-brand-purple-deep">Calculating 3-Pillar Triangulation Algorithm...</h3>
+                    <p class="text-xs sm:text-sm text-purple-600 max-w-md mx-auto font-semibold">Pillar 1: Behavioral Screener (40%) + Pillar 2: Oral Reading (40%) + Pillar 3: Reading Gaze (20%)...</p>
+                </div>
+
+                <div id="analysis-complete" class="hidden space-y-6 py-2 max-w-3xl mx-auto text-left animate-pop-in">
+                    <!-- Top Result Header Card -->
+                    <div class="p-6 sm:p-7 bg-gradient-to-br from-purple-950 via-purple-900 to-indigo-950 rounded-3xl text-white space-y-4 shadow-xl relative overflow-hidden">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-purple-800/80 pb-4">
+                            <div class="flex items-center gap-3.5">
+                                <div id="step5-avatar-box" class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-purple-500 to-amber-400 text-white font-black text-2xl flex items-center justify-center shadow-md">
+                                    👦
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h3 id="step5-student-name" class="font-heading font-black text-xl sm:text-2xl text-white">Student Name</h3>
+                                        <span id="step5-status-badge" class="px-3 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 rounded-full text-[11px] font-extrabold uppercase tracking-wider">
+                                            ● Screening Completed
+                                        </span>
+                                    </div>
+                                    <p id="step5-student-meta" class="text-xs text-purple-200 mt-0.5">Class 1A · SK Taman Permata · Age 7</p>
+                                </div>
+                            </div>
+                            <div class="text-left sm:text-right">
+                                <span class="text-[10px] text-purple-300 font-bold uppercase tracking-wider block">Triangulated Risk Index</span>
+                                <span id="step5-combined-score" class="font-heading font-black text-2xl sm:text-3xl text-amber-300">0%</span>
+                            </div>
+                        </div>
+
+                        <!-- Overall Classification Banner -->
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white/10 p-4 rounded-2xl border border-white/15 backdrop-blur-sm">
+                            <div>
+                                <span class="text-[10px] text-purple-200 font-bold uppercase tracking-wider block">Classification Result</span>
+                                <h4 id="step5-risk-level-title" class="font-heading font-extrabold text-lg sm:text-xl text-white">Few Indicators Observed</h4>
+                            </div>
+                            <span id="step5-risk-badge-pill" class="px-4 py-1.5 rounded-xl font-extrabold text-xs sm:text-sm bg-emerald-100 text-emerald-900 border border-emerald-300 shadow-xs">
+                                Low Risk
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 3-Pillar Triangulation Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 text-xs">
+                        <!-- Pillar 1 Card -->
+                        <div class="p-4 sm:p-5 bg-purple-50/80 rounded-2xl border border-purple-200 space-y-2 shadow-xs">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-purple-900">Pillar 1: Screener (40%)</span>
+                                <i class="fa-solid fa-clipboard-check text-purple-600"></i>
+                            </div>
+                            <strong id="step5-pillar1-val" class="font-heading text-2xl font-black text-purple-950 block">0%</strong>
+                            <p id="step5-pillar1-sub" class="text-[11px] text-gray-600 leading-snug">30 Behavioral indicators observed across phonology, decoding & memory.</p>
+                        </div>
+
+                        <!-- Pillar 2 Card -->
+                        <div class="p-4 sm:p-5 bg-purple-50/80 rounded-2xl border border-purple-200 space-y-2 shadow-xs">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-purple-900">Pillar 2: Reading (40%)</span>
+                                <i class="fa-solid fa-book-open-reader text-purple-600"></i>
+                            </div>
+                            <strong id="step5-pillar2-val" class="font-heading text-2xl font-black text-purple-950 block">0%</strong>
+                            <p id="step5-pillar2-sub" class="text-[11px] text-gray-600 leading-snug">Oral reading fluency & age-normed WCPM cadence.</p>
+                        </div>
+
+                        <!-- Pillar 3 Card -->
+                        <div class="p-4 sm:p-5 bg-purple-50/80 rounded-2xl border border-purple-200 space-y-2 shadow-xs">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-purple-900">Pillar 3: Gaze (20%)</span>
+                                <i class="fa-solid fa-eye text-purple-600"></i>
+                            </div>
+                            <strong id="step5-pillar3-val" class="font-heading text-2xl font-black text-purple-950 block">0%</strong>
+                            <p id="step5-pillar3-sub" class="text-[11px] text-gray-600 leading-snug">Ocular saccadic regressions & line tracking stability.</p>
+                        </div>
+                    </div>
+
+                    <!-- Recommendation & Educator Script Box -->
+                    <div class="p-5 bg-gradient-to-br from-amber-50 to-orange-50/50 rounded-2xl border border-amber-200 space-y-2 shadow-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="text-amber-700 font-extrabold text-xs uppercase tracking-wider flex items-center gap-1.5">
+                                <i class="fa-solid fa-lightbulb"></i> Diagnostic Finding & Guidance
+                            </span>
+                        </div>
+                        <p id="step5-recommendation-text" class="text-xs sm:text-sm text-gray-800 font-medium leading-relaxed">
+                            Reading progress and phonological decoding are consistent with typical grade-level milestones.
+                        </p>
+                    </div>
+
+                    <!-- Sync Confirmation Badge -->
+                    <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs font-bold text-emerald-800 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
+                        <span id="step5-sync-notice">Status updated to "Completed" and synchronized with the School Database.</span>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="pt-2 flex flex-col sm:flex-row items-center gap-3">
+                        <a id="step5-return-btn" href="admin-page.html" class="w-full sm:flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-black text-xs sm:text-sm rounded-2xl shadow-md hover:shadow-lg transition-all cursor-pointer transform hover:scale-[1.01]">
+                            <i class="fa-solid fa-user-graduate"></i>
+                            <span id="step5-return-btn-label">View Student Profile in Admin Portal</span>
+                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </a>
+                        <a id="step5-dossier-btn" href="report-preview.html" target="_blank" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-purple-100 hover:bg-purple-200 text-purple-900 font-extrabold text-xs sm:text-sm rounded-2xl border border-purple-200 shadow-xs transition-all cursor-pointer">
+                            <i class="fa-solid fa-file-pdf text-purple-600"></i>
+                            <span>Specialist Referral PDF</span>
+                        </a>
+                        <button type="button" onclick="exitToSourcePortal()" class="w-full sm:w-auto px-5 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs sm:text-sm rounded-2xl transition cursor-pointer">
+                            <span>Back to Roster</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- REGISTER CHILD MODAL -->
+    <div id="add-child-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-floating space-y-6 border border-purple-100 animate-pop">
+            <div class="flex items-center justify-between border-b border-purple-50 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="px-2.5 py-1.5 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center text-base gap-1 shadow-xs whitespace-nowrap">👧👦</span>
+                    <h3 class="font-heading text-xl font-bold text-brand-purple-deep">Register Child Profile</h3>
+                </div>
+                <button onclick="closeAddChildModal()" class="text-gray-400 hover:text-brand-purple-deep cursor-pointer p-1 rounded-lg">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form onsubmit="handleAddChild(event)" class="space-y-4 text-xs">
+                <!-- Avatar Emoji Selection (Boy / Girl) -->
+                <div>
+                    <label class="font-bold text-brand-purple-deep block mb-1.5">Choose Avatar (Boy 👦 / Girl 👧)</label>
+                    <div class="grid grid-cols-2 gap-3 text-center" id="wizard-avatar-options">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="child-avatar" value="👧" checked class="peer sr-only">
+                            <div class="p-3 rounded-2xl border-2 border-purple-100 bg-purple-50/40 peer-checked:border-purple-600 peer-checked:bg-purple-100/90 peer-checked:shadow-sm transition-all flex flex-col items-center gap-1 hover:bg-purple-50">
+                                <span class="text-3xl">👧</span>
+                                <span class="text-xs font-extrabold text-purple-900">Girl</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="child-avatar" value="👦" class="peer sr-only">
+                            <div class="p-3 rounded-2xl border-2 border-purple-100 bg-purple-50/40 peer-checked:border-purple-600 peer-checked:bg-purple-100/90 peer-checked:shadow-sm transition-all flex flex-col items-center gap-1 hover:bg-purple-50">
+                                <span class="text-3xl">👦</span>
+                                <span class="text-xs font-extrabold text-purple-900">Boy</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="font-bold text-brand-purple-deep block mb-1">Child's Full Name</label>
+                    <input type="text" id="child-name-input" required placeholder="e.g. Nur Aisyah / Faiz" class="w-full bg-purple-50/50 border border-purple-200 rounded-2xl p-3 focus:ring-2 focus:ring-purple-600 focus:outline-none font-semibold">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="font-bold text-brand-purple-deep block mb-1">Date of Birth</label>
+                        <input type="date" id="child-dob-input" required class="w-full bg-purple-50/50 border border-purple-200 rounded-2xl p-3 focus:ring-2 focus:ring-purple-600 focus:outline-none font-semibold">
+                    </div>
+                    <div>
+                        <label class="font-bold text-brand-purple-deep block mb-1">School Grade</label>
+                        <select id="child-grade-select" class="w-full bg-purple-50/50 border border-purple-200 rounded-2xl p-3 focus:ring-2 focus:ring-purple-600 focus:outline-none font-bold text-brand-purple-deep cursor-pointer">
+                            <option>Year 1</option>
+                            <option>Year 2</option>
+                            <option>Year 3</option>
+                            <option selected>Year 4</option>
+                            <option>Year 5</option>
+                            <option>Year 6</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="font-bold text-brand-purple-deep block mb-1">School Name</label>
+                    <input type="text" id="child-school-input" placeholder="e.g. SK Taman Primary School" class="w-full bg-purple-50/50 border border-purple-200 rounded-2xl p-3 focus:ring-2 focus:ring-purple-600 focus:outline-none font-semibold">
+                </div>
+
+                <div class="flex items-center gap-3 pt-2">
+                    <button type="button" onclick="closeAddChildModal()" class="w-1/3 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-2xl transition-all cursor-pointer">
+                        Cancel
+                    </button>
+                    <button type="submit" id="btn-save-child-profile" class="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white py-3.5 rounded-2xl font-black text-xs shadow-md hover:shadow-lg transition-all cursor-pointer">
+                        + Register Profile
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast" class="fixed top-5 right-5 z-50 transform translate-y-[-100px] opacity-0 transition-all duration-300 bg-purple-900 text-white px-5 py-3 rounded-2xl shadow-floating text-xs font-bold flex items-center gap-3">
+        <img src="assets/ollie-mascot.png" alt="Ollie Mascot" class="w-6 h-6 object-contain animate-owl-mascot">
+        <span id="toast-message">Notification message</span>
+    </div>
+
+    <!-- Application Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="js/supabase.js" defer></script>
+    <script src="js/auth.js" defer></script>
+    <script src="js/app.js" defer></script>
+    <script src="js/wizard.js" defer></script>
+    <script src="js/eye-tracking.js" defer></script>
+    <script src="js/chart.js" defer></script>
+</body>
+</html>
