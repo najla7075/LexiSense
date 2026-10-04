@@ -119,10 +119,27 @@ RESPONSE GUIDELINES:
 }
 
 function generateOnboardOllieResponse(query, role) {
-    const q = (query || '').toLowerCase();
+    const q = (query || '').toLowerCase().trim();
     
+    // Auto-detect language
+    const isEnglish = /\b(what|how|why|who|is|are|can|help|tell|me|about|score|risk|eye|tracking|exercise|home|child|reading|please)\b/i.test(q);
+
+    if (isEnglish) {
+        if (q.includes('saccade') || q.includes('eye') || q.includes('gaze') || q.includes('tracking')) {
+            return `Hoo-hoo! 🦉 **Eye-Tracking & Saccades in LexiSense Screening:**\n- **Saccadic Regressions:** Readers with dyslexia frequently experience eye jumping or backward regressions when decoding text.\n- **LexiSense Camera:** Tracks eye pause frequency, reading speed, and visual focus stability in real-time.\n- **Support:** Reading focus rulers and multisensory visual tools reduce eye strain and visual crowding. 👁️✨`;
+        }
+        if (q.includes('score') || q.includes('risk') || q.includes('report') || q.includes('64')) {
+            return `Hoo-hoo! 🦉 **Understanding LexiSense Risk Scores (e.g. 64% Moderate Risk):**\n- **Category:** 31% – 69% indicates **Moderate Risk**.\n- **Meaning:** Indicates minor difficulty in phonological decoding and saccadic eye regressions.\n- **Action:** Practice 10–15 mins of daily home multisensory reading and share the PDF Dossier with an Educational Psychologist if needed. 📖🎯`;
+        }
+        if (q.includes('exercise') || q.includes('home') || q.includes('practice') || q.includes('activity')) {
+            return `Hoo-hoo! 🦉 **Recommended Home Reading Activities:**\n1. **Phonics & Multisensory Tracing:** Have your child trace letter shapes in sand or shaving cream while pronouncing phonemes aloud.\n2. **Reading Focus Ruler:** Use line ruler overlays to guide horizontal gaze tracking.\n3. **10-Minute Daily Sessions:** Short, daily practice is far more effective than long, tiring sessions! 📖✨`;
+        }
+        return `Hoo-hoo! 🦉 I am **Ollie the Wise Owl**, your LexiSense AI Assistant!\nI can help you understand **dyslexia screening scores**, **eye-tracking saccades**, **PDF dossiers**, or **home phonics activities**.\n\n*Note: LexiSense is an early pre-diagnostic screening tool. Please consult a registered Educational Psychologist for official diagnosis.* 🦉✨`;
+    }
+
+    // Default to Bahasa Melayu
     if (q.includes('saccade') || q.includes('eye') || q.includes('mata') || q.includes('gaze')) {
-        return `Hoo-hoo! 🦉 **Mata & Eye-Tracking Saccades dalam Saringan LexiSense:**\n- **Saccades (Pergerakan Mata):** Kanak-kanak disleksia sering mengalami pergerakan mata melompat-lompat (*saccadic regressions*) apabila membaca.\n- **Kamera LexiSense:** Mengesan kadar regresi mata dan titik fokus visual semasa kanak-kanak membaca.\n- **Sokongan:** Latihan seperti *Line Ruler* dan visual *multisensory* membantu mengurangkan keletihan mata. 👁️✨`;
+        return `Hoo-hoo! 🦉 **Mata & Eye-Tracking Saccades dalam Saringan LexiSense:**\n- **Saccades (Pergerakan Mata):** Kanak-kanak disleksia sering mengalami pergerakan mata melompat-lompat (*saccadic regressions*) apabila membaca.\n- **Kamera LexiSense:** Mengesan kadar regresi mata dan titik fokus visual semasa kanak-kanak membaca.\n- **Sokongan:** Latihan *Line Ruler* dan visual *multisensory* membantu mengurangkan keletihan mata. 👁️✨`;
     }
     if (q.includes('score') || q.includes('markah') || q.includes('skor') || q.includes('64')) {
         return `Hoo-hoo! 🦉 **Penjelasan Skor Saringan LexiSense (64% Risk):**\n- **Kategori:** 31% – 69% (Risiko Sederhana / Moderate Risk).\n- **Maksud Skor:** Menunjukkan kesukaran dalam *phonological decoding* dan pergerakan mata (*saccadic regressions*).\n- **Tindakan:** Lakukan latihan multisensori di rumah 10-15 minit sehari & rujuk Laporan PDF dengan Pakar Psikologi Pendidikan. 📖🎯`;
