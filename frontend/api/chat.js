@@ -33,9 +33,10 @@ LEXISENSE SYSTEM KNOWLEDGE:
 
 RESPONSE GUIDELINES:
 1. **Language:** Respond in Bahasa Melayu if the user asks in Bahasa Melayu. Respond in English if the user asks in English.
-2. **Tone:** Warm, encouraging, empathetic, clear, professional, and accessible.
-3. **Medical Disclaimer:** Explicitly clarify that LexiSense is an AI pre-diagnostic screening tool and recommend consulting a registered Educational Psychologist or Speech-Language Pathologist for official medical diagnosis.
-4. **Security:** Never request or reveal user passwords, secret keys, or private database records.
+2. **Formatting & Layout (CRITICAL):** Keep responses compact, clean, and tight without any empty blank lines or double paragraph spaces between list items. Use bullet lists (- Item) directly on consecutive lines. Never output HTML tags.
+3. **Tone:** Warm, encouraging, empathetic, clear, professional, and accessible.
+4. **Medical Disclaimer:** Explicitly clarify that LexiSense is an AI pre-diagnostic screening tool and recommend consulting a registered Educational Psychologist or Speech-Language Pathologist for official medical diagnosis.
+5. **Security:** Never request or reveal user passwords, secret keys, or private database records.
 `;
 
         const messages = [
@@ -121,14 +122,14 @@ function generateOnboardOllieResponse(query, role) {
     const q = (query || '').toLowerCase();
     
     if (q.includes('saccade') || q.includes('eye') || q.includes('mata') || q.includes('gaze')) {
-        return `Hoo-hoo! 🦉 **Mata & Eye-Tracking Saccades dalam Saringan LexiSense:**\n\n- **Saccades (Pergerakan Mata):** Kanak-kanak disleksia sering mengalami pergerakan mata melompat-lompat (*saccadic regressions*) apabila membaca teks.\n- **Kamera LexiSense:** Kamera peranti membantu mengesan kadar regresi mata dan titik fokus visual semasa kanak-kanak membaca.\n- **Sokongan:** Latihan seperti *Line Ruler* dan visual *multisensory* membantu mengurangkan keletihan mata. 👁️✨`;
+        return `Hoo-hoo! 🦉 **Mata & Eye-Tracking Saccades dalam Saringan LexiSense:**\n- **Saccades (Pergerakan Mata):** Kanak-kanak disleksia sering mengalami pergerakan mata melompat-lompat (*saccadic regressions*) apabila membaca.\n- **Kamera LexiSense:** Mengesan kadar regresi mata dan titik fokus visual semasa kanak-kanak membaca.\n- **Sokongan:** Latihan seperti *Line Ruler* dan visual *multisensory* membantu mengurangkan keletihan mata. 👁️✨`;
     }
     if (q.includes('score') || q.includes('markah') || q.includes('skor') || q.includes('64')) {
-        return `Hoo-hoo! 🦉 **Penjelasan Skor Saringan LexiSense (64% Risk):**\n\n- **Kategori:** 31% – 69% menunjukkan **Risiko Sederhana (Moderate Risk)**.\n- **Maksud Skor:** Kanak-kanak menunjukkan beberapa petunjuk kesukaran dalam *phonological decoding* dan pergerakan mata (*saccadic regressions*).\n- **Tindakan:** Lakukan latihan multisensori di rumah 10-15 minit sehari dan rujuk Laporan PDF dengan Pakar Psikologi Pendidikan jika perlu. 📖🎯`;
+        return `Hoo-hoo! 🦉 **Penjelasan Skor Saringan LexiSense (64% Risk):**\n- **Kategori:** 31% – 69% (Risiko Sederhana / Moderate Risk).\n- **Maksud Skor:** Menunjukkan kesukaran dalam *phonological decoding* dan pergerakan mata (*saccadic regressions*).\n- **Tindakan:** Lakukan latihan multisensori di rumah 10-15 minit sehari & rujuk Laporan PDF dengan Pakar Psikologi Pendidikan. 📖🎯`;
     }
     if (q.includes('exercise') || q.includes('latihan') || q.includes('rumah') || q.includes('home')) {
-        return `Hoo-hoo! 🦉 **Cadangan Latihan Pembacaan Di Rumah:**\n\n1. **Phonics & Multisensory Tracing:** Suruh kanak-kanak menyebut bunyi huruf (*phonics*) sambil melukis bentuk huruf di atas pasir atau kain.\n2. **Reading Focus Ruler:** Gunakan pembaris penunjuk garisan untuk mengekalkan fokus mata.\n3. **Amalan 10 Minit:** Latihan pendek setiap hari lebih berkesan daripada sesi panjang yang memenatkan! 📖✨`;
+        return `Hoo-hoo! 🦉 **Cadangan Latihan Pembacaan Di Rumah:**\n1. **Phonics & Multisensory Tracing:** Sebut bunyi huruf (*phonics*) sambil melukis bentuk huruf di atas pasir atau kain.\n2. **Reading Focus Ruler:** Gunakan pembaris penunjuk garisan untuk mengekalkan fokus mata.\n3. **Amalan 10 Minit:** Sesi pendek harian lebih berkesan daripada sesi panjang memenatkan! 📖✨`;
     }
     
-    return `Hoo-hoo! 🦉 Saya **Ollie the Wise Owl**, Pembantu AI LexiSense anda!\n\nSaya boleh membantu anda memahami **skor saringan disleksia**, **pergerakan mata (eye-tracking saccades)**, **laporan PDF**, atau **latihan pembacaan di rumah**.\n\n*Nota: LexiSense ialah alat saringan awal pra-diagnostik. Sila rujuk Pakar Psikologi Pendidikan untuk diagnosis klinikal rasmi.* 🦉✨`;
+    return `Hoo-hoo! 🦉 Saya **Ollie the Wise Owl**, Pembantu AI LexiSense anda!\nSaya boleh membantu anda memahami **skor saringan disleksia**, **pergerakan mata (eye-tracking saccades)**, **laporan PDF**, atau **latihan pembacaan di rumah**.\n\n*Nota: LexiSense ialah alat saringan awal pra-diagnostik. Sila rujuk Pakar Psikologi Pendidikan untuk diagnosis klinikal rasmi.* 🦉✨`;
 }

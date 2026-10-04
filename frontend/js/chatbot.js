@@ -123,23 +123,42 @@ let chatHistory = [];
 function formatBotResponse(rawText) {
     if (!rawText) return '';
     
-    let text = rawText;
-    
+    let text = rawText.trim();
+
+    // If response is already rich HTML formatted
+    const containsHtmlTags = /<[a-z][\s\S]*>/i.test(text);
+
+    if (containsHtmlTags) {
+        return text
+            .replace(/\r\n/g, '\n')
+            .replace(/\n{2,}/g, '\n')
+            .replace(/<p>\s*<\/p>/gi, '')
+            .replace(/(<br\s*\/?>){2,}/gi, '<br>')
+            .trim();
+    }
+
+    // Standardize line endings and collapse 3+ empty newlines into max 2
+    text = text.replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n');
+
     // Parse Markdown headers
-    text = text.replace(/^### (.*$)/gim, '<h5 class="font-extrabold text-purple-950 mt-2.5 mb-1 font-heading text-xs tracking-tight">$1</h5>');
-    text = text.replace(/^## (.*$)/gim, '<h4 class="font-extrabold text-purple-950 mt-3 mb-1 font-heading text-sm">$1</h4>');
-    text = text.replace(/^# (.*$)/gim, '<h3 class="font-extrabold text-purple-950 mt-3.5 mb-1.5 font-heading text-base">$1</h3>');
+    text = text.replace(/^### (.*$)/gim, '<h5 class="font-extrabold text-purple-950 mt-1.5 mb-0.5 font-heading text-xs tracking-tight">$1</h5>');
+    text = text.replace(/^## (.*$)/gim, '<h4 class="font-extrabold text-purple-950 mt-2 mb-0.5 font-heading text-sm">$1</h4>');
+    text = text.replace(/^# (.*$)/gim, '<h3 class="font-extrabold text-purple-950 mt-2.5 mb-1 font-heading text-base">$1</h3>');
 
     // Parse bold and italics
     text = text.replace(/\*\*(.*?)\*\*/g, '<strong class="text-purple-950 font-bold">$1</strong>');
     text = text.replace(/\*(.*?)\*/g, '<em class="text-purple-900">$1</em>');
 
-    // Parse bullet lists and numbered lists
-    text = text.replace(/^\s*[-*•]\s+(.*)$/gim, '<div class="flex items-start gap-2 ml-1 my-1"><span class="text-purple-600 font-bold shrink-0">•</span><span>$1</span></div>');
-    text = text.replace(/^\s*(\d+)\.\s+(.*)$/gim, '<div class="flex items-start gap-2 ml-1 my-1"><span class="font-extrabold text-purple-700 shrink-0">$1.</span><span>$2</span></div>');
+    // Parse bullet lists and numbered lists with compact tight spacing
+    text = text.replace(/^\s*[-*•]\s+(.*)$/gim, '<div class="flex items-start gap-1.5 my-0.5 text-xs leading-snug"><span class="text-purple-600 font-bold shrink-0 select-none">•</span><span>$1</span></div>');
+    text = text.replace(/^\s*(\d+)\.\s+(.*)$/gim, '<div class="flex items-start gap-1.5 my-0.5 text-xs leading-snug"><span class="font-extrabold text-purple-700 shrink-0 select-none">$1.</span><span>$2</span></div>');
 
-    // Parse line breaks
-    text = text.replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>');
+    // Remove any newlines that directly touch block tags
+    text = text.replace(/(<\/div>|<\/h[3-5]>)\n+/gi, '$1');
+    text = text.replace(/\n+(<div|<h[3-5])/gi, '$1');
+
+    // Convert remaining double newlines to a tight single break and single newlines to <br>
+    text = text.replace(/\n\n/g, '<div class="h-1"></div>').replace(/\n/g, '<br>');
 
     return text;
 }
@@ -209,14 +228,14 @@ async function sendChatMessage() {
         <div class="w-10 h-10 bg-amber-400/90 rounded-2xl flex items-center justify-center p-1 shrink-0 shadow-md animate-owl-mascot ring-2 ring-amber-200">
             <img src="assets/ollie-mascot.png" alt="Ollie Mascot" class="w-8.5 h-8.5 object-contain">
         </div>
-        <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-md text-gray-800 text-xs leading-relaxed max-w-[88%] space-y-2 border border-purple-200/80">
-            <div class="flex items-center justify-between border-b border-purple-100 pb-1.5">
+        <div class="bg-white p-3.5 rounded-2xl rounded-tl-none shadow-md text-gray-800 text-xs leading-relaxed max-w-[88%] border border-purple-200/80">
+            <div class="flex items-center justify-between border-b border-purple-100 pb-1.5 mb-2">
                 <span class="font-extrabold text-purple-700 font-heading flex items-center gap-1.5">
                     <span>Ollie Wise Owl AI</span> <img src="assets/ollie-mascot.png" alt="Ollie" class="w-5 h-5 object-contain inline-block">
                 </span>
-                <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-extrabold">AI Assistant</span>
+                <span class="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-extrabold">AI Assistant</span>
             </div>
-            <div class="space-y-2">${formattedReply}</div>
+            <div class="chat-reply-content space-y-1">${formattedReply}</div>
         </div>
     `;
     container.appendChild(botMsg);
@@ -249,21 +268,8 @@ async function getSmartOwlAIResponse(query) {
             headers['Authorization'] = `Bearer ${token}`;
         }
 
-        // Try both standard endpoint /api/chatbot/ask/ and /api/chat
         let response = null;
         try {
-            response = await fetch('/api/chatbot/ask/', {
-                method: 'POST',
-                headers: headers,
-                body: JSON.stringify({ 
-                    message: query,
-                    role: currentRole,
-                    history: chatHistory
-                }),
-                signal: controller.signal
-            });
-        } catch (fetchErr) {
-            // If /api/chatbot/ask/ fails, attempt fallback to /api/chat
             response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: headers,
@@ -274,6 +280,21 @@ async function getSmartOwlAIResponse(query) {
                 }),
                 signal: controller.signal
             });
+        } catch (fetchErr) {}
+
+        if (!response || !response.ok) {
+            try {
+                response = await fetch('/api/chatbot/ask/', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({ 
+                        message: query,
+                        role: currentRole,
+                        history: chatHistory
+                    }),
+                    signal: controller.signal
+                });
+            } catch (err) {}
         }
 
         clearTimeout(timeoutId);
