@@ -816,16 +816,29 @@
             </div>
 
             <!-- Quick Suggestion Chips -->
-            <div class="p-2 bg-white border-t border-purple-50 flex gap-1.5 overflow-x-auto text-xs whitespace-nowrap no-scrollbar">
-                <button onclick="sendQuickMessage('What is Dyslexia?')" class="bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold px-3 py-1.5 rounded-full border border-purple-100 transition-colors flex items-center gap-1.5">
-                    <img src="assets/ollie-mascot.png" alt="Ollie" class="w-3.5 h-3.5 object-contain">
-                    <span>What is Dyslexia?</span>
+            <div class="p-2 bg-white border-t border-purple-50 flex items-center gap-1">
+                <button onclick="document.getElementById('index-quick-pills').scrollBy({left: -150, behavior: 'smooth'})" class="p-1 text-purple-400 hover:text-purple-700 rounded-full hover:bg-purple-50 transition-colors shrink-0 cursor-pointer" title="Scroll Left">
+                    <i class="fa-solid fa-chevron-left text-xs"></i>
                 </button>
-                <button onclick="sendQuickMessage('Suggest home reading exercises')" class="bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold px-3 py-1.5 rounded-full border border-purple-100 transition-colors">
-                    📖 Home Exercises
-                </button>
-                <button onclick="sendQuickMessage('What are symptoms in 7 year olds?')" class="bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold px-3 py-1.5 rounded-full border border-purple-100 transition-colors">
-                    📌 7 Yo Symptoms
+
+                <div id="index-quick-pills" onwheel="if(event.deltaY!==0){event.preventDefault();this.scrollLeft+=event.deltaY;}" class="flex-1 flex gap-1.5 overflow-x-auto text-xs whitespace-nowrap custom-scrollbar-x py-1 px-1 scroll-smooth">
+                    <button onclick="sendQuickMessage('What is Dyslexia?')" class="bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold px-3 py-1.5 rounded-full border border-purple-100 transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer">
+                        <img src="assets/ollie-mascot.png" alt="Ollie" class="w-3.5 h-3.5 object-contain">
+                        <span>What is Dyslexia?</span>
+                    </button>
+                    <button onclick="sendQuickMessage('Suggest home reading exercises')" class="bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold px-3 py-1.5 rounded-full border border-purple-100 transition-colors shrink-0 cursor-pointer">
+                        📖 Home Exercises
+                    </button>
+                    <button onclick="sendQuickMessage('What are symptoms in 7 year olds?')" class="bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold px-3 py-1.5 rounded-full border border-purple-100 transition-colors shrink-0 cursor-pointer">
+                        📌 7 Yo Symptoms
+                    </button>
+                    <button onclick="sendQuickMessage('How accurate is the screening?')" class="bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold px-3 py-1.5 rounded-full border border-purple-100 transition-colors shrink-0 cursor-pointer">
+                        🎯 Screening Accuracy
+                    </button>
+                </div>
+
+                <button onclick="document.getElementById('index-quick-pills').scrollBy({left: 150, behavior: 'smooth'})" class="p-1 text-purple-400 hover:text-purple-700 rounded-full hover:bg-purple-50 transition-colors shrink-0 cursor-pointer" title="Scroll Right">
+                    <i class="fa-solid fa-chevron-right text-xs"></i>
                 </button>
             </div>
 

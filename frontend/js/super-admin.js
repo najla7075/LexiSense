@@ -123,20 +123,46 @@ async function syncAllSuperAdminData() {
         }
 
         // 2. Map Profiles into userMap
+        let localUsersObj = {};
+        let roleOverrides = {};
+        try {
+            localUsersObj = JSON.parse(localStorage.getItem('lexisense_registered_users') || '{}');
+            roleOverrides = JSON.parse(localStorage.getItem('lexisense_user_role_overrides') || '{}');
+        } catch(e) {}
+        const localUsersList = Array.isArray(localUsersObj) ? localUsersObj : Object.values(localUsersObj);
+
         if (Array.isArray(dbProfiles) && dbProfiles.length > 0) {
             dbProfiles.forEach(p => {
+                const pIdStr = String(p.id || '').toLowerCase().trim();
+                const cleanEmail = (p.email || '').toLowerCase().trim();
+                const cleanUname = (p.username || '').toLowerCase().trim();
                 const key = p.id || p.username || p.email;
-                let userStatus = p.is_active === false ? 'disabled' : (p.status || 'active');
-                if (p.is_approved === false) userStatus = 'pending';
+
+                const localMatch = localUsersList.find(lu => 
+                    (lu.email && lu.email.toLowerCase().trim() === cleanEmail) || 
+                    (lu.username && lu.username.toLowerCase().trim() === cleanUname) ||
+                    (lu.id && String(lu.id).toLowerCase().trim() === pIdStr)
+                );
+
+                const explicitOverrideRole = roleOverrides[pIdStr] || roleOverrides[cleanEmail] || roleOverrides[cleanUname];
+
+                let resolvedRole = explicitOverrideRole || localMatch?.role || p.role || 'parent';
+                let resolvedIsActive = (localMatch && localMatch.is_active !== undefined) ? localMatch.is_active : (p.is_active !== false);
+                let resolvedIsApproved = (localMatch && localMatch.is_approved !== undefined) ? localMatch.is_approved : (p.is_approved !== false);
+                let resolvedStatus = localMatch?.status || p.status || 'active';
+
+                let userStatus = resolvedIsActive === false ? 'disabled' : resolvedStatus;
+                if (resolvedIsApproved === false) userStatus = 'pending';
 
                 userMap.set(String(key).toLowerCase(), {
                     id: p.id || `usr-${p.username}`,
                     full_name: p.full_name || p.name || p.username || 'User',
                     username: p.username || p.email?.split('@')[0] || 'user',
                     email: p.email || 'user@lexisense.ai',
-                    role: p.role || 'parent',
-                    school: p.school || p.school_branch || p.school_name || 'SK Taman Ria',
-                    is_active: p.is_active !== false,
+                    role: resolvedRole,
+                    school: p.school || p.school_branch || p.school_name || localMatch?.school || 'SK Taman Ria',
+                    is_active: resolvedIsActive,
+                    is_approved: resolvedIsApproved,
                     status: userStatus,
                     created_at: p.created_at ? p.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
                     last_login: 'Active Now',
@@ -144,6 +170,34 @@ async function syncAllSuperAdminData() {
                 });
             });
         }
+
+        // Add any registered users from local storage not present in dbProfiles
+        localUsersList.forEach(lu => {
+            if (!lu) return;
+            const cleanEmail = (lu.email || '').toLowerCase().trim();
+            const cleanUname = (lu.username || '').toLowerCase().trim();
+            const key = (lu.id || cleanUname || cleanEmail).toLowerCase();
+
+            if (key && !userMap.has(key)) {
+                let userStatus = lu.is_active === false ? 'disabled' : (lu.status || 'active');
+                if (lu.is_approved === false) userStatus = 'pending';
+
+                userMap.set(key, {
+                    id: lu.id || `usr-${lu.username || (cleanEmail ? cleanEmail.split('@')[0] : 'user')}`,
+                    full_name: lu.full_name || lu.name || lu.username || 'User',
+                    username: lu.username || (cleanEmail ? cleanEmail.split('@')[0] : 'user'),
+                    email: lu.email || 'user@lexisense.ai',
+                    role: lu.role || 'parent',
+                    school: lu.school || lu.school_branch || 'SK Taman Ria',
+                    is_active: lu.is_active !== false,
+                    is_approved: lu.is_approved !== false,
+                    status: userStatus,
+                    created_at: lu.created_at ? lu.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
+                    last_login: 'Active Now',
+                    screenings_count: 0
+                });
+            }
+        });
 
         // Build comprehensive children & student lookup map
         const childrenLookup = new Map();
@@ -361,10 +415,10 @@ async function syncAllSuperAdminData() {
         if (pendingAdmins.length > 0) {
             dynamicNotifications.push({
                 id: 'notif-pending',
-                title: `${pendingAdmins.length} Educator Registration Requests`,
-                desc: `${pendingAdmins.map(a => a.full_name).join(', ')} requested educator credentials.`,
+                title: `${pendingAdmins.length} Permohonan Pendidik Menunggu Pengesahan & Sekolah`,
+                desc: `${pendingAdmins.map(a => a.full_name || a.username).join(', ')} memohon akaun pendidik. Sila sahkan & tetapkan cawangan sekolah.`,
                 type: 'users',
-                time: '15 min ago',
+                time: 'Just now',
                 is_read: false,
                 actionView: 'users',
                 filter: 'pending'
@@ -434,7 +488,8 @@ function switchSuperAdminView(viewName) {
         btn.classList.remove('active');
         const icon = btn.querySelector('i');
         if (icon) {
-            icon.classList.add('text-slate-500');
+            icon.classList.remove('text-white');
+            icon.classList.add('text-slate-400');
         }
     });
 
@@ -450,7 +505,8 @@ function switchSuperAdminView(viewName) {
         targetNav.classList.add('active');
         const icon = targetNav.querySelector('i');
         if (icon) {
-            icon.classList.remove('text-slate-500');
+            icon.classList.remove('text-slate-400');
+            icon.classList.add('text-white');
         }
     }
 
@@ -504,12 +560,52 @@ function updateOverviewMetrics() {
     const totalScreenings = window.superAdminData.screenings.length;
     const totalSchools = window.superAdminData.schools.length;
     const highRiskCount = window.superAdminData.screenings.filter(s => s.score >= 65).length;
-    const pendingAdminsCount = window.superAdminData.users.filter(u => u.status === 'pending').length;
+    const pendingAdminsCount = window.superAdminData.users.filter(u => u.status === 'pending' || u.is_approved === false).length;
 
     if (totalUsersEl) totalUsersEl.textContent = totalUsers.toLocaleString();
     if (totalScreeningsEl) totalScreeningsEl.textContent = totalScreenings.toLocaleString();
     if (totalSchoolsEl) totalSchoolsEl.textContent = totalSchools.toLocaleString();
     if (highRiskEl) highRiskEl.textContent = `${highRiskCount}`;
+
+    // Render Pending Educator Registration Alert Banner in Dashboard Overview
+    const bannerContainer = document.getElementById('sa-pending-educator-alert-banner');
+    if (bannerContainer) {
+        if (pendingAdminsCount > 0) {
+            const firstPending = window.superAdminData.users.find(u => u.status === 'pending' || u.is_approved === false);
+            bannerContainer.innerHTML = `
+                <div class="bg-gradient-to-r from-amber-500 via-purple-600 to-indigo-700 p-0.5 rounded-3xl shadow-lg my-3">
+                    <div class="bg-white rounded-[23px] p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-2xl bg-amber-100 border border-amber-300 flex items-center justify-center text-amber-700 font-extrabold text-xl shrink-0">
+                                ⏳
+                            </div>
+                            <div>
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[11px] font-black border border-amber-300">
+                                    <i class="fa-solid fa-user-clock text-amber-600"></i> ${pendingAdminsCount} Permohonan Pendidik Menunggu Pengesahan
+                                </span>
+                                <h4 class="font-heading font-extrabold text-slate-900 text-sm sm:text-base mt-1">
+                                    Pendaftaran Pendidik Baru Memerlukan Kelulusan & Penetapan Sekolah
+                                </h4>
+                                <p class="text-xs text-slate-600 font-medium">
+                                    Sila sahkan akaun pendidik dan tetapkan cawangan sekolah untuk memberikan akses portal.
+                                </p>
+                            </div>
+                        </div>
+                        <button onclick="${firstPending ? `openApproveEducatorModal('${firstPending.id}')` : 'filterUsersByPending()'}" class="shrink-0 px-4 py-2.5 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-800 hover:to-indigo-800 text-white font-extrabold text-xs rounded-2xl shadow-md transition-all flex items-center gap-2 cursor-pointer">
+                            <span>Sahkan & Assign Sekolah Now</span>
+                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            bannerContainer.classList.remove('hidden');
+        } else {
+            bannerContainer.classList.add('hidden');
+            bannerContainer.innerHTML = '';
+        }
+    }
+
+
 
     // Needs Your Attention Section
     const attentionTier3 = document.getElementById('overview-attention-tier3-count');
@@ -598,17 +694,17 @@ function renderRecentActivityStream() {
     }
 
     streamContainer.innerHTML = logs.map(log => `
-        <div class="flex items-center justify-between p-3 bg-purple-50/30 rounded-2xl border border-purple-100/70 hover:bg-purple-50/60 transition-colors text-xs">
-            <div class="flex items-center gap-3">
+        <div class="flex items-center justify-between p-3 bg-purple-50/30 rounded-2xl border border-purple-100/70 hover:bg-purple-50/60 transition-colors text-xs overflow-hidden">
+            <div class="flex items-center gap-3 min-w-0 flex-1 mr-2 overflow-hidden">
                 <div class="w-8 h-8 rounded-xl ${log.status === 'SUCCESS' ? 'bg-purple-100 text-purple-700' : 'bg-rose-100 text-rose-700'} flex items-center justify-center text-xs font-bold shrink-0">
                     <i class="fa-solid ${log.event.includes('AUTH') ? 'fa-shield-halved' : (log.event.includes('REPORT') ? 'fa-file-pdf' : 'fa-brain')}"></i>
                 </div>
-                <div class="overflow-hidden">
-                    <span class="font-bold text-slate-900 block truncate">${log.event.replace(/_/g, ' ')}</span>
-                    <span class="text-slate-500 text-[11px] block truncate">${log.target} · <span class="font-semibold text-purple-800">@${log.actor}</span></span>
+                <div class="min-w-0 flex-1 overflow-hidden">
+                    <span class="font-bold text-slate-900 block truncate">${escapeHTML(log.event.replace(/_/g, ' '))}</span>
+                    <span class="text-slate-500 text-[11px] block truncate" title="${escapeHTML(log.target)} · @${escapeHTML(log.actor)}">${escapeHTML(log.target)} · <span class="font-semibold text-purple-800">@${escapeHTML(log.actor)}</span></span>
                 </div>
             </div>
-            <div class="text-right shrink-0">
+            <div class="text-right shrink-0 ml-1">
                 <span class="inline-block px-2 py-0.5 rounded-full text-[9px] font-black ${log.status === 'SUCCESS' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'}">${log.status}</span>
                 <span class="block text-[10px] text-slate-400 mt-0.5">${log.timestamp.includes(' ') ? log.timestamp.split(' ')[1] : log.timestamp}</span>
             </div>
@@ -891,9 +987,11 @@ function loadSuperAdminUserTable() {
                 <td class="p-3.5 text-slate-600 font-semibold">${escapeHTML(user.email)}</td>
                 <td class="p-3.5 text-purple-900 font-bold">${escapeHTML(user.school || 'Unassigned')}</td>
                 <td class="p-3.5">
-                    <span class="inline-block px-2.5 py-0.5 rounded-full text-[10.5px] font-bold border ${roleBadge}">
-                        ${roleLabel}
-                    </span>
+                    <select onchange="updateUserRoleDirectly('${user.id}', this.value)" class="bg-purple-50/90 border border-purple-200 rounded-xl px-2.5 py-1 text-xs font-bold text-purple-950 focus:ring-2 focus:ring-purple-600 focus:outline-none transition-all cursor-pointer hover:bg-purple-100 shadow-xs">
+                        <option value="parent" ${user.role === 'parent' ? 'selected' : ''}>👨‍👩‍👧 Parent</option>
+                        <option value="admin" ${user.role === 'admin' || user.role === 'teacher' ? 'selected' : ''}>👨‍🏫 Educator / Admin</option>
+                        <option value="super_admin" ${user.role === 'super_admin' ? 'selected' : ''}>👑 Super Admin</option>
+                    </select>
                 </td>
                 <td class="p-3.5">
                     <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-black border ${statusBadge}">
@@ -902,12 +1000,12 @@ function loadSuperAdminUserTable() {
                 </td>
                 <td class="p-3.5 text-right">
                     <div class="flex items-center justify-end gap-1.5">
-                        ${user.status === 'pending' ? `
-                            <button onclick="approveUserAdmin('${user.id}')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-[11px] transition-colors flex items-center gap-1">
-                                <i class="fa-solid fa-check"></i> Approve
+                        ${(user.status === 'pending' || user.is_approved === false) ? `
+                            <button onclick="openApproveEducatorModal('${user.id}')" class="px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl font-bold text-[11px] transition-all flex items-center gap-1.5 shadow-xs cursor-pointer">
+                                <i class="fa-solid fa-school-flag"></i> Sahkan & Assign Sekolah
                             </button>
                         ` : ''}
-                        <button onclick="openUserProfileDrawer('${user.id}')" class="px-2.5 py-1 bg-purple-50 hover:bg-purple-100 text-purple-800 rounded-lg font-bold text-[11px] border border-purple-200 transition-colors">
+                        <button onclick="openUserProfileDrawer('${user.id}')" class="px-2.5 py-1 bg-purple-50 hover:bg-purple-100 text-purple-800 rounded-lg font-bold text-[11px] border border-purple-200 transition-colors cursor-pointer">
                             Manage &rarr;
                         </button>
                     </div>
@@ -917,6 +1015,279 @@ function loadSuperAdminUserTable() {
     }).join('');
 }
 window.loadSuperAdminUserTable = loadSuperAdminUserTable;
+
+/**
+ * Multi-level Supabase Sync for Profile updates (ID -> Email -> Username -> Upsert)
+ */
+async function syncProfileToSupabase(userObj, updatePayload = {}) {
+    if (!userObj) return false;
+    const client = typeof getSupabase === 'function' ? getSupabase() : null;
+    if (!client) return false;
+
+    const cleanEmail = (userObj.email || '').toLowerCase().trim();
+    const cleanUname = (userObj.username || '').toLowerCase().trim();
+    const userId = userObj.id;
+    const targetRole = updatePayload.role || userObj.role || 'admin';
+
+    let updated = false;
+
+    // 1. Try RPC call first (runs with SECURITY DEFINER to bypass RLS policy in Supabase)
+    try {
+        const targetIdentifier = cleanEmail || cleanUname || userId;
+        if (targetIdentifier) {
+            const { error: rpcErr } = await client.rpc('update_user_role', {
+                target_email: targetIdentifier,
+                target_role: targetRole
+            });
+            if (!rpcErr) {
+                updated = true;
+                console.log(`[Supabase Cloud RPC Success] Updated role for ${targetIdentifier} -> ${targetRole} ✅`);
+            }
+        }
+    } catch (e) {}
+
+    if (!updated) {
+        // Safe payload containing ONLY valid Supabase Cloud profiles table columns
+        const dbPayload = {
+            role: targetRole,
+            is_active: userObj.is_active !== false,
+            updated_at: new Date().toISOString()
+        };
+
+        if (userObj.school || userObj.school_branch || updatePayload.school_branch) {
+            dbPayload.school_branch = userObj.school || userObj.school_branch || updatePayload.school_branch;
+        }
+
+        try {
+            // 2. Try update by UUID id
+            if (userId && typeof isValidUUID === 'function' && isValidUUID(userId)) {
+                const { data, error } = await client.from('profiles').update(dbPayload).eq('id', userId).select();
+                if (!error && Array.isArray(data) && data.length > 0) {
+                    updated = true;
+                    console.log(`[Supabase Cloud Success] Profile updated by ID (${userId}) -> role: ${data[0].role} ✅`);
+                } else if (error) {
+                    console.warn("[Supabase Cloud] Update by ID notice:", error.message);
+                }
+            }
+
+            // 3. Fallback: Try update by email if not updated by ID
+            if (!updated && cleanEmail) {
+                const { data, error } = await client.from('profiles').update(dbPayload).ilike('email', cleanEmail).select();
+                if (!error && Array.isArray(data) && data.length > 0) {
+                    updated = true;
+                    console.log(`[Supabase Cloud Success] Profile updated by Email (${cleanEmail}) -> role: ${data[0].role} ✅`);
+                } else if (error) {
+                    console.warn("[Supabase Cloud] Update by Email notice:", error.message);
+                }
+            }
+
+            // 4. Fallback: Try update by username if not updated
+            if (!updated && cleanUname) {
+                const { data, error } = await client.from('profiles').update(dbPayload).ilike('username', cleanUname).select();
+                if (!error && Array.isArray(data) && data.length > 0) {
+                    updated = true;
+                    console.log(`[Supabase Cloud Success] Profile updated by Username (${cleanUname}) -> role: ${data[0].role} ✅`);
+                } else if (error) {
+                    console.warn("[Supabase Cloud] Update by Username notice:", error.message);
+                }
+            }
+
+            // 5. Fallback: Upsert full profile if not found in profiles table
+            if (!updated) {
+                const upsertRow = {
+                    username: userObj.username || cleanUname || (cleanEmail ? cleanEmail.split('@')[0] : 'user'),
+                    full_name: userObj.full_name || userObj.name || userObj.username || 'User',
+                    email: userObj.email || cleanEmail,
+                    role: targetRole,
+                    is_active: true,
+                    updated_at: new Date().toISOString()
+                };
+                if (userId && typeof isValidUUID === 'function' && isValidUUID(userId)) {
+                    upsertRow.id = userId;
+                }
+                if (dbPayload.school_branch) {
+                    upsertRow.school_branch = dbPayload.school_branch;
+                }
+
+                const { data: upData, error: upErr } = await client.from('profiles').upsert([upsertRow]).select();
+                if (!upErr && Array.isArray(upData) && upData.length > 0) {
+                    updated = true;
+                    console.log(`[Supabase Cloud Success] Profile upserted to Supabase -> role: ${upData[0].role} ✅`);
+                } else if (upErr) {
+                    console.error("[Supabase Cloud Error] Upsert notice:", upErr.message);
+                }
+            }
+        } catch (e) {
+            console.warn("[Supabase Cloud Sync Exception]:", e);
+        }
+    }
+
+    return updated;
+}
+/**
+ * Synchronizes user object across all local storage registries & active session
+ */
+function syncUserToLocalStorage(userObj) {
+    if (!userObj) return;
+    try {
+        const cleanEmail = (userObj.email || '').toLowerCase().trim();
+        const cleanUname = (userObj.username || '').toLowerCase().trim();
+        const pIdStr = String(userObj.id || '').toLowerCase().trim();
+
+        // 1. Update or Insert into lexisense_registered_users
+        let localUsers = JSON.parse(localStorage.getItem('lexisense_registered_users') || '{}');
+        let found = false;
+
+        if (Array.isArray(localUsers)) {
+            localUsers.forEach(u => {
+                if ((u.email && u.email.toLowerCase().trim() === cleanEmail) || 
+                    (u.username && u.username.toLowerCase().trim() === cleanUname) || 
+                    (u.id && String(u.id).toLowerCase().trim() === pIdStr)) {
+                    u.role = userObj.role;
+                    u.is_approved = userObj.is_approved;
+                    u.is_active = userObj.is_active;
+                    u.status = userObj.status;
+                    if (userObj.school || userObj.school_branch) {
+                        u.school = userObj.school || userObj.school_branch;
+                        u.school_branch = userObj.school || userObj.school_branch;
+                    }
+                    found = true;
+                }
+            });
+            if (!found) {
+                localUsers.push({
+                    id: userObj.id,
+                    username: userObj.username || cleanUname,
+                    full_name: userObj.full_name || userObj.name || userObj.username,
+                    email: userObj.email || cleanEmail,
+                    role: userObj.role,
+                    school: userObj.school || userObj.school_branch || null,
+                    school_branch: userObj.school || userObj.school_branch || null,
+                    is_active: userObj.is_active !== false,
+                    is_approved: userObj.is_approved !== false,
+                    status: userObj.status || 'active',
+                    updated_at: new Date().toISOString()
+                });
+            }
+            localStorage.setItem('lexisense_registered_users', JSON.stringify(localUsers));
+        } else if (typeof localUsers === 'object' && localUsers !== null) {
+            Object.keys(localUsers).forEach(k => {
+                if (k.toLowerCase() === cleanUname || k.toLowerCase() === cleanEmail || (localUsers[k]?.id && String(localUsers[k].id).toLowerCase().trim() === pIdStr)) {
+                    localUsers[k].role = userObj.role;
+                    localUsers[k].is_approved = userObj.is_approved;
+                    localUsers[k].is_active = userObj.is_active;
+                    localUsers[k].status = userObj.status;
+                    if (userObj.school || userObj.school_branch) {
+                        localUsers[k].school = userObj.school || userObj.school_branch;
+                        localUsers[k].school_branch = userObj.school || userObj.school_branch;
+                    }
+                    found = true;
+                }
+            });
+            if (!found) {
+                const key = cleanUname || cleanEmail || userObj.id;
+                if (key) {
+                    localUsers[key] = {
+                        id: userObj.id,
+                        username: userObj.username || cleanUname,
+                        full_name: userObj.full_name || userObj.name || userObj.username,
+                        email: userObj.email || cleanEmail,
+                        role: userObj.role,
+                        school: userObj.school || userObj.school_branch || null,
+                        school_branch: userObj.school || userObj.school_branch || null,
+                        is_active: userObj.is_active !== false,
+                        is_approved: userObj.is_approved !== false,
+                        status: userObj.status || 'active',
+                        updated_at: new Date().toISOString()
+                    };
+                }
+            }
+            localStorage.setItem('lexisense_registered_users', JSON.stringify(localUsers));
+        }
+
+        // 2. Save explicit role override map in localStorage
+        let roleOverrides = JSON.parse(localStorage.getItem('lexisense_user_role_overrides') || '{}');
+        if (pIdStr) roleOverrides[pIdStr] = userObj.role;
+        if (cleanEmail) roleOverrides[cleanEmail] = userObj.role;
+        if (cleanUname) roleOverrides[cleanUname] = userObj.role;
+        localStorage.setItem('lexisense_user_role_overrides', JSON.stringify(roleOverrides));
+
+        // 3. Update logged-in session user if matching
+        let loggedIn = window.loggedInUser || JSON.parse(localStorage.getItem('lexisense_user') || 'null');
+        if (loggedIn && ((loggedIn.email && loggedIn.email.toLowerCase().trim() === cleanEmail) || 
+                         (loggedIn.username && loggedIn.username.toLowerCase().trim() === cleanUname) || 
+                         (loggedIn.id && String(loggedIn.id).toLowerCase().trim() === pIdStr))) {
+            loggedIn.role = userObj.role;
+            loggedIn.is_approved = userObj.is_approved;
+            loggedIn.is_active = userObj.is_active;
+            loggedIn.status = userObj.status;
+            if (userObj.school || userObj.school_branch) loggedIn.school = userObj.school || userObj.school_branch;
+            window.loggedInUser = loggedIn;
+            localStorage.setItem('lexisense_user', JSON.stringify(loggedIn));
+        }
+
+        // 4. Update profile username key in local storage
+        if (cleanUname) {
+            let prof = JSON.parse(localStorage.getItem(`lexisense_profile_${cleanUname}`) || 'null');
+            if (prof) {
+                prof.role = userObj.role;
+                prof.is_approved = userObj.is_approved;
+                prof.is_active = userObj.is_active;
+                prof.status = userObj.status;
+                if (userObj.school || userObj.school_branch) prof.school = userObj.school || userObj.school_branch;
+                localStorage.setItem(`lexisense_profile_${cleanUname}`, JSON.stringify(prof));
+            }
+        }
+    } catch (e) {
+        console.warn("Error updating local storage registries:", e);
+    }
+}
+window.syncUserToLocalStorage = syncUserToLocalStorage;
+
+async function updateUserRoleDirectly(userId, newRole) {
+    const userObj = window.superAdminData.users.find(u => 
+        String(u.id) === String(userId) || 
+        (u.username && String(u.username).toLowerCase() === String(userId).toLowerCase()) || 
+        (u.email && String(u.email).toLowerCase() === String(userId).toLowerCase())
+    );
+
+    if (!userObj) {
+        console.warn("[Super Admin] Target user not found for ID:", userId);
+        showToast("Ralat: Pengguna tidak dijumpai dalam senarai.", "warning");
+        return;
+    }
+
+    const oldRole = userObj.role;
+    const wasPending = userObj.status === 'pending' || userObj.is_approved === false;
+    userObj.role = newRole;
+    userObj.is_approved = true;
+    userObj.is_active = true;
+    userObj.status = 'active';
+
+    // 1. Sync live with Supabase cloud DB profiles table
+    await syncProfileToSupabase(userObj, {
+        role: newRole,
+        is_approved: true,
+        is_active: true,
+        status: 'active'
+    });
+
+    // 2. Sync local storage user registries
+    syncUserToLocalStorage(userObj);
+
+    addAuditLog('ROLE_MODIFIED', `Changed role for ${userObj.full_name} from ${oldRole} to ${newRole}`);
+    showToast(`Peranan ${userObj.full_name} ditukar ke ${newRole} & disegerakkan ke Supabase! ⚡`);
+
+    // Always dispatch role email notification
+    sendUserRoleChangeEmail(userObj, oldRole, newRole);
+
+    if ((newRole === 'admin' || newRole === 'teacher') && wasPending) {
+        sendEducatorApprovalEmail(userObj);
+    }
+
+    await syncAllSuperAdminData();
+}
+window.updateUserRoleDirectly = updateUserRoleDirectly;
 
 function filterUsersByPending() {
     switchSuperAdminView('users');
@@ -928,31 +1299,400 @@ function filterUsersByPending() {
 }
 window.filterUsersByPending = filterUsersByPending;
 
-async function approveUserAdmin(userId) {
+async function sendEducatorApprovalEmail(user) {
+    if (!user || !user.email) return;
+
+    const recipient = user.email;
+    const name = user.full_name || user.name || user.username || 'Pendidik';
+    const school = user.school || user.school_branch || 'Sekolah';
+    const username = user.username || user.email;
+    const portalUrl = `${window.location.origin || 'https://lexisense.ai'}/index.html`;
+
+    const emailHTML = `<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Akaun Pendidik LexiSense Anda Telah Disahkan</title>
+  <style>
+    body { margin: 0; padding: 0; background-color: #F8FAFC; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1E1B4B; }
+    .card-wrap { max-width: 600px; margin: 24px auto; background-color: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 28px; overflow: hidden; box-shadow: 0 20px 45px -12px rgba(99, 102, 241, 0.12); }
+    .header-box { background: linear-gradient(135deg, #4C1D95 0%, #6D28D9 50%, #4F46E5 100%); padding: 36px 28px 30px; text-align: center; color: #FFFFFF; }
+    .content-box { padding: 36px 32px 28px; text-align: left; }
+    .badge-pill { display: inline-block; font-size: 11px; font-weight: 800; color: #065F46; background-color: #D1FAE5; border: 1px solid #A7F3D0; padding: 6px 16px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+    .detail-box { background: linear-gradient(180deg, #FAF5FF 0%, #F5EEFD 100%); border: 1.5px solid #E9D5FF; border-radius: 20px; padding: 22px; margin: 20px 0; }
+    .btn-login { display: inline-block; background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%); color: #FFFFFF !important; font-size: 14px; font-weight: 800; text-decoration: none; padding: 14px 32px; border-radius: 16px; box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3); }
+  </style>
+</head>
+<body style="background-color: #F8FAFC; margin: 0; padding: 20px;">
+  <div class="card-wrap">
+    <div class="header-box">
+      <div style="font-size: 44px; margin-bottom: 8px;">🦉</div>
+      <h1 style="margin: 0; font-size: 28px; font-weight: 800; color: #FFFFFF;">LexiSense</h1>
+      <div style="display: inline-block; margin-top: 8px; font-size: 11px; font-weight: 800; color: #EDE9FE; background-color: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); padding: 4px 14px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 1.2px;">
+        AI Literacy & Dyslexia Screening System
+      </div>
+    </div>
+    
+    <div class="content-box">
+      <div style="text-align: center;">
+        <span class="badge-pill">✅ Permohonan Disahkan Super Admin</span>
+      </div>
+
+      <h2 style="margin: 0 0 12px; font-size: 22px; font-weight: 800; color: #1E1B4B; line-height: 1.3;">
+        Tahniah, Akaun Pendidik Anda Telah Diluluskan! 🎉
+      </h2>
+
+      <p style="margin: 0 0 16px; font-size: 14.5px; line-height: 1.6; color: #475569; font-weight: 500;">
+        Hai <strong>${name}</strong>,
+      </p>
+
+      <p style="margin: 0 0 20px; font-size: 14.5px; line-height: 1.6; color: #475569; font-weight: 500;">
+        Berita gembira! Permohonan akaun Pendidik / Guru Sekolah anda bagi <strong>${school}</strong> telah disahkan dan diluluskan secara rasmi oleh Super Admin LexiSense.
+      </p>
+
+      <div class="detail-box">
+        <h3 style="margin: 0 0 12px; font-size: 14px; font-weight: 800; color: #4C1D95; letter-spacing: 0.5px;">
+          📋 BUTIRAN AKAUN PENDIDIK DISAHKAN:
+        </h3>
+        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="font-size: 13.5px; color: #334155; line-height: 1.8;">
+          <tr>
+            <td style="font-weight: 700; width: 140px; color: #6B21A8;">Nama Penuh:</td>
+            <td style="font-weight: 800; color: #1E1B4B;">${name}</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 700; color: #6B21A8;">E-mel Berdaftar:</td>
+            <td style="font-weight: 800; color: #1E1B4B;">${recipient}</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 700; color: #6B21A8;">Nama Pengguna:</td>
+            <td style="font-weight: 800; color: #1E1B4B;">${username}</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 700; color: #6B21A8;">Sekolah / Cawangan:</td>
+            <td style="font-weight: 800; color: #1E1B4B;">${school}</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 700; color: #6B21A8;">Peranan Portal:</td>
+            <td style="font-weight: 800; color: #059669;">Educator / School Administrator</td>
+          </tr>
+        </table>
+      </div>
+
+      <p style="margin: 0 0 24px; font-size: 14px; line-height: 1.6; color: #475569; font-weight: 500;">
+        Anda kini boleh log masuk ke Portal Pendidik untuk menguruskan senarai murid, menjalankan saringan dyslexia 3-Pillar, serta melihat laporan komprehensif.
+      </p>
+
+      <div style="text-align: center; margin: 28px 0 16px;">
+        <a href="${portalUrl}" class="btn-login">🔑 Log Masuk Ke Portal Pendidik Sekarang →</a>
+      </div>
+
+      <p style="margin: 20px 0 0; font-size: 12px; text-align: center; color: #94A3B8; font-weight: 600;">
+        Jika anda tidak membuat permohonan ini, sila abaikan e-mel ini atau hubungi sokongan LexiSense.
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    try {
+        const res = await fetch('/api/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                to: recipient,
+                from: 'LexiSense Support <noreply@lexisense.my>',
+                subject: `LexiSense — Akaun Pendidik Anda Telah Disahkan! 🦉✨`,
+                html: emailHTML
+            })
+        });
+        if (res.ok) {
+            console.log("Educator approval email sent via Resend API to", recipient);
+        } else {
+            const errData = await res.json().catch(() => ({}));
+            console.warn("Resend API notice:", res.status, errData);
+        }
+    } catch (e) {
+        console.warn("Notice dispatching approval email, trying fallback FormSubmit:", e);
+        try {
+            await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(recipient)}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify({
+                    _subject: `LexiSense — Akaun Pendidik Anda Telah Disahkan! 🦉✨`,
+                    Status: 'Educator Account Approved by Super Admin',
+                    Educator_Name: name,
+                    School_Branch: school,
+                    Registered_Email: recipient,
+                    Message: `Akaun Pendidik anda bagi ${school} telah disahkan. Anda kini boleh log masuk.`
+                })
+            });
+        } catch(fallbackErr) {}
+    }
+}
+window.sendEducatorApprovalEmail = sendEducatorApprovalEmail;
+
+async function sendUserRoleChangeEmail(user, oldRole, newRole) {
+    if (!user) return;
+
+    let recipient = user.email;
+    if (!recipient || recipient.includes('@lexisense.ai')) {
+        try {
+            const localUsers = JSON.parse(localStorage.getItem('lexisense_users') || '{}');
+            for (const k in localUsers) {
+                const u = localUsers[k];
+                if (u && (u.id === user.id || u.username === user.username) && u.email && !u.email.includes('@lexisense.ai')) {
+                    recipient = u.email;
+                    break;
+                }
+            }
+        } catch(e) {}
+    }
+
+    if (!recipient || recipient.includes('@lexisense.ai')) {
+        try {
+            const loggedIn = JSON.parse(localStorage.getItem('lexisense_user') || '{}');
+            if (loggedIn && loggedIn.email && !loggedIn.email.includes('@lexisense.ai')) {
+                recipient = loggedIn.email;
+            }
+        } catch(e) {}
+    }
+
+    if (!recipient || recipient.includes('@lexisense.ai')) {
+        console.warn("[Resend API] Skipping role email: No valid recipient email address found for user", user);
+        showToast("Amaran: E-mel penerima tidak dijumpai untuk pengguna ini.", "warning");
+        return;
+    }
+
+    const name = user.full_name || user.username || 'Pengguna LexiSense';
+
+    const roleMap = {
+        'parent': 'Ibu Bapa (Parent)',
+        'admin': 'Pendidik / Pentadbir (Educator / Admin)',
+        'super_admin': 'Super Admin',
+        'teacher': 'Guru / Pendidik'
+    };
+
+    const oldRoleLabel = roleMap[oldRole] || oldRole;
+    const newRoleLabel = roleMap[newRole] || newRole;
+
+    const emailHTML = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family: Arial, sans-serif; background-color: #f8fafc; padding: 20px;">
+  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; padding: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+    <div style="text-align: center; margin-bottom: 24px;">
+      <h1 style="color: #4c1d95; margin: 0; font-size: 24px;">🦉 LexiSense</h1>
+      <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Sistem Saringan & Sokongan Pembacaan Disleksia</p>
+    </div>
+    
+    <div style="background-color: #f3e8ff; border-left: 4px solid #7e22ce; padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+      <h2 style="color: #581c87; margin: 0 0 8px 0; font-size: 18px;">Kemaskini Peranan Akaun Anda ✨</h2>
+      <p style="color: #6b21a8; margin: 0; font-size: 14px;">Salam ${escapeHTML(name)}, peranan akaun anda di portal LexiSense telah dikemaskini oleh Pentadbir Sistem.</p>
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+      <tr>
+        <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #64748b; font-weight: bold;">E-mel Berdaftar:</td>
+        <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #0f172a; font-weight: bold;">${escapeHTML(recipient)}</td>
+      </tr>
+      <tr>
+        <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #64748b; font-weight: bold;">Peranan Asal:</td>
+        <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #ef4444; font-weight: bold;">${escapeHTML(oldRoleLabel)}</td>
+      </tr>
+      <tr>
+        <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #64748b; font-weight: bold;">Peranan Baharu:</td>
+        <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #15803d; font-weight: bold;">${escapeHTML(newRoleLabel)}</td>
+      </tr>
+    </table>
+
+    <div style="text-align: center; margin-top: 30px;">
+      <a href="https://lexisense.my" style="background-color: #7e22ce; color: #ffffff; padding: 12px 28px; border-radius: 12px; text-decoration: none; font-weight: bold; display: inline-block;">Log Masuk Ke Portal LexiSense</a>
+    </div>
+
+    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0 20px 0;" />
+    <p style="font-size: 12px; text-align: center; color: #94a3b8;">
+      Ini adalah e-mel automatik daripada sistem LexiSense (<a href="https://lexisense.my" style="color: #7e22ce;">lexisense.my</a>). Sila hubungi pentadbir jika anda memerlukan bantuan.
+    </p>
+  </div>
+</body>
+</html>`;
+
+    try {
+        const res = await fetch('/api/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                to: recipient,
+                from: 'LexiSense Support <noreply@lexisense.my>',
+                subject: `LexiSense — Peranan Akaun Anda Telah Dikemaskini (-> ${newRoleLabel}) 🦉`,
+                html: emailHTML
+            })
+        });
+        if (res.ok) {
+            console.log(`[Resend API Success] Role change email sent to ${recipient} (${oldRole} -> ${newRole})`);
+            showToast(`Emel notifikasi peranan berjaya dihantar ke: ${recipient} ✉️`);
+        } else {
+            const errData = await res.json().catch(() => ({}));
+            console.warn("Resend API role change email error:", res.status, errData);
+            showToast(`Ralat Resend (${res.status}): ${errData.error || errData.message || 'Gagal hantar emel'}`, 'warning');
+        }
+    } catch (e) {
+        console.warn("Notice dispatching role change email:", e);
+    }
+}
+window.sendUserRoleChangeEmail = sendUserRoleChangeEmail;
+
+/**
+ * Interactive Modal for Approving Educator Accounts & Assigning School Branch
+ */
+function openApproveEducatorModal(userId) {
     const user = window.superAdminData.users.find(u => u.id === userId);
     if (!user) return;
 
-    user.status = 'active';
-    user.is_active = true;
-    user.role = 'admin';
-
-    const client = typeof getSupabase === 'function' ? getSupabase() : null;
-    if (client && isValidUUID(userId)) {
-        try {
-            await client.from('profiles').update({
-                is_active: true,
-                role: 'admin',
-                updated_at: new Date().toISOString()
-            }).eq('id', userId);
-        } catch (err) {
-            console.warn("Notice updating profile approval in Supabase:", err);
-        }
+    let modal = document.getElementById('sa-approve-educator-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'sa-approve-educator-modal';
+        modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-md animate-fade-in';
+        document.body.appendChild(modal);
     }
 
-    addAuditLog('USER_ACCOUNT_APPROVED', `Approved administrator credentials for ${user.full_name} (${user.email})`);
-    showToast(`Approved ${user.full_name} as School Administrator! 🛡️`);
-    
+    const schoolsList = window.superAdminData.schools || [];
+    const requestedSchool = user.school || user.school_branch || 'SK Taman Ria';
+
+    let schoolOptionsHtml = schoolsList.map(sch => 
+        `<option value="${escapeHTML(sch.name)}" ${sch.name.toLowerCase() === requestedSchool.toLowerCase() ? 'selected' : ''}>🏫 ${escapeHTML(sch.name)} (${sch.code || 'MOE'})</option>`
+    ).join('');
+
+    if (!schoolsList.some(s => s.name.toLowerCase() === requestedSchool.toLowerCase())) {
+        schoolOptionsHtml += `<option value="${escapeHTML(requestedSchool)}" selected>🏫 ${escapeHTML(requestedSchool)} (Dimohon Pendidik)</option>`;
+    }
+    schoolOptionsHtml += `<option value="__custom__">➕ Taip / Tambah Sekolah Baru...</option>`;
+
+    modal.innerHTML = `
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 border-2 border-purple-200 shadow-2xl space-y-6 text-left relative overflow-hidden animate-pop">
+            <div class="flex items-center justify-between border-b border-purple-100 pb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center text-xl font-extrabold shadow-md">
+                        🏫
+                    </div>
+                    <div>
+                        <h3 class="font-heading font-extrabold text-lg text-slate-900">Sahkan Pendidik & Assign Sekolah</h3>
+                        <p class="text-xs text-slate-500 font-medium">Tetapkan cawangan sekolah dan peranan portal sebelum mengaktifkan akses.</p>
+                    </div>
+                </div>
+                <button onclick="closeApproveEducatorModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-xl cursor-pointer">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="bg-purple-50/80 rounded-2xl p-4 border border-purple-200 space-y-2 text-xs">
+                <div class="flex justify-between"><span class="font-bold text-slate-600">Nama Pendidik:</span><span class="font-bold text-purple-950">${escapeHTML(user.full_name || user.username)}</span></div>
+                <div class="flex justify-between"><span class="font-bold text-slate-600">E-mel Berdaftar:</span><span class="font-mono text-purple-800 font-bold">${escapeHTML(user.email)}</span></div>
+                <div class="flex justify-between"><span class="font-bold text-slate-600">Sekolah Dimohon:</span><span class="font-bold text-indigo-900">${escapeHTML(requestedSchool)}</span></div>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-800 mb-1.5">Pilih / Sahkan Cawangan Sekolah (Assign School) <span class="text-rose-500">*</span></label>
+                    <select id="approve-educator-school-select" onchange="toggleCustomSchoolInput(this.value)" class="w-full bg-slate-50 border border-purple-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-900 focus:bg-white focus:ring-2 focus:ring-purple-600 focus:outline-none transition-all cursor-pointer">
+                        ${schoolOptionsHtml}
+                    </select>
+                </div>
+
+                <div id="approve-custom-school-group" class="hidden">
+                    <label class="block text-xs font-extrabold text-slate-800 mb-1">Nama Sekolah Baru</label>
+                    <input type="text" id="approve-educator-school-custom" placeholder="Contoh: SK Seri Bintang Utama" class="w-full bg-slate-50 border border-purple-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-900 focus:bg-white focus:ring-2 focus:ring-purple-600 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-800 mb-1.5">Peranan Portal (Assigned Role)</label>
+                    <select id="approve-educator-role-select" class="w-full bg-slate-50 border border-purple-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-900 focus:bg-white focus:ring-2 focus:ring-purple-600 focus:outline-none transition-all cursor-pointer">
+                        <option value="admin" selected>👨‍🏫 Educator / School Administrator</option>
+                        <option value="super_admin">👑 Super Administrator</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="pt-2 flex items-center gap-3">
+                <button onclick="closeApproveEducatorModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all cursor-pointer">
+                    Batal
+                </button>
+                <button onclick="confirmApproveEducator('${user.id}')" class="flex-1 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-check"></i>
+                    <span>Sahkan & Hantar E-mel</span>
+                </button>
+            </div>
+        </div>
+    `;
+
+    modal.classList.remove('hidden');
+}
+
+function toggleCustomSchoolInput(val) {
+    const customGrp = document.getElementById('approve-custom-school-group');
+    if (customGrp) {
+        if (val === '__custom__') customGrp.classList.remove('hidden');
+        else customGrp.classList.add('hidden');
+    }
+}
+window.toggleCustomSchoolInput = toggleCustomSchoolInput;
+
+function closeApproveEducatorModal() {
+    const modal = document.getElementById('sa-approve-educator-modal');
+    if (modal) modal.classList.add('hidden');
+}
+window.closeApproveEducatorModal = closeApproveEducatorModal;
+window.openApproveEducatorModal = openApproveEducatorModal;
+
+async function confirmApproveEducator(userId) {
+    const user = window.superAdminData.users.find(u => u.id === userId);
+    if (!user) return;
+
+    const schoolSelect = document.getElementById('approve-educator-school-select');
+    const schoolCustom = document.getElementById('approve-educator-school-custom');
+    const roleSelect = document.getElementById('approve-educator-role-select');
+
+    let assignedSchool = schoolSelect ? schoolSelect.value : (user.school || 'SK Taman Ria');
+    if (assignedSchool === '__custom__' && schoolCustom && schoolCustom.value.trim()) {
+        assignedSchool = schoolCustom.value.trim();
+    }
+    const assignedRole = roleSelect ? roleSelect.value : 'admin';
+
+    user.school = assignedSchool;
+    user.school_branch = assignedSchool;
+    user.role = assignedRole;
+    user.is_approved = true;
+    user.is_active = true;
+    user.status = 'active';
+
+    // 1. Sync live with Supabase cloud DB profiles table
+    await syncProfileToSupabase(user, {
+        school_branch: assignedSchool,
+        role: assignedRole,
+        is_approved: true,
+        is_active: true,
+        status: 'active'
+    });
+
+    // 2. Sync local storage registries
+    syncUserToLocalStorage(user);
+
+    addAuditLog('USER_ACCOUNT_APPROVED', `Approved educator credentials for ${user.full_name} (${user.email}) and assigned to ${assignedSchool}`);
+    showToast(`Akaun ${user.full_name} disahkan & ditetapkan ke ${assignedSchool}! E-mel telah dihantar. 📧🎉`);
+
+    closeApproveEducatorModal();
+
+    // Dispatch approval email notification with assigned school
+    sendEducatorApprovalEmail(user, assignedSchool);
+
     await syncAllSuperAdminData();
+}
+window.confirmApproveEducator = confirmApproveEducator;
+
+async function approveUserAdmin(userId) {
+    openApproveEducatorModal(userId);
 }
 window.approveUserAdmin = approveUserAdmin;
 
@@ -1031,23 +1771,48 @@ window.closeUserProfileDrawer = closeUserProfileDrawer;
 async function saveDrawerUserRole() {
     const userId = window.superAdminData.activeDrawerUserId;
     const roleSelect = document.getElementById('drawer-role-select');
-    if (!userId || !roleSelect) return;
+    if (!userId || !roleSelect) {
+        showToast("Amaran: Sila pilih pengguna terlebih dahulu.", "warning");
+        return;
+    }
 
-    const userObj = window.superAdminData.users.find(u => u.id === userId);
+    const newRole = roleSelect.value;
+    const userObj = window.superAdminData.users.find(u => 
+        String(u.id) === String(userId) || 
+        (u.username && String(u.username).toLowerCase() === String(userId).toLowerCase()) || 
+        (u.email && String(u.email).toLowerCase() === String(userId).toLowerCase())
+    );
+
     if (userObj) {
         const oldRole = userObj.role;
-        userObj.role = roleSelect.value;
-        const client = typeof getSupabase === 'function' ? getSupabase() : null;
-        if (client && isValidUUID(userObj.id)) {
-            try {
-                await client.from('profiles').update({
-                    role: userObj.role,
-                    updated_at: new Date().toISOString()
-                }).eq('id', userObj.id);
-            } catch (e) {}
+        const wasPending = userObj.status === 'pending' || userObj.is_approved === false;
+        userObj.role = newRole;
+        userObj.is_approved = true;
+        userObj.is_active = true;
+        userObj.status = 'active';
+
+        // 1. Sync live with Supabase cloud DB profiles table
+        await syncProfileToSupabase(userObj, {
+            role: newRole,
+            is_approved: true,
+            is_active: true,
+            status: 'active'
+        });
+
+        // 2. Sync local storage registries
+        syncUserToLocalStorage(userObj);
+
+        addAuditLog('ROLE_MODIFIED', `Changed role for ${userObj.full_name} from ${oldRole} to ${newRole}`);
+        showToast(`Peranan ${userObj.full_name} ditukar ke ${newRole} & disegerakkan ke Supabase! ⚡`);
+
+        // Always dispatch role email notification
+        sendUserRoleChangeEmail(userObj, oldRole, newRole);
+
+        if ((newRole === 'admin' || newRole === 'teacher') && wasPending) {
+            sendEducatorApprovalEmail(userObj);
         }
-        addAuditLog('ROLE_MODIFIED', `Changed role for ${userObj.full_name} from ${oldRole} to ${userObj.role}`);
-        showToast(`User role updated to ${userObj.role} successfully! 🛡️`);
+    } else {
+        showToast("Ralat: Pengguna tidak dijumpai dalam memori.", "warning");
     }
 
     closeUserProfileDrawer();
@@ -1063,15 +1828,14 @@ async function handleDrawerStatusToggle() {
     userObj.is_active = !userObj.is_active;
     userObj.status = userObj.is_active ? 'active' : 'disabled';
 
-    const client = typeof getSupabase === 'function' ? getSupabase() : null;
-    if (client && isValidUUID(userObj.id)) {
-        try {
-            await client.from('profiles').update({
-                is_active: userObj.is_active,
-                updated_at: new Date().toISOString()
-            }).eq('id', userObj.id);
-        } catch (e) {}
-    }
+    // 1. Sync live with Supabase cloud DB profiles table
+    await syncProfileToSupabase(userObj, {
+        is_active: userObj.is_active,
+        status: userObj.status
+    });
+
+    // 2. Sync local storage registries
+    syncUserToLocalStorage(userObj);
 
     addAuditLog('ACCOUNT_STATUS_CHANGED', `${userObj.is_active ? 'Reactivated' : 'Suspended'} user ${userObj.full_name}`);
     showToast(`User account ${userObj.is_active ? 'reactivated' : 'suspended'}.`);
@@ -1719,9 +2483,10 @@ async function initializeSuperAdmin() {
     // Ensure document is visible
     document.documentElement.style.visibility = 'visible';
 
-    // Set user profile initials & names
-    const currentName = window.currentUserProfile?.full_name || 'Faiz';
-    const initials = currentName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'FZ';
+    // Set user profile initials & names dynamically from active session
+    const loggedInUser = window.loggedInUser || window.currentUserProfile || JSON.parse(localStorage.getItem('lexisense_user') || '{}');
+    const currentName = loggedInUser.full_name || loggedInUser.name || loggedInUser.username || (loggedInUser.email ? loggedInUser.email.split('@')[0] : 'Super Admin');
+    const initials = currentName.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'SA';
     
     const sidebarInitials = document.getElementById('sidebar-user-initials');
     const headerInitials = document.getElementById('header-user-initials');

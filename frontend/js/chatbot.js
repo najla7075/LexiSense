@@ -122,24 +122,26 @@ let chatHistory = [];
 
 function formatBotResponse(rawText) {
     if (!rawText) return '';
-    // If it's already HTML (contains tags), return as is
-    if (rawText.includes('<p>') || rawText.includes('<div>') || rawText.includes('<ul>') || rawText.includes('<strong>') || rawText.includes('<br>')) {
-        return rawText;
-    }
-    // Otherwise, convert markdown to styled HTML
-    return rawText
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-purple-950 font-bold">$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em class="text-purple-900">$1</em>')
-        .replace(/^### (.*$)/gim, '<h5 class="font-bold text-purple-900 mt-2 font-heading">$1</h5>')
-        .replace(/^## (.*$)/gim, '<h4 class="font-bold text-purple-900 mt-2 font-heading text-sm">$1</h4>')
-        .replace(/^# (.*$)/gim, '<h3 class="font-bold text-purple-900 mt-2 font-heading text-base">$1</h3>')
-        .replace(/^\s*[-*]\s+(.*)$/gim, '<div class="flex items-start gap-1.5 ml-2 my-0.5"><span class="text-amber-500">•</span><span>$1</span></div>')
-        .replace(/^\s*(\d+)\.\s+(.*)$/gim, '<div class="flex items-start gap-1.5 ml-2 my-0.5"><span class="font-bold text-purple-700">$1.</span><span>$2</span></div>')
-        .replace(/\n\n/g, '<br><br>')
-        .replace(/\n/g, '<br>');
+    
+    let text = rawText;
+    
+    // Parse Markdown headers
+    text = text.replace(/^### (.*$)/gim, '<h5 class="font-extrabold text-purple-950 mt-2.5 mb-1 font-heading text-xs tracking-tight">$1</h5>');
+    text = text.replace(/^## (.*$)/gim, '<h4 class="font-extrabold text-purple-950 mt-3 mb-1 font-heading text-sm">$1</h4>');
+    text = text.replace(/^# (.*$)/gim, '<h3 class="font-extrabold text-purple-950 mt-3.5 mb-1.5 font-heading text-base">$1</h3>');
+
+    // Parse bold and italics
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong class="text-purple-950 font-bold">$1</strong>');
+    text = text.replace(/\*(.*?)\*/g, '<em class="text-purple-900">$1</em>');
+
+    // Parse bullet lists and numbered lists
+    text = text.replace(/^\s*[-*•]\s+(.*)$/gim, '<div class="flex items-start gap-2 ml-1 my-1"><span class="text-purple-600 font-bold shrink-0">•</span><span>$1</span></div>');
+    text = text.replace(/^\s*(\d+)\.\s+(.*)$/gim, '<div class="flex items-start gap-2 ml-1 my-1"><span class="font-extrabold text-purple-700 shrink-0">$1.</span><span>$2</span></div>');
+
+    // Parse line breaks
+    text = text.replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>');
+
+    return text;
 }
 
 async function sendChatMessage() {

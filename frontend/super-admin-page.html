@@ -64,39 +64,63 @@
             background-color: #FAF8F5;
             color: #1E1B4B;
         }
+        body {
+            font-family: 'Plus Jakarta Sans', 'Nunito', sans-serif;
+            background-color: #FAF8F5;
+            color: #1E1B4B;
+        }
+        /* Ultra-Modern Dark Glass Sidebar Styles */
         .sidebar-link {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #94A3B8;
+            border: 1px solid transparent;
+        }
+        .sidebar-link:hover {
+            color: #F8FAFC;
+            background-color: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.08);
+            transform: translateX(4px);
+        }
+        .sidebar-link:hover i {
+            color: #A855F7 !important;
         }
         .sidebar-link.active {
-            background-color: #7C3AED;
-            color: #FFFFFF;
-            box-shadow: 0 4px 14px rgba(124, 58, 237, 0.25);
+            background: linear-gradient(135deg, #7C3AED 0%, #6366F1 100%) !important;
+            color: #FFFFFF !important;
+            border-color: rgba(192, 132, 252, 0.4) !important;
+            box-shadow: 0 6px 20px -2px rgba(124, 58, 237, 0.45), 0 0 15px rgba(99, 102, 241, 0.25) !important;
+            transform: translateX(0) !important;
+        }
+        .sidebar-link.active::before {
+            content: '';
+            position: absolute;
+            left: -12px;
+            top: 20%;
+            height: 60%;
+            width: 4px;
+            border-radius: 0 4px 4px 0;
+            background: #A855F7;
+            box-shadow: 0 0 10px #A855F7;
         }
         .sidebar-link.active i {
             color: #FFFFFF !important;
         }
-        .sidebar-link:not(.active):hover {
-            background-color: #F5F3FF;
-            color: #6D28D9;
-        }
-        .sidebar-link:not(.active):hover i {
-            color: #7C3AED;
-        }
         /* Custom scrollbar for drawers and modals */
         .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+            width: 5px;
+            height: 5px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
-            background: #F5F3FF;
+            background: rgba(255, 255, 255, 0.03);
             border-radius: 8px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #DDD6FE;
+            background: rgba(168, 85, 247, 0.25);
             border-radius: 8px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #C4B5FD;
+            background: rgba(168, 85, 247, 0.45);
         }
         /* Drawer transitions */
         .drawer-backdrop {
@@ -124,21 +148,29 @@
     <!-- ========================================================================= -->
     <div id="mobile-sidebar-backdrop" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 lg:hidden hidden transition-opacity"></div>
     
-    <aside id="sidebar-wrapper" class="fixed top-0 left-0 bottom-0 w-64 bg-white border-r border-purple-100/90 z-50 flex flex-col justify-between transition-transform duration-300 lg:translate-x-0 -translate-x-full no-print">
+    <!-- ========================================================================= -->
+    <!-- 1. LEFT SIDEBAR NAVIGATION (Ultra-Modern 2026 Dark Glass Theme) -->
+    <!-- ========================================================================= -->
+    <div id="mobile-sidebar-backdrop" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-40 lg:hidden hidden transition-opacity"></div>
+    
+    <aside id="sidebar-wrapper" class="fixed top-0 left-0 bottom-0 w-64 bg-gradient-to-b from-[#130E26] via-[#0F0C1B] to-[#0A0814] border-r border-purple-900/30 z-50 flex flex-col justify-between transition-transform duration-300 lg:translate-x-0 -translate-x-full no-print shadow-[10px_0_30px_rgba(0,0,0,0.3)]">
         
-        <!-- Top: Brand Header -->
+        <!-- Top: Brand Header & Nav -->
         <div>
-            <div class="p-5 border-b border-purple-100 flex items-center justify-between">
-                <div class="flex items-center gap-3 cursor-pointer" onclick="switchSuperAdminView('overview')">
-                    <img src="assets/lexisense-logo.png" alt="LexiSense Logo" class="h-10 w-10 object-contain drop-shadow-xs">
+            <!-- Sleek Header -->
+            <div class="p-4 border-b border-purple-900/30 bg-white/5 backdrop-blur-md flex items-center justify-between">
+                <div class="flex items-center gap-3 cursor-pointer group" onclick="switchSuperAdminView('overview')">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border border-purple-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.25)] group-hover:scale-105 transition-transform">
+                        <img src="assets/lexisense-logo.png" alt="LexiSense Logo" class="h-6 w-6 object-contain">
+                    </div>
                     <div>
                         <div class="flex items-center gap-1.5">
-                            <span class="font-brand text-2xl font-extrabold text-brand-purple-deep tracking-tight leading-none">LexiSense</span>
+                            <span class="font-brand text-2xl font-extrabold bg-gradient-to-r from-white via-purple-100 to-indigo-200 bg-clip-text text-transparent tracking-tight leading-none">LexiSense</span>
                         </div>
-                        <span class="text-[11px] font-bold text-purple-700 tracking-wide uppercase">Super Admin</span>
+                        <span class="text-[9px] font-black text-purple-300 bg-purple-500/20 border border-purple-400/30 px-2 py-0.5 rounded-full tracking-widest uppercase inline-block mt-0.5">Super Admin</span>
                     </div>
                 </div>
-                <button onclick="toggleMobileSidebar()" class="lg:hidden p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+                <button onclick="toggleMobileSidebar()" class="lg:hidden p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
@@ -148,50 +180,59 @@
                 
                 <!-- Group 1: MAIN -->
                 <div class="space-y-1">
-                    <p class="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Main</p>
-                    <button onclick="switchSuperAdminView('overview')" id="sa-nav-overview" class="sidebar-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs text-slate-700 active">
+                    <div class="flex items-center justify-between px-3 mb-2">
+                        <span class="text-[10px] font-black text-purple-400/70 uppercase tracking-widest">Main</span>
+                        <div class="h-[1px] flex-1 bg-gradient-to-r from-purple-500/30 to-transparent ml-2"></div>
+                    </div>
+                    <button onclick="switchSuperAdminView('overview')" id="sa-nav-overview" class="sidebar-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs active">
                         <i class="fa-solid fa-house w-4 text-center text-sm"></i>
                         <span>Dashboard</span>
                     </button>
-                    <button onclick="switchSuperAdminView('users')" id="sa-nav-users" class="sidebar-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs text-slate-700">
-                        <i class="fa-solid fa-users w-4 text-center text-sm text-slate-500"></i>
+                    <button onclick="switchSuperAdminView('users')" id="sa-nav-users" class="sidebar-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs">
+                        <i class="fa-solid fa-users w-4 text-center text-sm text-slate-400"></i>
                         <span>Users & Roles</span>
                     </button>
-                    <button onclick="switchSuperAdminView('screenings')" id="sa-nav-screenings" class="sidebar-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs text-slate-700">
-                        <i class="fa-solid fa-brain w-4 text-center text-sm text-slate-500"></i>
+                    <button onclick="switchSuperAdminView('screenings')" id="sa-nav-screenings" class="sidebar-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs">
+                        <i class="fa-solid fa-brain w-4 text-center text-sm text-slate-400"></i>
                         <span>Screenings</span>
                     </button>
-                    <button onclick="switchSuperAdminView('schools')" id="sa-nav-schools" class="sidebar-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs text-slate-700">
-                        <i class="fa-solid fa-school w-4 text-center text-sm text-slate-500"></i>
+                    <button onclick="switchSuperAdminView('schools')" id="sa-nav-schools" class="sidebar-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs">
+                        <i class="fa-solid fa-school w-4 text-center text-sm text-slate-400"></i>
                         <span>Schools</span>
                     </button>
                 </div>
 
                 <!-- Group 2: INSIGHTS -->
                 <div class="space-y-1">
-                    <p class="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Insights</p>
-                    <button onclick="switchSuperAdminView('analytics')" id="sa-nav-analytics" class="sidebar-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs text-slate-700">
-                        <i class="fa-solid fa-chart-pie w-4 text-center text-sm text-slate-500"></i>
+                    <div class="flex items-center justify-between px-3 mb-2">
+                        <span class="text-[10px] font-black text-purple-400/70 uppercase tracking-widest">Insights</span>
+                        <div class="h-[1px] flex-1 bg-gradient-to-r from-purple-500/30 to-transparent ml-2"></div>
+                    </div>
+                    <button onclick="switchSuperAdminView('analytics')" id="sa-nav-analytics" class="sidebar-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs">
+                        <i class="fa-solid fa-chart-pie w-4 text-center text-sm text-slate-400"></i>
                         <span>Analytics</span>
                     </button>
-                    <button onclick="switchSuperAdminView('alerts')" id="sa-nav-alerts" class="sidebar-link w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-bold text-xs text-slate-700">
+                    <button onclick="switchSuperAdminView('alerts')" id="sa-nav-alerts" class="sidebar-link w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-bold text-xs">
                         <div class="flex items-center gap-3">
-                            <i class="fa-solid fa-bell w-4 text-center text-sm text-slate-500"></i>
+                            <i class="fa-solid fa-bell w-4 text-center text-sm text-slate-400"></i>
                             <span>Alerts</span>
                         </div>
-                        <span id="sidebar-alert-badge" class="px-1.5 py-0.5 bg-rose-500 text-white rounded-full text-[10px] font-black leading-none">0</span>
+                        <span id="sidebar-alert-badge" class="px-2 py-0.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-full text-[10px] font-black leading-none shadow-[0_0_10px_rgba(244,63,94,0.4)]">0</span>
                     </button>
                 </div>
 
                 <!-- Group 3: SYSTEM -->
                 <div class="space-y-1">
-                    <p class="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">System</p>
-                    <button onclick="switchSuperAdminView('security')" id="sa-nav-security" class="sidebar-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs text-slate-700">
-                        <i class="fa-solid fa-shield-halved w-4 text-center text-sm text-slate-500"></i>
+                    <div class="flex items-center justify-between px-3 mb-2">
+                        <span class="text-[10px] font-black text-purple-400/70 uppercase tracking-widest">System</span>
+                        <div class="h-[1px] flex-1 bg-gradient-to-r from-purple-500/30 to-transparent ml-2"></div>
+                    </div>
+                    <button onclick="switchSuperAdminView('security')" id="sa-nav-security" class="sidebar-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs">
+                        <i class="fa-solid fa-shield-halved w-4 text-center text-sm text-slate-400"></i>
                         <span>Security</span>
                     </button>
-                    <button onclick="switchSuperAdminView('settings')" id="sa-nav-settings" class="sidebar-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs text-slate-700">
-                        <i class="fa-solid fa-sliders w-4 text-center text-sm text-slate-500"></i>
+                    <button onclick="switchSuperAdminView('settings')" id="sa-nav-settings" class="sidebar-link w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs">
+                        <i class="fa-solid fa-sliders w-4 text-center text-sm text-slate-400"></i>
                         <span>Settings</span>
                     </button>
                 </div>
@@ -199,25 +240,25 @@
         </div>
 
         <!-- Bottom Sidebar: System Status & User Profile -->
-        <div class="p-3.5 border-t border-purple-100 bg-purple-50/40 space-y-3">
+        <div class="p-3.5 border-t border-purple-900/30 bg-white/5 backdrop-blur-md space-y-3">
             <!-- System Health Status -->
-            <div class="flex items-center gap-2 px-3 py-1.5 bg-white rounded-xl border border-purple-100 text-[11px] font-bold text-emerald-800 shadow-2xs">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <div class="flex items-center gap-2.5 px-3 py-2 bg-emerald-950/40 border border-emerald-500/30 rounded-xl text-[11px] font-bold text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]"></span>
                 <span>All Systems Operational</span>
             </div>
 
             <!-- Profile Info Bar -->
-            <div class="flex items-center justify-between p-2 rounded-xl bg-white border border-purple-100 shadow-2xs">
+            <div class="flex items-center justify-between p-2 rounded-2xl bg-white/5 border border-white/10 hover:border-purple-500/30 transition-all">
                 <div class="flex items-center gap-2.5 overflow-hidden">
-                    <div class="w-8 h-8 rounded-lg bg-amber-400 text-purple-950 flex items-center justify-center font-extrabold text-xs shrink-0 shadow-2xs border border-amber-300">
-                        <span id="sidebar-user-initials">FZ</span>
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-amber-500 text-purple-950 flex items-center justify-center font-black text-xs shrink-0 shadow-[0_0_12px_rgba(251,191,36,0.3)] border border-amber-300/60">
+                        <span id="sidebar-user-initials">SA</span>
                     </div>
                     <div class="truncate text-left">
-                        <span class="text-xs font-bold text-slate-900 block truncate" id="sidebar-user-name">Faiz</span>
-                        <span class="text-[10px] text-purple-700 font-semibold block truncate">Super Administrator</span>
+                        <span class="text-xs font-bold text-white block truncate" id="sidebar-user-name">Admin</span>
+                        <span class="text-[10px] text-purple-300 font-semibold block truncate">Super Administrator</span>
                     </div>
                 </div>
-                <button onclick="logout()" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Sign Out">
+                <button onclick="logout()" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/20 rounded-xl transition-all" title="Sign Out">
                     <i class="fa-solid fa-right-from-bracket text-xs"></i>
                 </button>
             </div>
@@ -314,10 +355,10 @@
             <!-- ========================================================================= -->
             <!-- VIEW 1: DASHBOARD (OVERVIEW) -->
             <!-- ========================================================================= -->
-            <div id="sa-view-overview" class="superadmin-view-panel space-y-6">
+            <div id="sa-view-overview" class="superadmin-view-panel space-y-6 flex flex-col w-full">
                 
                 <!-- Personal Welcome Header + Quick Actions -->
-                <div class="bg-white rounded-3xl p-6 border border-purple-100/90 shadow-subtle flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="w-full bg-white rounded-3xl p-6 border border-purple-100/90 shadow-subtle flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div class="space-y-1">
                         <div class="flex items-center gap-2">
                             <h2 class="font-heading text-2xl sm:text-3xl font-extrabold text-slate-900" id="welcome-greeting">
@@ -331,23 +372,26 @@
 
                     <!-- 3 Compact Quick Actions -->
                     <div class="flex flex-wrap items-center gap-2">
-                        <button onclick="openAddAdminModal()" class="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5">
+                        <button onclick="openAddAdminModal()" class="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer">
                             <i class="fa-solid fa-user-plus"></i>
                             <span>+ Add Admin</span>
                         </button>
-                        <button onclick="openAddSchoolModal()" class="px-3.5 py-2 bg-purple-50 hover:bg-purple-100 text-purple-900 font-bold text-xs rounded-xl border border-purple-200 transition-all flex items-center gap-1.5">
+                        <button onclick="openAddSchoolModal()" class="px-3.5 py-2 bg-purple-50 hover:bg-purple-100 text-purple-900 font-bold text-xs rounded-xl border border-purple-200 transition-all flex items-center gap-1.5 cursor-pointer">
                             <i class="fa-solid fa-school-flag"></i>
                             <span>+ Register School</span>
                         </button>
-                        <button onclick="switchSuperAdminView('alerts')" class="px-3.5 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 transition-all flex items-center gap-1.5">
+                        <button onclick="switchSuperAdminView('alerts')" class="px-3.5 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 transition-all flex items-center gap-1.5 cursor-pointer">
                             <i class="fa-solid fa-bell text-amber-500"></i>
                             <span>View Alerts</span>
                         </button>
                     </div>
                 </div>
 
+                <!-- Educator Registration Pending Alert Banner Placeholder -->
+                <div id="sa-pending-educator-alert-banner" class="w-full hidden"></div>
+
                 <!-- 4 Top Executive KPI Stat Cards (Live Synchronized) -->
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <!-- Stat 1: Users -->
                     <div onclick="switchSuperAdminView('users')" class="bg-white p-5 rounded-3xl border border-purple-100/90 shadow-subtle hover:shadow-card cursor-pointer transition-all space-y-2">
                         <div class="flex items-center justify-between text-slate-500 text-xs font-bold uppercase tracking-wider">
@@ -390,16 +434,16 @@
                 </div>
 
                 <!-- NEEDS YOUR ATTENTION SECTION (Live Synchronized) -->
-                <div class="bg-white rounded-3xl p-6 border border-purple-100/90 shadow-subtle space-y-4">
+                <div class="w-full bg-white rounded-3xl p-6 border border-purple-100/90 shadow-subtle space-y-4">
                     <div class="flex items-center justify-between border-b border-purple-50 pb-3">
                         <div class="flex items-center gap-2">
                             <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
                             <h3 class="font-heading font-extrabold text-base text-slate-900">Needs Your Attention</h3>
                         </div>
-                        <button onclick="switchSuperAdminView('alerts')" class="text-xs font-bold text-purple-700 hover:text-purple-900">View all &rarr;</button>
+                        <button onclick="switchSuperAdminView('alerts')" class="text-xs font-bold text-purple-700 hover:text-purple-900 cursor-pointer">View all &rarr;</button>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                    <div class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
                         <!-- Action Item 1: High-Risk Screenings -->
                         <div onclick="filterScreeningsByTier('tier3')" class="p-4 rounded-2xl bg-rose-50/60 hover:bg-rose-50 border border-rose-100 cursor-pointer transition-all space-y-1">
                             <div class="flex items-center gap-2">
@@ -439,7 +483,7 @@
                 </div>
 
                 <!-- Middle Section: Screening Overview (Risk Chart) & Recent Activity -->
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
                     
                     <!-- Left: Screening Overview & Risk Stratification -->
                     <div class="lg:col-span-7 bg-white rounded-3xl p-6 border border-purple-100/90 shadow-subtle space-y-5">

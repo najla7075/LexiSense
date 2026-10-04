@@ -1583,7 +1583,7 @@ async function renderChildReportContent(childNameOrId, selectedHistoryIdx = 0) {
     const p1Score = selectedRecord.pillar1_score || Math.min(100, Math.round(score * 1.05));
     const p2Score = selectedRecord.pillar2_score || Math.min(100, Math.round(score * 0.95));
     const p3Score = selectedRecord.pillar3_score || Math.min(100, Math.round(score * 0.90));
-    const readingWCPM = selectedRecord.reading_wpm || (score >= 70 ? 32 : (score >= 36 ? 54 : 88));
+    const readingWCPM = selectedRecord.reading_wpm || Math.max(18, Math.round(85 * (1 - (score / 140))));
     const hesitationMs = selectedRecord.hesitation_ms || (score >= 70 ? 450 : 280);
 
     // Save active report data globally for dynamic filter & AI generation
@@ -1882,8 +1882,8 @@ async function renderComparisonJourney(childNameOrId, idxA = 0, idxB = 1) {
     const prevScore = parseInt(previous.match_score || previous.score || 0, 10);
     const scoreDiff = latestScore - prevScore;
 
-    const latestWPM = latest.reading_wpm || (latestScore >= 70 ? 32 : (latestScore >= 36 ? 54 : 88));
-    const prevWPM = previous.reading_wpm || (prevScore >= 70 ? 28 : (prevScore >= 36 ? 44 : 76));
+    const latestWPM = latest.reading_wpm || Math.max(18, Math.round(85 * (1 - (latestScore / 140))));
+    const prevWPM = previous.reading_wpm || Math.max(18, Math.round(85 * (1 - (prevScore / 140))));
     const wpmDiff = latestWPM - prevWPM;
 
     const displayChildName = latest.child_name || (latest.child ? latest.child.replace(/^[^\w]+/, '').trim() : targetName) || 'Child';
@@ -2036,7 +2036,7 @@ async function updateReportWithMultimodalResult(payload, skipSupabaseSync = fals
 
     const matchScoreVal = parseInt(payload.matchScore || payload.score || 0, 10);
     const riskLevelVal = payload.riskLevel || payload.outcome || (matchScoreVal >= 65 ? 'Elevated Indicators Observed' : (matchScoreVal >= 35 ? 'Some Indicators Observed' : 'Few Indicators Observed'));
-    const readingWPMVal = Math.round(payload.temporalMetrics?.calculatedWCPM || payload.temporalMetrics?.calculatedWPM || payload.reading_wpm || (matchScoreVal >= 65 ? 32 : (matchScoreVal >= 35 ? 54 : 96)));
+    const readingWPMVal = Math.round(payload.temporalMetrics?.calculatedWCPM || payload.temporalMetrics?.calculatedWPM || payload.reading_wpm || Math.max(18, 85 * (1 - (matchScoreVal / 140))));
     const hesitationMsVal = Math.round(payload.temporalMetrics?.avgHesitationMs || payload.hesitation_ms || (matchScoreVal >= 65 ? 460 : (matchScoreVal >= 35 ? 290 : 180)));
     const fixationsVal = payload.temporalMetrics?.wordsAttempted || payload.subScores?.fixationCount || (matchScoreVal >= 65 ? 38 : (matchScoreVal >= 35 ? 24 : 16));
     const regressionsVal = payload.temporalMetrics?.regressionsCount ?? payload.subScores?.regressions ?? (matchScoreVal >= 65 ? 6 : (matchScoreVal >= 35 ? 3 : 1));
@@ -2232,7 +2232,7 @@ async function playGazeReadingReplay(targetChildName) {
     const riskLevel = (activeRecord && (activeRecord.risk_level || activeRecord.outcome)) || (score >= 65 ? 'Elevated Indicators' : (score >= 35 ? 'Some Indicators' : 'Few Indicators'));
 
     // Synchronize metric stats with child's real screening data
-    const readingWPM = activeRecord?.reading_wpm || (score >= 65 ? 32 : (score >= 35 ? 54 : 96));
+    const readingWPM = activeRecord?.reading_wpm || Math.max(18, Math.round(85 * (1 - (score / 140))));
     const hesitationMs = activeRecord?.hesitation_ms || (score >= 65 ? 460 : (score >= 35 ? 290 : 180));
     const fixationsCount = activeRecord?.sub_scores?.fixationCount || activeRecord?.sub_scores?.fixations || (score >= 65 ? 38 : (score >= 35 ? 24 : 16));
     const regressionsCount = activeRecord?.sub_scores?.regressions ?? activeRecord?.sub_scores?.regressionsCount ?? (score >= 65 ? 6 : (score >= 35 ? 3 : 1));
@@ -2537,7 +2537,7 @@ async function openEmailReportModal(targetChildName) {
     const school = matchedChild?.school || 'Primary School';
     const score = parseInt(latestRecord?.match_score || latestRecord?.score || 45, 10);
     const riskLevel = latestRecord?.risk_level || latestRecord?.outcome || (score >= 65 ? 'Elevated Indicators Observed' : (score >= 35 ? 'Some Indicators Observed' : 'Few Indicators Observed'));
-    const readingWPM = latestRecord?.reading_wpm || (score >= 65 ? 32 : (score >= 35 ? 54 : 96));
+    const readingWPM = latestRecord?.reading_wpm || Math.max(18, Math.round(85 * (1 - (score / 140))));
     const hesitationMs = latestRecord?.hesitation_ms || (score >= 65 ? 460 : (score >= 35 ? 290 : 180));
     const fixations = latestRecord?.sub_scores?.fixationCount || (score >= 65 ? 38 : (score >= 35 ? 24 : 16));
     const regressions = latestRecord?.sub_scores?.regressions ?? (score >= 65 ? 6 : (score >= 35 ? 3 : 1));
@@ -2954,33 +2954,29 @@ async function dispatchEmailReport() {
         includeGazeLink: document.getElementById('email-opt-gaze-link')?.checked ?? true
     });
 
-    let realSent = false;
-    let senderUsed = 'noreply@mykasih.com.my';
-
     try {
-        // 1. Try local/production backend SMTP server endpoint first
-        const backendRes = await fetch('/api/send-email-report', {
+        // 1. Send via Vercel Serverless Function (/api/send-email)
+        const resendRes = await fetch('/api/send-email', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 to: recipient,
+                from: 'LexiSense Screening <noreply@lexisense.my>',
                 subject: subject,
-                childName: childName,
-                html: emailHTML,
-                text: `LexiSense Dyslexia Screening Report for ${childName}. Score: ${score}%, Classification: ${riskLevel}.`
+                html: emailHTML
             })
         });
 
-        if (backendRes.ok) {
-            const data = await backendRes.json();
-            if (data.success) {
-                realSent = true;
-                if (data.sender) senderUsed = data.sender;
-                console.log("LexiSense backend email dispatched:", data);
-            }
+        if (resendRes.ok) {
+            realSent = true;
+            senderUsed = 'noreply@lexisense.my';
+            console.log("LexiSense report email dispatched via Vercel serverless to", recipient);
+        } else {
+            const data = await resendRes.json().catch(() => ({}));
+            console.warn("Resend API notice:", resendRes.status, data);
         }
     } catch (backendErr) {
-        console.warn("Backend mail server not reachable, attempting fallback:", backendErr);
+        console.warn("Resend API dispatch notice:", backendErr);
     }
 
     if (!realSent) {

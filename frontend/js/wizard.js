@@ -15,45 +15,45 @@
 
 // 30 Standardized Pre-Screening Items
 const DYSLEXIA_QUESTIONNAIRE = [
-    // Section A: Phonological Processing & Language Mechanics (Q1–Q7)
-    { id: 1, section: 'A', title: 'Section A: Phonological & Language', text: 'Has difficulty identifying or creating rhyming words (e.g., cat / bat / hat).' },
-    { id: 2, section: 'A', title: 'Section A: Phonological & Language', text: 'Struggles to segment spoken words into individual phoneme sounds (e.g., "cat" → /k/ /æ/ /t/).' },
-    { id: 3, section: 'A', title: 'Section A: Phonological & Language', text: 'Has difficulty blending separate letter sounds together to form a whole word.' },
-    { id: 4, section: 'A', title: 'Section A: Phonological & Language', text: 'Often confuses or substitutes similar-sounding words in everyday conversation.' },
-    { id: 5, section: 'A', title: 'Section A: Phonological & Language', text: 'Experienced delayed early speech development compared to peers.' },
-    { id: 6, section: 'A', title: 'Section A: Phonological & Language', text: 'Persistently mispronounces multisyllabic words (e.g., "aminal" for "animal").' },
-    { id: 7, section: 'A', title: 'Section A: Phonological & Language', text: 'Has difficulty with rapid automatized naming (recalling names of colors, objects, or numbers quickly).' },
+    // Section A: Sound & Language Skills (Q1–Q7)
+    { id: 1, section: 'A', title: 'Section A: Sound & Language Skills', text: 'Has trouble identifying or coming up with rhyming words (e.g., cat / bat / hat).' },
+    { id: 2, section: 'A', title: 'Section A: Sound & Language Skills', text: 'Struggles to break down spoken words into individual sounds (e.g., separating "cat" into /k/ /æ/ /t/).' },
+    { id: 3, section: 'A', title: 'Section A: Sound & Language Skills', text: 'Finds it hard to blend separate letter sounds together to make a whole word (e.g., joining /b/ /u/ /k/ /u/ to form "buku").' },
+    { id: 4, section: 'A', title: 'Section A: Sound & Language Skills', text: 'Often confuses or swaps similar-sounding words when talking (e.g., saying "pacific" instead of "specific").' },
+    { id: 5, section: 'A', title: 'Section A: Sound & Language Skills', text: 'Started talking later than other children of the same age.' },
+    { id: 6, section: 'A', title: 'Section A: Sound & Language Skills', text: 'Frequently mispronounces longer words (e.g., saying "aminal" for "animal" or "helipokter" for "helicopter").' },
+    { id: 7, section: 'A', title: 'Section A: Sound & Language Skills', text: 'Takes longer to quickly name common colors, objects, or numbers when asked.' },
 
-    // Section B: Reading Accuracy & Decoding Fluency (Q8–Q14)
-    { id: 8, section: 'B', title: 'Section B: Reading & Decoding', text: 'Reads slowly and with heavy effort, lacking natural conversational fluency.' },
-    { id: 9, section: 'B', title: 'Section B: Reading & Decoding', text: 'Guesses unfamiliar words based on the initial letter or picture context rather than decoding.' },
-    { id: 10, section: 'B', title: 'Section B: Reading & Decoding', text: 'Confuses visually similar words (e.g., "was" vs. "saw", "cat" vs. "cot").' },
-    { id: 11, section: 'B', title: 'Section B: Reading & Decoding', text: 'Frequently loses reading place or skips whole lines of text without a finger guide.' },
-    { id: 12, section: 'B', title: 'Section B: Reading & Decoding', text: 'Struggles to master letter-sound correspondences despite regular classroom practice.' },
-    { id: 13, section: 'B', title: 'Section B: Reading & Decoding', text: 'Struggles significantly when reading unfamiliar pseudo-words or nonsense syllables.' },
-    { id: 14, section: 'B', title: 'Section B: Reading & Decoding', text: 'Reading speed and decoding accuracy are markedly below grade-level expectations.' },
+    // Section B: Reading Ability & Speed (Q8–Q14)
+    { id: 8, section: 'B', title: 'Section B: Reading Ability & Speed', text: 'Reads slowly, stumbles often, and seems to put in a lot of effort while reading.' },
+    { id: 9, section: 'B', title: 'Section B: Reading Ability & Speed', text: 'Tries to guess unknown words based on the first letter or picture instead of sounding them out.' },
+    { id: 10, section: 'B', title: 'Section B: Reading Ability & Speed', text: 'Often confuses words that look visually similar (e.g., "was" vs "saw", or "cat" vs "cot").' },
+    { id: 11, section: 'B', title: 'Section B: Reading Ability & Speed', text: 'Frequently loses their place while reading or skips lines unless using a finger or ruler to guide them.' },
+    { id: 12, section: 'B', title: 'Section B: Reading Ability & Speed', text: 'Struggles to remember which sound matches which letter, even after plenty of practice.' },
+    { id: 13, section: 'B', title: 'Section B: Reading Ability & Speed', text: 'Has significant trouble reading new or made-up words that they haven\'t seen before.' },
+    { id: 14, section: 'B', title: 'Section B: Reading Ability & Speed', text: 'Reading speed and accuracy are noticeably behind other children in the same grade.' },
 
-    // Section C: Spelling & Written Expression (Q15–Q19)
-    { id: 15, section: 'C', title: 'Section C: Spelling & Writing', text: 'Makes frequent, inconsistent spelling errors even on simple, common sight words.' },
-    { id: 16, section: 'C', title: 'Section C: Spelling & Writing', text: 'Relies solely on phonetic spelling (e.g., spelling "sed" for "said", "wun" for "one").' },
-    { id: 17, section: 'C', title: 'Section C: Spelling & Writing', text: 'Persistently reverses mirror letters or numbers past age 7 (e.g., b/d, p/q, 6/9).' },
-    { id: 18, section: 'C', title: 'Section C: Spelling & Writing', text: 'Demonstrates difficulty retaining spelling patterns after extensive home practice.' },
-    { id: 19, section: 'C', title: 'Section C: Spelling & Writing', text: 'Shows marked avoidance or emotional frustration during pencil-and-paper writing tasks.' },
+    // Section C: Spelling & Writing (Q15–Q19)
+    { id: 15, section: 'C', title: 'Section C: Spelling & Writing', text: 'Makes frequent, unpredictable spelling mistakes, even on simple everyday words.' },
+    { id: 16, section: 'C', title: 'Section C: Spelling & Writing', text: 'Spells words strictly by how they sound (e.g., writing "sed" for "said", or "wun" for "one").' },
+    { id: 17, section: 'C', title: 'Section C: Spelling & Writing', text: 'Persistently reverses mirror letters or numbers past age 7 (e.g., mixing up b/d, p/q, or 6/9).' },
+    { id: 18, section: 'C', title: 'Section C: Spelling & Writing', text: 'Finds it hard to remember spelling patterns even after practicing many times at home.' },
+    { id: 19, section: 'C', title: 'Section C: Spelling & Writing', text: 'Shows strong avoidance, frustration, or emotional stress during writing tasks with pencil and paper.' },
 
-    // Section D: Working Memory & Cognitive Sequencing (Q20–Q24)
-    { id: 20, section: 'D', title: 'Section D: Working Memory & Sequencing', text: 'Has difficulty memorizing sequential information (e.g., days of the week, months, times tables).' },
-    { id: 21, section: 'D', title: 'Section D: Working Memory & Sequencing', text: 'Struggles to retain and execute multi-step verbal directions (e.g., "wash hands, get bag, put on shoes").' },
-    { id: 22, section: 'D', title: 'Section D: Working Memory & Sequencing', text: 'Shows difficulty recalling plot details immediately after a paragraph is read aloud to them.' },
-    { id: 23, section: 'D', title: 'Section D: Working Memory & Sequencing', text: 'Experiences persistent spatial confusion with left versus right orientation.' },
-    { id: 24, section: 'D', title: 'Section D: Working Memory & Sequencing', text: 'Has difficulty estimating time intervals and understanding temporal concepts (e.g., before vs after).' },
+    // Section D: Memory & Following Directions (Q20–Q24)
+    { id: 20, section: 'D', title: 'Section D: Memory & Following Directions', text: 'Struggles to memorize ordered lists (e.g., days of the week, months of the year, or times tables).' },
+    { id: 21, section: 'D', title: 'Section D: Memory & Following Directions', text: 'Finds it hard to remember and follow multi-step spoken directions (e.g., "pack your bag, wash your hands, then put on your shoes").' },
+    { id: 22, section: 'D', title: 'Section D: Memory & Following Directions', text: 'Has difficulty remembering story details immediately after a paragraph is read aloud to them.' },
+    { id: 23, section: 'D', title: 'Section D: Memory & Following Directions', text: 'Often gets confused between Left and Right.' },
+    { id: 24, section: 'D', title: 'Section D: Memory & Following Directions', text: 'Has trouble estimating time or understanding time concepts (e.g., before vs after, or how long 5 minutes feels).' },
 
-    // Section E: Family History & Discrepancy Indicators (Q25–Q30)
-    { id: 25, section: 'E', title: 'Section E: Family History & Indicators', text: 'Biological family history of reading, spelling, or phonological learning differences.' },
-    { id: 26, section: 'E', title: 'Section E: Family History & Indicators', text: 'Displays acute reading anxiety, fatigue, or complaints of words moving/blurring on white pages.' },
-    { id: 27, section: 'E', title: 'Section E: Family History & Indicators', text: 'Demonstrates strong oral comprehension and verbal reasoning when stories are read to them.' },
-    { id: 28, section: 'E', title: 'Section E: Family History & Indicators', text: 'Presents fine-motor grip awkwardness or labor-intensive handwriting speed.' },
-    { id: 29, section: 'E', title: 'Section E: Family History & Indicators', text: 'Exhibits noticeable difficulty organizing study materials and managing multi-step school tasks.' },
-    { id: 30, section: 'E', title: 'Section E: Family History & Indicators', text: 'Reading and spelling difficulties appear unexpected given the child’s general cognitive brightness and creativity.' }
+    // Section E: Family History & Brightness Indicators (Q25–Q30)
+    { id: 25, section: 'E', title: 'Section E: Family History & Brightness Indicators', text: 'Has a biological family history (parent or sibling) of reading, spelling, or learning differences.' },
+    { id: 26, section: 'E', title: 'Section E: Family History & Brightness Indicators', text: 'Gets easily tired or anxious while reading, or complains that words look like they are "moving" or "blurry" on white paper.' },
+    { id: 27, section: 'E', title: 'Section E: Family History & Brightness Indicators', text: 'Has strong speaking skills, great understanding, and smart ideas when stories are read aloud to them.' },
+    { id: 28, section: 'E', title: 'Section E: Family History & Brightness Indicators', text: 'Holds a pencil awkwardly, or writes very slowly with a lot of strain.' },
+    { id: 29, section: 'E', title: 'Section E: Family History & Brightness Indicators', text: 'Struggles to keep school books, materials, and multi-step homework tasks organized.' },
+    { id: 30, section: 'E', title: 'Section E: Family History & Brightness Indicators', text: 'Reading and spelling difficulties seem unexpected because the child is otherwise bright, creative, and quick-thinking.' }
 ];
 
 // Expected Oral Reading Fluency Norms (Words Correct Per Minute) by Grade
@@ -725,7 +725,7 @@ function calculate3PillarDyslexiaRisk() {
     const grade = child.grade || 'Year 1';
     const fluencyNorm = GRADE_FLUENCY_NORMS[grade] || GRADE_FLUENCY_NORMS['Year 1'];
 
-    // 1. PILLAR 1: Questionnaire Score Calculation (Excluding N/A responses)
+    // 1. PILLAR 1: Behavioral Questionnaire Score Calculation (Excluding N/A responses)
     let validQuestionsCount = 0;
     let rawScore = 0;
     const subScores = { A: 0, B: 0, C: 0, D: 0, E: 0 };
@@ -744,7 +744,7 @@ function calculate3PillarDyslexiaRisk() {
     const maxPossibleRaw = Math.max(validQuestionsCount * 3, 1); // 0–3 Likert scale (Never=0, Mild=1, Mod=2, Severe=3)
     const pillar1Score = Math.min(100, Math.round((rawScore / maxPossibleRaw) * 100));
 
-    // 2. PILLAR 2: Oral Reading Fluency & WCPM Age-Normed Z-Score
+    // 2. PILLAR 2 & 3: Check for real live eye tracking / oral reading data
     let gazePayload = null;
     if (typeof getGazeMetricsPayload === 'function') {
         gazePayload = getGazeMetricsPayload();
@@ -757,6 +757,7 @@ function calculate3PillarDyslexiaRisk() {
     let isQuestionnaireOnly = !isRealGazeActive;
     let zFluencyScore = 0;
     let discrepancyAlert = null;
+    let temporalMetrics = null;
 
     if (isRealGazeActive) {
         const observedWCPM = gazePayload.calculatedWCPM;
@@ -779,9 +780,37 @@ function calculate3PillarDyslexiaRisk() {
         } else if (pillar1Score >= 65 && observedWCPM >= fluencyNorm.expectedWCPM) {
             discrepancyAlert = "⚠️ Inter-Pillar Discrepancy Note: High behavioral indicators contrast with age-appropriate oral reading fluency. Recommend classroom observation to rule out task anxiety.";
         }
+        temporalMetrics = gazePayload;
     } else {
-        isQuestionnaireOnly = true;
-        matchScore = pillar1Score;
+        // Camera Off / Eye-Tracking Skipped:
+        // Dynamically estimate Pillar 2 (Decoding) & Pillar 3 (Visual/Memory) from sub-scores so Step 5 matches Full Report and never displays 0%!
+        const maxB_C = Math.max(((subCounts.B + subCounts.C) * 3), 1);
+        const rawB_C = subScores.B + subScores.C;
+        pillar2Score = Math.min(100, Math.max(10, Math.round((rawB_C / maxB_C) * 100)));
+
+        const maxD_A = Math.max(((subCounts.D + subCounts.A) * 3), 1);
+        const rawD_A = subScores.D + subScores.A;
+        pillar3Score = Math.min(100, Math.max(10, Math.round((rawD_A / maxD_A) * 100)));
+
+        // Dynamic Grade-Normed WCPM Estimation based on Grade Norm & Section B difficulty ratio (instead of static 32 WCPM)
+        const decodingDeficitPct = subCounts.B > 0 ? (subScores.B / (subCounts.B * 3)) : (rawScore / maxPossibleRaw);
+        const estimatedWCPM = Math.max(15, Math.round(fluencyNorm.expectedWCPM * (1 - (decodingDeficitPct * 0.50))));
+        const estimatedFixation = Math.max(65, Math.round(92 - (decodingDeficitPct * 20)));
+
+        matchScore = Math.round(
+            (pillar1Score * 0.40) +
+            (pillar2Score * 0.35) +
+            (pillar3Score * 0.25)
+        );
+
+        temporalMetrics = {
+            totalReadingSeconds: 0,
+            calculatedWCPM: estimatedWCPM,
+            calculatedWPM: estimatedWCPM,
+            avgHesitationMs: Math.round(300 + (decodingDeficitPct * 500)),
+            fixationStability: estimatedFixation,
+            isEstimated: true
+        };
     }
 
     // Honest Risk Categorization
@@ -820,11 +849,7 @@ function calculate3PillarDyslexiaRisk() {
         zFluencyScore,
         subScores,
         gradeNormUsed: `${grade} (Expected: ${fluencyNorm.expectedWCPM} WCPM)`,
-        temporalMetrics: gazePayload || {
-            totalReadingSeconds: 0,
-            calculatedWCPM: 0,
-            avgHesitationMs: 0
-        }
+        temporalMetrics
     };
 }
 

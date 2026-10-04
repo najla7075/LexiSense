@@ -5,35 +5,45 @@
  */
 
 const DYSLEXIA_QUESTIONNAIRE = [
-    { id: 1, section: 'A', title: 'Section A: Phonological & Language', text: 'Student has difficulty recognizing or producing rhyming words.' },
-    { id: 2, section: 'A', title: 'Section A: Phonological & Language', text: 'Student struggles to isolate individual sounds (e.g. "cat" → c-a-t).' },
-    { id: 3, section: 'A', title: 'Section A: Phonological & Language', text: 'Student has difficulty blending sounds smoothly into whole words.' },
-    { id: 4, section: 'A', title: 'Section A: Phonological & Language', text: 'Student confuses phonetically similar words or phonemes.' },
-    { id: 5, section: 'A', title: 'Section A: Phonological & Language', text: 'Student demonstrates delayed speech or expressive vocabulary recall.' },
-    { id: 6, section: 'A', title: 'Section A: Phonological & Language', text: 'Student substitutes syllables when pronouncing multi-syllabic words.' },
-    { id: 7, section: 'A', title: 'Section A: Phonological & Language', text: 'Student has difficulty rapidly naming familiar classroom objects.' },
+    // Section A: Sound & Language Skills (Q1–Q7)
+    { id: 1, section: 'A', title: 'Section A: Sound & Language Skills', text: 'Has trouble identifying or coming up with rhyming words (e.g., cat / bat / hat).' },
+    { id: 2, section: 'A', title: 'Section A: Sound & Language Skills', text: 'Struggles to break down spoken words into individual sounds (e.g., separating "cat" into /k/ /æ/ /t/).' },
+    { id: 3, section: 'A', title: 'Section A: Sound & Language Skills', text: 'Finds it hard to blend separate letter sounds together to make a whole word (e.g., joining /b/ /u/ /k/ /u/ to form "buku").' },
+    { id: 4, section: 'A', title: 'Section A: Sound & Language Skills', text: 'Often confuses or swaps similar-sounding words when talking (e.g., saying "pacific" instead of "specific").' },
+    { id: 5, section: 'A', title: 'Section A: Sound & Language Skills', text: 'Started talking later than other children of the same age.' },
+    { id: 6, section: 'A', title: 'Section A: Sound & Language Skills', text: 'Frequently mispronounces longer words (e.g., saying "aminal" for "animal" or "helipokter" for "helicopter").' },
+    { id: 7, section: 'A', title: 'Section A: Sound & Language Skills', text: 'Takes longer to quickly name common colors, objects, or numbers when asked.' },
 
-    { id: 8, section: 'B', title: 'Section B: Reading & Decoding Fluency', text: 'Student reads slowly and with marked effort, lacking cadence.' },
-    { id: 9, section: 'B', title: 'Section B: Reading & Decoding Fluency', text: 'Student guesses words based on initial letters rather than sounding them out.' },
-    { id: 10, section: 'B', title: 'Section B: Reading & Decoding Fluency', text: 'Student confuses visually similar words (e.g. "saw" vs "was").' },
-    { id: 11, section: 'B', title: 'Section B: Reading & Decoding Fluency', text: 'Student skips lines or requires a finger guide to maintain place in text.' },
-    { id: 12, section: 'B', title: 'Section B: Reading & Decoding Fluency', text: 'Student struggles to retain letter-sound correspondences.' },
-    { id: 13, section: 'B', title: 'Section B: Reading & Decoding Fluency', text: 'Student has marked difficulty decoding unfamiliar test tokens.' },
-    { id: 14, section: 'B', title: 'Section B: Reading & Decoding Fluency', text: 'Student reading fluency is noticeably below year group benchmarks.' },
+    // Section B: Reading Ability & Speed (Q8–Q14)
+    { id: 8, section: 'B', title: 'Section B: Reading Ability & Speed', text: 'Reads slowly, stumbles often, and seems to put in a lot of effort while reading.' },
+    { id: 9, section: 'B', title: 'Section B: Reading Ability & Speed', text: 'Tries to guess unknown words based on the first letter or picture instead of sounding them out.' },
+    { id: 10, section: 'B', title: 'Section B: Reading Ability & Speed', text: 'Often confuses words that look visually similar (e.g., "was" vs "saw", or "cat" vs "cot").' },
+    { id: 11, section: 'B', title: 'Section B: Reading Ability & Speed', text: 'Frequently loses their place while reading or skips lines unless using a finger or ruler to guide them.' },
+    { id: 12, section: 'B', title: 'Section B: Reading Ability & Speed', text: 'Struggles to remember which sound matches which letter, even after plenty of practice.' },
+    { id: 13, section: 'B', title: 'Section B: Reading Ability & Speed', text: 'Has significant trouble reading new or made-up words that they haven\'t seen before.' },
+    { id: 14, section: 'B', title: 'Section B: Reading Ability & Speed', text: 'Reading speed and accuracy are noticeably behind other children in the same grade.' },
 
-    { id: 15, section: 'C', title: 'Section C: Spelling & Letter Form Representation', text: 'Student makes recurring spelling errors on high-frequency words.' },
-    { id: 16, section: 'C', title: 'Section C: Spelling & Letter Form Representation', text: 'Student spells strictly phonetically without orthographic conventions.' },
-    { id: 17, section: 'C', title: 'Section C: Spelling & Letter Form Representation', text: 'Student displays recurring letter/numeral reversals (b/d, p/q).' },
-    { id: 18, section: 'C', title: 'Section C: Spelling & Letter Form Representation', text: 'Student shows avoidance or noticeable frustration during written exercises.' },
+    // Section C: Spelling & Writing (Q15–Q19)
+    { id: 15, section: 'C', title: 'Section C: Spelling & Writing', text: 'Makes frequent, unpredictable spelling mistakes, even on simple everyday words.' },
+    { id: 16, section: 'C', title: 'Section C: Spelling & Writing', text: 'Spells words strictly by how they sound (e.g., writing "sed" for "said", or "wun" for "one").' },
+    { id: 17, section: 'C', title: 'Section C: Spelling & Writing', text: 'Persistently reverses mirror letters or numbers past age 7 (e.g., mixing up b/d, p/q, or 6/9).' },
+    { id: 18, section: 'C', title: 'Section C: Spelling & Writing', text: 'Finds it hard to remember spelling patterns even after practicing many times at home.' },
+    { id: 19, section: 'C', title: 'Section C: Spelling & Writing', text: 'Shows strong avoidance, frustration, or emotional stress during writing tasks with pencil and paper.' },
 
-    { id: 19, section: 'D', title: 'Section D: Working Memory & Sequencing', text: 'Student struggles to retain sequential lists (days of week, alphabet).' },
-    { id: 20, section: 'D', title: 'Section D: Working Memory & Sequencing', text: 'Student has difficulty remembering and executing multi-step instructions.' },
-    { id: 21, section: 'D', title: 'Section D: Working Memory & Sequencing', text: 'Student confuses spatial or lateral orientations (left vs right).' },
-    { id: 22, section: 'D', title: 'Section D: Working Memory & Sequencing', text: 'Student has difficulty recalling narrative points immediately after reading.' },
+    // Section D: Memory & Following Directions (Q20–Q24)
+    { id: 20, section: 'D', title: 'Section D: Memory & Following Directions', text: 'Struggles to memorize ordered lists (e.g., days of the week, months of the year, or times tables).' },
+    { id: 21, section: 'D', title: 'Section D: Memory & Following Directions', text: 'Finds it hard to remember and follow multi-step spoken directions (e.g., "pack your bag, wash your hands, then put on your shoes").' },
+    { id: 22, section: 'D', title: 'Section D: Memory & Following Directions', text: 'Has difficulty remembering story details immediately after a paragraph is read aloud to them.' },
+    { id: 23, section: 'D', title: 'Section D: Memory & Following Directions', text: 'Often gets confused between Left and Right.' },
+    { id: 24, section: 'D', title: 'Section D: Memory & Following Directions', text: 'Has trouble estimating time or understanding time concepts (e.g., before vs after, or how long 5 minutes feels).' },
 
-    { id: 23, section: 'E', title: 'Section E: Visual Fatigue & Family Indicators', text: 'Student reports letters blurring or dancing on bright white paper.' },
-    { id: 24, section: 'E', title: 'Section E: Visual Fatigue & Family Indicators', text: 'Student demonstrates visual fatigue, eye rubbing, or head tilt.' },
-    { id: 25, section: 'E', title: 'Section E: Visual Fatigue & Family Indicators', text: 'Known family history of reading, language, or learning differences.' }
+    // Section E: Family History & Brightness Indicators (Q25–Q30)
+    { id: 25, section: 'E', title: 'Section E: Family History & Brightness Indicators', text: 'Has a biological family history (parent or sibling) of reading, spelling, or learning differences.' },
+    { id: 26, section: 'E', title: 'Section E: Family History & Brightness Indicators', text: 'Gets easily tired or anxious while reading, or complains that words look like they are "moving" or "blurry" on white paper.' },
+    { id: 27, section: 'E', title: 'Section E: Family History & Brightness Indicators', text: 'Has strong speaking skills, great understanding, and smart ideas when stories are read aloud to them.' },
+    { id: 28, section: 'E', title: 'Section E: Family History & Brightness Indicators', text: 'Holds a pencil awkwardly, or writes very slowly with a lot of strain.' },
+    { id: 29, section: 'E', title: 'Section E: Family History & Brightness Indicators', text: 'Struggles to keep school books, materials, and multi-step homework tasks organized.' },
+    { id: 30, section: 'E', title: 'Section E: Family History & Brightness Indicators', text: 'Reading and spelling difficulties seem unexpected because the child is otherwise bright, creative, and quick-thinking.' }
 ];
 
 const READING_PASSAGES = {
@@ -2218,7 +2228,7 @@ function viewStudentProfile(studentName) {
     const wcpmEl = document.getElementById('detailSummaryReadingWCPM');
     const phonoEl = document.getElementById('detailSummaryPhonologicalMatch');
 
-    const calculatedWPM = student.reading_wpm || (isHighRisk ? 32 : (isModRisk ? 48 : 88));
+    const calculatedWPM = student.reading_wpm || Math.max(18, Math.round(85 * (1 - (riskScore / 140))));
     const gazeStabilityVal = isCompleted ? (isHighRisk ? 62 : (isModRisk ? 78 : 94)) : 0;
     const phonoMatchVal = isCompleted ? (student.pillar2_score || (isHighRisk ? 42 : (isModRisk ? 68 : 92))) : 0;
 
@@ -2363,7 +2373,7 @@ function renderStudentComparisonResult(student) {
 
     const isDone = student.status === 'Completed';
     const currentScore = isDone ? (typeof student.score === 'number' ? student.score : 50) : 0;
-    const currentWPM = student.reading_wpm || (currentScore >= 65 ? 32 : (currentScore >= 35 ? 48 : 88));
+    const currentWPM = student.reading_wpm || Math.max(18, Math.round(85 * (1 - (currentScore / 140))));
     const expectedWPM = 50; // Grade norm
     const gazeStability = isDone ? (currentScore >= 65 ? 62 : (currentScore >= 35 ? 78 : 94)) : 0;
 

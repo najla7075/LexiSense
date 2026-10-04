@@ -32,12 +32,28 @@ async function updateHeaderUserUI() {
     const client = typeof getSupabase === 'function' ? getSupabase() : null;
     let currentUser = window.loggedInUser || JSON.parse(localStorage.getItem('lexisense_user') || 'null');
     
-    if (currentUser?.username) {
+    if (currentUser && client) {
         try {
-            const customSaved = JSON.parse(localStorage.getItem(`lexisense_profile_${currentUser.username.toLowerCase()}`) || 'null');
-            if (customSaved) {
-                currentUser = { ...currentUser, ...customSaved };
+            let query = client.from('profiles').select('*');
+            if (currentUser.id && isValidUUID(currentUser.id)) {
+                query = query.eq('id', currentUser.id);
+            } else if (currentUser.email) {
+                query = query.ilike('email', currentUser.email);
+            } else if (currentUser.username) {
+                query = query.ilike('username', currentUser.username);
+            }
+            const { data: dbProf } = await query.maybeSingle();
+            if (dbProf && dbProf.full_name) {
+                currentUser.name = dbProf.full_name;
+                currentUser.full_name = dbProf.full_name;
+                if (dbProf.avatar_url) currentUser.avatar = dbProf.avatar_url;
+                if (dbProf.school_branch) currentUser.school = dbProf.school_branch;
+                if (dbProf.role) currentUser.role = dbProf.role;
                 window.loggedInUser = currentUser;
+                localStorage.setItem('lexisense_user', JSON.stringify(currentUser));
+                if (currentUser.username) {
+                    localStorage.setItem(`lexisense_profile_${currentUser.username.toLowerCase()}`, JSON.stringify(currentUser));
+                }
             }
         } catch(e) {}
     }
@@ -50,7 +66,7 @@ async function updateHeaderUserUI() {
                     .from('profiles')
                     .select('*')
                     .eq('id', session.user.id)
-                    .single();
+                    .maybeSingle();
                 if (profile && profile.is_active) {
                     currentUser = {
                         id: profile.id,
@@ -131,6 +147,11 @@ async function updateHeaderUserUI() {
 
         if (heroTitle) {
             heroTitle.innerHTML = `Hello, <span class="text-amber-300">${escapeHTML(currentUser.name || currentUser.username)}</span>! <span class="animate-wave-hand">👋</span>`;
+        }
+
+        const chatGreeting = document.getElementById('chat-greeting-text');
+        if (chatGreeting) {
+            chatGreeting.textContent = `Hoo-hoo, ${currentUser.name || currentUser.username}! 👋`;
         }
 
         updateNotificationsFooter(currentUser, roleIcon, roleBadge);
@@ -233,6 +254,69 @@ function closeAuthModal(event) {
     }
     hideAuthMessages();
 }
+
+/**
+ * Renders & Opens Educator Pending Approval Confirmation Modal
+ */
+function showEducatorPendingApprovalModal(name, email, school) {
+    let modal = document.getElementById('educatorPendingApprovalModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'educatorPendingApprovalModal';
+        modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-md animate-fade-in';
+        modal.innerHTML = `
+            <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 border-2 border-purple-200 shadow-2xl space-y-5 text-center relative overflow-hidden animate-pop">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-white flex items-center justify-center text-3xl mx-auto shadow-md">
+                    ⏳
+                </div>
+                <div class="space-y-2">
+                    <span class="inline-block px-3 py-1 bg-amber-100 text-amber-900 border border-amber-300 font-extrabold text-[11px] rounded-full uppercase tracking-wider">
+                        Menunggu Pengesahan Super Admin
+                    </span>
+                    <h3 class="font-heading font-extrabold text-xl text-slate-900">
+                        Permohonan Pendidik Telah Diterima 🦉
+                    </h3>
+                    <p class="text-xs text-slate-600 leading-relaxed font-medium">
+                        Hai <strong id="pending-modal-name" class="text-purple-900 font-bold"></strong>! Permohonan pendaftaran pautan sekolah <strong id="pending-modal-school" class="text-indigo-900 font-bold"></strong> anda telah didaftarkan dalam sistem.
+                    </p>
+                </div>
+
+                <div class="bg-purple-50/80 rounded-2xl p-4 border border-purple-200 text-left text-xs space-y-2">
+                    <div class="flex items-center justify-between text-slate-700">
+                        <span class="font-bold">E-mel Berdaftar:</span>
+                        <span id="pending-modal-email" class="font-mono text-purple-800 font-bold"></span>
+                    </div>
+                    <div class="flex items-center justify-between text-slate-700">
+                        <span class="font-bold">Status Akses:</span>
+                        <span class="font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-md">⏳ Pending Approval</span>
+                    </div>
+                </div>
+
+                <p class="text-[11.5px] text-slate-500 italic">
+                    Akaun pendidik perlu disahkan oleh Super Admin LexiSense terlebih dahulu. E-mel pemberitahuan akan dihantar sebaik sahaja akses anda diluluskan.
+                </p>
+
+                <button onclick="closeEducatorPendingApprovalModal()" class="w-full py-3 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-800 hover:to-indigo-800 text-white font-extrabold text-xs rounded-2xl shadow-lg transition-all cursor-pointer">
+                    Faham & Tutup Modal
+                </button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    document.getElementById('pending-modal-name').textContent = name || 'Pendidik';
+    document.getElementById('pending-modal-email').textContent = email || '';
+    document.getElementById('pending-modal-school').textContent = school || 'Sekolah';
+
+    modal.classList.remove('hidden');
+}
+
+function closeEducatorPendingApprovalModal() {
+    const modal = document.getElementById('educatorPendingApprovalModal');
+    if (modal) modal.classList.add('hidden');
+}
+window.showEducatorPendingApprovalModal = showEducatorPendingApprovalModal;
+window.closeEducatorPendingApprovalModal = closeEducatorPendingApprovalModal;
 
 /**
  * Switches modal tab views (login, register, forgot) with animated transitions
@@ -350,6 +434,9 @@ function hideAuthMessages() {
 /**
  * Handles Supabase Login Submission with Strict Password Verification
  */
+/**
+ * Handles Supabase Login Submission with Strict Password Verification
+ */
 async function handleLoginSubmit(event) {
     event.preventDefault();
     hideAuthMessages();
@@ -359,37 +446,44 @@ async function handleLoginSubmit(event) {
     const submitBtn = document.getElementById('btn-submit-login');
 
     if (!usernameInput || !passwordInput) {
-        showAuthError("Please enter both username/email and password.");
+        showAuthError("Sila masukkan nama pengguna / e-mel dan kata laluan.");
         return;
     }
 
-    setButtonLoading(submitBtn, true, "Signing In...");
+    setButtonLoading(submitBtn, true, "Mengesahkan Log Masuk...");
 
     try {
         const client = getSupabase();
         let targetEmail = usernameInput;
         const cleanInput = usernameInput.toLowerCase();
 
-        // 1. Resolve username to email address if username was provided
+        if (!client) {
+            showAuthError("Ralat: Pangkalan data Supabase tidak dapat disambungkan.");
+            setButtonLoading(submitBtn, false, "Log In to Account →");
+            return;
+        }
+
+        // 1. Resolve username to email address via Supabase profiles table
         if (!usernameInput.includes('@')) {
-            // Check local username-to-email mapping
-            const mappedEmail = localStorage.getItem(`lexisense_email_map_${cleanInput}`);
-            if (mappedEmail) {
-                targetEmail = mappedEmail;
-            } else {
-                // Check registered users store
-                try {
-                    const localUsers = JSON.parse(localStorage.getItem('lexisense_registered_users') || '{}');
-                    if (localUsers[cleanInput]?.email) {
-                        targetEmail = localUsers[cleanInput].email;
-                    } else if (Array.isArray(localUsers)) {
-                        const found = localUsers.find(u => u.username?.toLowerCase() === cleanInput);
-                        if (found?.email) targetEmail = found.email;
-                    }
-                } catch(e) {}
+            try {
+                const { data: profile } = await client
+                    .from('profiles')
+                    .select('email')
+                    .ilike('username', usernameInput)
+                    .maybeSingle();
+                if (profile && profile.email) {
+                    targetEmail = profile.email;
+                }
+            } catch(e) {}
+
+            if (targetEmail === usernameInput) {
+                const mappedEmail = localStorage.getItem(`lexisense_email_map_${cleanInput}`);
+                if (mappedEmail) {
+                    targetEmail = mappedEmail;
+                }
             }
 
-            // Check Demo Accounts mapping
+            // Official Demo Accounts mapping
             const DEMO_MAP = {
                 'faizikhwan': 'faiz.ikhwan@sktamanria.edu.my',
                 'faiz': 'faiz.ikhwan@sktamanria.edu.my',
@@ -398,24 +492,13 @@ async function handleLoginSubmit(event) {
                 'parent_demo': 'parent@lexisense.com',
                 'parent': 'parent@lexisense.com',
                 'super_admin': 'superadmin@lexisense.com',
-                'superadmin': 'superadmin@lexisense.com'
+                'superadmin': 'superadmin@lexisense.com',
+                'suzana': 'suzana@lexisense.com',
+                'suzana_admin': 'suzana@lexisense.ai',
+                'suzana_demo': 'suzana@lexisense.com'
             };
             if (DEMO_MAP[cleanInput]) {
                 targetEmail = DEMO_MAP[cleanInput];
-            }
-
-            // Check Supabase profile lookup for email
-            if (client && targetEmail === usernameInput) {
-                try {
-                    const { data: profile } = await client
-                        .from('profiles')
-                        .select('email')
-                        .ilike('username', usernameInput)
-                        .maybeSingle();
-                    if (profile && profile.email) {
-                        targetEmail = profile.email;
-                    }
-                } catch(e) {}
             }
         }
 
@@ -423,45 +506,70 @@ async function handleLoginSubmit(event) {
         let loginSuccess = false;
         let authenticatedUser = null;
 
-        // 2. Try Supabase Live Authentication (Official Cloud Password Verification)
-        if (client && targetEmail.includes('@')) {
+        // 2. Strict Supabase Live Cloud Password Authentication
+        if (targetEmail.includes('@')) {
             try {
-                const { data, error } = await client.auth.signInWithPassword({
+                const { data, error: authError } = await client.auth.signInWithPassword({
                     email: targetEmail,
                     password: passwordInput
                 });
 
-                if (!error && data?.session?.user) {
+                if (!authError && data?.session?.user) {
                     let userProfile = null;
                     try {
-                        const { data: prof } = await client
+                        // 1. Fetch profile by Supabase Auth user ID
+                        const { data: prof1 } = await client
                             .from('profiles')
                             .select('*')
                             .eq('id', data.session.user.id)
-                            .single();
-                        userProfile = prof;
-                    } catch (e) {}
+                            .maybeSingle();
+                        if (prof1) userProfile = prof1;
+
+                        // 2. Fallback: Fetch profile by email
+                        if (!userProfile && targetEmail) {
+                            const { data: prof2 } = await client
+                                .from('profiles')
+                                .select('*')
+                                .ilike('email', targetEmail.trim())
+                                .maybeSingle();
+                            if (prof2) userProfile = prof2;
+                        }
+
+                        // 3. Fallback: Fetch profile by username
+                        if (!userProfile && usernameInput) {
+                            const { data: prof3 } = await client
+                                .from('profiles')
+                                .select('*')
+                                .ilike('username', usernameInput.trim())
+                                .maybeSingle();
+                            if (prof3) userProfile = prof3;
+                        }
+                    } catch (e) {
+                        console.warn("Notice fetching Supabase live profile:", e);
+                    }
 
                     authenticatedUser = {
                         id: data.session.user.id,
-                        username: userProfile?.username || usernameInput,
-                        name: userProfile?.full_name || usernameInput,
+                        username: userProfile?.username || usernameInput.split('@')[0],
+                        name: userProfile?.full_name || userProfile?.name || usernameInput,
+                        full_name: userProfile?.full_name || userProfile?.name || usernameInput,
                         email: targetEmail,
                         role: userProfile?.role || 'parent',
                         school: userProfile?.school_branch || null,
-                        avatar: userProfile?.avatar_url || '👩'
+                        avatar: userProfile?.avatar_url || '👩',
+                        is_approved: userProfile?.is_approved !== false,
+                        is_active: userProfile?.is_active !== false,
+                        status: userProfile?.status || 'active'
                     };
                     loginSuccess = true;
                     console.log("Logged in securely via Supabase Cloud Auth 🔒⚡");
-                } else if (error) {
-                    console.warn("Supabase Auth sign-in notice:", error.message);
                 }
             } catch (authErr) {
                 console.warn("Supabase Auth exception:", authErr);
             }
         }
 
-        // 3. Fallback to Demo Accounts (Strict Demo Password Check)
+        // 3. Official Demo Account Fallback (STRICT DEMO PASSWORD MATCHING ONLY)
         if (!loginSuccess) {
             const DEMO_ACCOUNTS = {
                 faiz: {
@@ -474,7 +582,6 @@ async function handleLoginSubmit(event) {
                     role: 'admin',
                     designation: 'SEN Literacy Specialist / Guru Pemulihan',
                     school: 'SK Taman Ria',
-                    school_branch: 'SK Taman Ria',
                     avatar: '👨‍🏫'
                 },
                 admin: {
@@ -487,7 +594,6 @@ async function handleLoginSubmit(event) {
                     role: 'admin',
                     designation: 'SEN Literacy Specialist / Guru Pemulihan',
                     school: 'SK Taman Ria',
-                    school_branch: 'SK Taman Ria',
                     avatar: '👨‍🏫'
                 },
                 parent: {
@@ -529,122 +635,72 @@ async function handleLoginSubmit(event) {
             );
 
             if (demoAcc) {
-                // Check if demo user has a custom password updated in storage
                 let expectedPassword = demoAcc.defaultPwd;
-                try {
-                    const customProf = JSON.parse(localStorage.getItem(`lexisense_profile_${demoAcc.username.toLowerCase()}`) || '{}');
-                    if (customProf.password) expectedPassword = customProf.password;
-                } catch(e) {}
-
                 if (passwordInput === expectedPassword || (demoAcc.altPwd && passwordInput === demoAcc.altPwd)) {
+                    let dbProf = null;
+                    if (client) {
+                        try {
+                            const { data: p } = await client
+                                .from('profiles')
+                                .select('*')
+                                .or(`username.eq.${demoAcc.username},email.eq.${demoAcc.email}`)
+                                .maybeSingle();
+                            if (p) dbProf = p;
+                        } catch(e) {}
+                    }
+
+                    const resolvedName = dbProf?.full_name || dbProf?.name || demoAcc.name;
+
                     authenticatedUser = {
-                        id: demoAcc.id,
-                        username: demoAcc.username,
-                        name: demoAcc.name,
-                        email: demoAcc.email,
-                        role: demoAcc.role,
-                        designation: demoAcc.designation || 'SEN Literacy Specialist',
-                        school: demoAcc.school,
-                        avatar: demoAcc.avatar,
+                        id: dbProf?.id || demoAcc.id,
+                        username: dbProf?.username || demoAcc.username,
+                        name: resolvedName,
+                        full_name: resolvedName,
+                        email: dbProf?.email || demoAcc.email,
+                        role: dbProf?.role || demoAcc.role,
+                        designation: dbProf?.designation || demoAcc.designation || 'SEN Literacy Specialist',
+                        school: dbProf?.school_branch || demoAcc.school,
+                        avatar: dbProf?.avatar_url || demoAcc.avatar,
                         is_demo: true
                     };
                     loginSuccess = true;
-                } else {
-                    showAuthError("Incorrect username/email or password.");
-                    setButtonLoading(submitBtn, false, "Log In to Account →");
-                    return;
                 }
             }
         }
 
-        // 4. Fallback to Local Registered Users Store (Strict Password Verification)
-        if (!loginSuccess) {
-            try {
-                const localUsers = JSON.parse(localStorage.getItem('lexisense_registered_users') || '{}');
-                let matchedUser = null;
-
-                if (Array.isArray(localUsers)) {
-                    matchedUser = localUsers.find(u => 
-                        (u.username && u.username.toLowerCase() === cleanInput) ||
-                        (u.email && u.email.toLowerCase() === cleanInput) ||
-                        (u.email && u.email.toLowerCase() === cleanEmail)
-                    );
-                } else if (typeof localUsers === 'object' && localUsers !== null) {
-                    matchedUser = localUsers[cleanInput] || Object.values(localUsers).find(u => 
-                        (u.email && u.email.toLowerCase() === cleanInput) ||
-                        (u.email && u.email.toLowerCase() === cleanEmail) ||
-                        (u.username && u.username.toLowerCase() === cleanInput)
-                    );
-                }
-
-                if (matchedUser) {
-                    if (matchedUser.password && matchedUser.password === passwordInput) {
-                        authenticatedUser = {
-                            id: matchedUser.id || 'usr_' + Date.now(),
-                            username: matchedUser.username || usernameInput,
-                            name: matchedUser.name || matchedUser.full_name || usernameInput,
-                            email: matchedUser.email || targetEmail,
-                            role: matchedUser.role || 'parent',
-                            school: matchedUser.school || matchedUser.school_branch || null,
-                            avatar: matchedUser.avatar || '👩'
-                        };
-                        loginSuccess = true;
-                    } else {
-                        showAuthError("Incorrect username/email or password.");
-                        setButtonLoading(submitBtn, false, "Log In to Account →");
-                        return;
-                    }
-                }
-            } catch(e) {}
-        }
-
-        // 5. Fallback to User Scoped Profile (Strict Password Verification)
-        if (!loginSuccess) {
-            try {
-                const userProf = JSON.parse(localStorage.getItem(`lexisense_profile_${cleanInput}`) || 'null');
-                if (userProf && userProf.password) {
-                    if (userProf.password === passwordInput) {
-                        authenticatedUser = {
-                            id: userProf.id || 'usr_' + Date.now(),
-                            username: userProf.username || usernameInput,
-                            name: userProf.name || userProf.full_name || usernameInput,
-                            email: userProf.email || targetEmail,
-                            role: userProf.role || 'parent',
-                            school: userProf.school || userProf.school_branch || null,
-                            avatar: userProf.avatar || '👩'
-                        };
-                        loginSuccess = true;
-                    } else {
-                        showAuthError("Incorrect username/email or password.");
-                        setButtonLoading(submitBtn, false, "Log In to Account →");
-                        return;
-                    }
-                }
-            } catch(e) {}
-        }
-
+        // 4. STRICT SECURITY REJECTION: IF NOT AUTHENTICATED VIA SUPABASE OR VALID DEMO, BLOCK LOGIN!
         if (!loginSuccess || !authenticatedUser) {
-            showAuthError("Incorrect username/email or password.");
+            showAuthError("Log masuk gagal. E-mel / nama pengguna atau kata laluan tidak sah.");
             setButtonLoading(submitBtn, false, "Log In to Account →");
             return;
         }
 
-        // Merge any saved local customizations (phone, avatar, school)
-        try {
-            const savedProfile = JSON.parse(localStorage.getItem(`lexisense_profile_${authenticatedUser.username.toLowerCase()}`) || 'null');
-            if (savedProfile) {
-                authenticatedUser = { ...authenticatedUser, ...savedProfile };
+        // Check if Educator account is pending Super Admin approval
+        const isEducatorRole = authenticatedUser.role === 'admin' || authenticatedUser.role === 'teacher';
+        if (isEducatorRole) {
+            const isApproved = authenticatedUser.is_approved !== false && 
+                               authenticatedUser.status !== 'pending' && 
+                               authenticatedUser.is_active !== false;
+            if (!isApproved) {
+                closeAuthModal();
+                showEducatorPendingApprovalModal(
+                    authenticatedUser.name || authenticatedUser.full_name,
+                    authenticatedUser.email,
+                    authenticatedUser.school || 'Sekolah'
+                );
+                setButtonLoading(submitBtn, false, "Log In to Account →");
+                return;
             }
-        } catch(e) {}
+        }
 
-        // Save session locally
+        // Save active session locally
         window.loggedInUser = authenticatedUser;
         localStorage.setItem('lexisense_user', JSON.stringify(authenticatedUser));
         localStorage.setItem(`lexisense_email_map_${authenticatedUser.username.toLowerCase()}`, authenticatedUser.email);
         localStorage.setItem(`lexisense_profile_${authenticatedUser.username.toLowerCase()}`, JSON.stringify(authenticatedUser));
 
         if (typeof showToast === 'function') {
-            showToast(`Welcome back, ${authenticatedUser.name}! 👋`);
+            showToast(`Selamat kembali, ${authenticatedUser.name}! 👋`);
         }
 
         closeAuthModal();
@@ -661,7 +717,7 @@ async function handleLoginSubmit(event) {
 
     } catch (err) {
         console.error("Login Exception:", err);
-        showAuthError("Incorrect username/email or password.");
+        showAuthError("Ralat semasa log masuk: " + (err.message || err));
     } finally {
         setButtonLoading(submitBtn, false, "Log In to Account →");
     }
@@ -683,175 +739,221 @@ async function handleRegisterSubmit(event) {
     const submitBtn = document.getElementById('btn-submit-register');
 
     if (!nameInput || !emailInput || !usernameInput || !passwordInput || !confirmPasswordInput) {
-        showAuthError("Please fill in all required registration fields.");
+        showAuthError("Sila isi semua medan pendaftaran yang diperlukan.");
         return;
     }
 
     if (selectedUserType === 'teacher' && !schoolInput) {
-        showAuthError("Educators / Teachers must enter their School or Branch Name.");
+        showAuthError("Guru / Pendidik wajib memasukkan Nama Sekolah atau Cawangan.");
         return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(emailInput)) {
-        showAuthError("Please enter a valid email address.");
+        showAuthError("Sila masukkan alamat e-mel yang sah.");
         return;
     }
 
     if (usernameInput.length < 3 || !/^[a-zA-Z0-9_]+$/.test(usernameInput)) {
-        showAuthError("Username must be at least 3 characters (letters, numbers, underscores).");
+        showAuthError("Nama pengguna (username) mestilah sekurang-kurangnya 3 aksara (huruf, nombor, underscore).");
         return;
     }
 
     const strength = evaluatePasswordStrength(passwordInput);
     if (strength.score < 2) {
-        showAuthError("Password is too weak. Must be at least 8 characters long with numbers & casing.");
+        showAuthError("Kata laluan terlalu lemah. Mestilah sekurang-kurangnya 8 aksara dengan gabungan nombor & huruf.");
         return;
     }
 
     if (passwordInput !== confirmPasswordInput) {
-        showAuthError("Passwords do not match. Please re-enter your password.");
+        showAuthError("Kata laluan tidak sepadan. Sila masukkan semula.");
         return;
     }
 
-    setButtonLoading(submitBtn, true, "Creating Account...");
+    setButtonLoading(submitBtn, true, "Mendaftar Akaun Supabase...");
 
     try {
         const client = getSupabase();
         const cleanUser = usernameInput.toLowerCase();
+        const cleanEmail = emailInput.toLowerCase();
 
-        // 1. Save user mapping to local database store immediately
-        localStorage.setItem(`lexisense_email_map_${cleanUser}`, emailInput);
-        
-        let localUsers = {};
-        try {
-            localUsers = JSON.parse(localStorage.getItem('lexisense_registered_users') || '{}');
-        } catch(e) {}
-
-        function generateUUID() {
-            if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-                return v.toString(16);
-            });
+        if (!client) {
+            showAuthError("Ralat: Pangkalan data Supabase tidak dapat disambungkan.");
+            setButtonLoading(submitBtn, false, "Create Account →");
+            return;
         }
 
-        const newUserId = generateUUID();
-        localUsers[cleanUser] = {
-            id: newUserId,
-            username: usernameInput,
-            email: emailInput,
-            password: passwordInput,
-            name: nameInput,
-            full_name: nameInput,
-            role: selectedUserType,
-            school: selectedUserType === 'teacher' ? schoolInput : null
-        };
-        localStorage.setItem('lexisense_registered_users', JSON.stringify(localUsers));
+        // 1. Check if email or username already exists in Supabase profiles table, local storage, or demo accounts
+        const DEMO_EMAILS = [
+            'faiz.ikhwan@sktamanria.edu.my',
+            'admin@sktamanria.edu.my',
+            'parent@lexisense.com',
+            'superadmin@lexisense.com',
+            'suzana@lexisense.com',
+            'suzana@lexisense.ai'
+        ];
+        if (DEMO_EMAILS.includes(cleanEmail)) {
+            showAuthError(`E-mel "${emailInput}" telah pun didaftarkan (The email is already in use). Sila log masuk atau gunakan e-mel lain.`);
+            setButtonLoading(submitBtn, false, "Create Account →");
+            return;
+        }
 
-        // 2. Register to Supabase Cloud Auth & Profiles Table
-        let supabaseUserId = newUserId;
+        // Check Supabase profiles table for existing email or username across any category
         if (client) {
             try {
-                const { data, error: supaAuthErr } = await client.auth.signUp({
-                    email: emailInput,
-                    password: passwordInput,
-                    options: {
-                        data: {
-                            full_name: nameInput,
-                            username: usernameInput,
-                            role: selectedUserType,
-                            school_branch: selectedUserType === 'teacher' ? schoolInput : null
-                        }
+                const { data: existingProfiles } = await client
+                    .from('profiles')
+                    .select('username, email, role')
+                    .or(`username.ilike.${usernameInput},email.ilike.${emailInput}`);
+
+                if (existingProfiles && existingProfiles.length > 0) {
+                    const matchEmail = existingProfiles.find(p => p.email?.toLowerCase() === cleanEmail);
+                    const matchUname = existingProfiles.find(p => p.username?.toLowerCase() === cleanUser);
+                    if (matchEmail) {
+                        showAuthError(`E-mel "${emailInput}" telah pun didaftarkan (The email is already in use). Sila log masuk atau guna e-mel lain.`);
+                        setButtonLoading(submitBtn, false, "Create Account →");
+                        return;
                     }
-                });
-
-                if (data?.user?.id) {
-                    supabaseUserId = data.user.id;
-                    localUsers[cleanUser].id = supabaseUserId;
-                    localStorage.setItem('lexisense_registered_users', JSON.stringify(localUsers));
-                }
-
-                // Insert/Upsert profile directly into Supabase 'profiles' table
-                const profilePayload = {
-                    id: supabaseUserId,
-                    username: usernameInput,
-                    full_name: nameInput,
-                    email: emailInput,
-                    role: selectedUserType,
-                    school_branch: selectedUserType === 'teacher' ? schoolInput : null,
-                    is_active: true,
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                };
-
-                let { data: profData, error: profErr } = await client.from('profiles').upsert([profilePayload]).select();
-                
-                // If failed with ID (foreign key constraint), retry without ID so database assigns gen_random_uuid()
-                if (profErr) {
-                    console.warn("Notice saving profile with Auth ID, retrying without ID:", profErr.message);
-                    delete profilePayload.id;
-                    const { data: retryProf, error: retryErr } = await client.from('profiles').insert([profilePayload]).select();
-                    if (retryProf && retryProf[0]?.id) {
-                        supabaseUserId = retryProf[0].id;
-                        localUsers[cleanUser].id = supabaseUserId;
-                        localStorage.setItem('lexisense_registered_users', JSON.stringify(localUsers));
-                        console.log(`Profile for "${nameInput}" saved to Supabase 'profiles' table! 👤✅`, retryProf[0]);
-                    } else if (retryErr) {
-                        console.error("Profile insert error in Supabase:", retryErr.message);
+                    if (matchUname) {
+                        showAuthError(`Nama pengguna "${usernameInput}" telah wujud dalam Supabase. Sila guna username lain.`);
+                        setButtonLoading(submitBtn, false, "Create Account →");
+                        return;
                     }
-                } else if (profData && profData[0]?.id) {
-                    console.log(`Profile for "${nameInput}" saved to Supabase 'profiles' table! 👤✅`, profData[0]);
                 }
-
-                // Log registration activity to audit_logs
-                try {
-                    await client.from('audit_logs').insert([{
-                        actor: nameInput,
-                        event: 'REGISTER_USER',
-                        target: `Registered new ${selectedUserType} account for "${nameInput}" (${emailInput})`,
-                        status: 'SUCCESS',
-                        ip: '127.0.0.1',
-                        timestamp: new Date().toISOString()
-                    }]);
-                } catch(e) {}
-
-            } catch (supaErr) {
-                console.warn("Supabase cloud registration notice:", supaErr);
+            } catch (e) {
+                console.warn("Supabase profile existence check notice:", e);
             }
         }
 
-        // 3. Immediately Log In & Redirect
+        // Check Local Storage Users Registry
+        try {
+            const localUsers = JSON.parse(localStorage.getItem('lexisense_registered_users') || '{}');
+            const allLocalArray = Array.isArray(localUsers) ? localUsers : Object.values(localUsers);
+            const foundLocalEmail = allLocalArray.find(u => u.email && u.email.toLowerCase() === cleanEmail);
+            if (foundLocalEmail) {
+                showAuthError(`E-mel "${emailInput}" telah pun didaftarkan (The email is already in use). Sila log masuk atau guna e-mel lain.`);
+                setButtonLoading(submitBtn, false, "Create Account →");
+                return;
+            }
+        } catch(e) {}
+
+        // 2. Perform Supabase Cloud Authentication Sign Up
+        const { data: authData, error: supaAuthErr } = await client.auth.signUp({
+            email: emailInput,
+            password: passwordInput,
+            options: {
+                data: {
+                    full_name: nameInput,
+                    username: usernameInput,
+                    role: selectedUserType,
+                    school_branch: selectedUserType === 'teacher' ? schoolInput : null
+                }
+            }
+        });
+
+        if (supaAuthErr) {
+            console.error("Supabase Cloud Auth SignUp Error:", supaAuthErr);
+            let userMsg = supaAuthErr.message;
+            if (userMsg.includes("User already registered") || userMsg.includes("already been registered")) {
+                userMsg = `E-mel "${emailInput}" telah pun didaftarkan (The email is already in use). Sila log masuk.`;
+            } else if (userMsg.includes("Password should be")) {
+                userMsg = "Kata laluan tidak memenuhi syarat keselamatan Supabase.";
+            }
+            showAuthError(`Pendaftaran Gagal: ${userMsg}`);
+            setButtonLoading(submitBtn, false, "Create Account →");
+            return;
+        }
+
+        const supabaseUserId = authData?.user?.id || `usr-${Date.now()}`;
+        const isEducatorRole = (selectedUserType === 'teacher' || selectedUserType === 'admin');
+
+        // 3. Upsert Profile into Supabase 'public.profiles' table
+        const profilePayload = {
+            id: supabaseUserId,
+            username: usernameInput,
+            full_name: nameInput,
+            email: emailInput,
+            role: selectedUserType,
+            school_branch: isEducatorRole ? schoolInput : null,
+            is_active: true,
+            is_approved: !isEducatorRole,
+            status: isEducatorRole ? 'pending' : 'active',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        };
+
+        const { data: profData, error: profErr } = await client.from('profiles').upsert([profilePayload]).select();
+        if (profErr) {
+            console.warn("Notice upserting profile with ID, retrying insert:", profErr.message);
+            delete profilePayload.id;
+            const { data: insData, error: insErr } = await client.from('profiles').insert([profilePayload]).select();
+            if (insErr) {
+                console.error("Critical: Failed to insert profile into Supabase profiles table:", insErr.message);
+            } else {
+                console.log("Profile successfully inserted into Supabase 'profiles' table ✅", insData);
+            }
+        } else {
+            console.log("Profile successfully upserted into Supabase 'profiles' table ✅", profData);
+        }
+
+        // Also save profile to local registry map for instant cross-checking
+        try {
+            let localUsers = JSON.parse(localStorage.getItem('lexisense_registered_users') || '{}');
+            if (Array.isArray(localUsers)) {
+                localUsers.push(profilePayload);
+            } else if (typeof localUsers === 'object') {
+                localUsers[cleanUser] = profilePayload;
+            }
+            localStorage.setItem('lexisense_registered_users', JSON.stringify(localUsers));
+        } catch(e) {}
+
+        // 4. Log audit activity
+        try {
+            await client.from('audit_logs').insert([{
+                actor: nameInput,
+                event: 'REGISTER_USER',
+                target: `Registered new ${selectedUserType} account for "${nameInput}" (${emailInput})`,
+                status: 'SUCCESS',
+                ip: '127.0.0.1',
+                timestamp: new Date().toISOString()
+            }]);
+        } catch(e) {}
+
+        // 5. IF EDUCATOR / TEACHER, REQUIRE SUPER ADMIN APPROVAL GATE BEFORE ACCESS!
+        if (isEducatorRole) {
+            closeAuthModal();
+            showEducatorPendingApprovalModal(nameInput, emailInput, schoolInput);
+            setButtonLoading(submitBtn, false, "Create Account →");
+            return;
+        }
+
+        // 6. IF PARENT, STORE ACTIVE SESSION & REDIRECT IMMEDIATELY
         window.loggedInUser = {
             id: supabaseUserId,
             username: usernameInput,
             name: nameInput,
+            full_name: nameInput,
             email: emailInput,
             role: selectedUserType,
-            school: selectedUserType === 'teacher' ? schoolInput : null,
-            password: passwordInput
+            school: null,
+            is_approved: true,
+            status: 'active'
         };
         localStorage.setItem('lexisense_user', JSON.stringify(window.loggedInUser));
+        localStorage.setItem(`lexisense_email_map_${cleanUser}`, emailInput);
         localStorage.setItem(`lexisense_profile_${cleanUser}`, JSON.stringify(window.loggedInUser));
 
         if (typeof showToast === 'function') {
-            showToast(`Account created successfully! Welcome to LexiSense, ${nameInput}! 🎉`);
+            showToast(`Akaun berjaya didaftarkan! Selamat datang, ${nameInput}! 🎉`);
         }
 
         closeAuthModal();
-
-        let redirectUrl = 'parent-page.html';
-        if (selectedUserType === 'teacher' || selectedUserType === 'admin') {
-            redirectUrl = 'admin-page.html';
-        } else if (selectedUserType === 'super_admin') {
-            redirectUrl = 'super-admin-page.html';
-        }
-
-        showLoginWelcomeExperience(window.loggedInUser, redirectUrl);
+        const regRedirect = (selectedUserType === 'admin' || selectedUserType === 'teacher') ? 'admin-page.html' : 'parent-page.html';
+        showLoginWelcomeExperience(window.loggedInUser, regRedirect);
 
     } catch (err) {
         console.error("Registration Exception:", err);
-        showAuthError("An error occurred during registration. Please try again.");
+        showAuthError("Ralat semasa pendaftaran: " + (err.message || err));
     } finally {
         setButtonLoading(submitBtn, false, "Create Account →");
     }
@@ -1146,16 +1248,40 @@ async function loginAsDemo(role = 'admin') {
 
     // 2. Fallback Demo Session Mode for instant testing
     if (!loggedIn) {
+        let dbProfile = null;
+        if (client) {
+            try {
+                const { data: prof } = await client
+                    .from('profiles')
+                    .select('*')
+                    .or(`username.eq.${targetDemo.username},email.eq.${targetDemo.email}`)
+                    .maybeSingle();
+                if (prof) dbProfile = prof;
+            } catch(e) {}
+        }
+
+        let localProfile = null;
+        try {
+            localProfile = JSON.parse(localStorage.getItem(`lexisense_profile_${targetDemo.username.toLowerCase()}`) || 'null');
+        } catch(e) {}
+
+        const resolvedName = dbProfile?.full_name || dbProfile?.name || localProfile?.name || localProfile?.full_name || targetDemo.name;
+
         window.loggedInUser = {
-            id: targetDemo.id,
-            username: targetDemo.username,
-            name: targetDemo.name,
-            email: targetDemo.email,
-            role: targetDemo.role,
-            school: targetDemo.school,
+            id: dbProfile?.id || targetDemo.id,
+            username: dbProfile?.username || targetDemo.username,
+            name: resolvedName,
+            full_name: resolvedName,
+            email: dbProfile?.email || targetDemo.email,
+            role: dbProfile?.role || targetDemo.role,
+            school: dbProfile?.school_branch || targetDemo.school,
+            avatar: dbProfile?.avatar_url || targetDemo.avatar || '👩',
             is_demo: true
         };
         localStorage.setItem('lexisense_user', JSON.stringify(window.loggedInUser));
+        if (targetDemo.username) {
+            localStorage.setItem(`lexisense_profile_${targetDemo.username.toLowerCase()}`, JSON.stringify(window.loggedInUser));
+        }
     }
 
     if (typeof showToast === 'function') {
@@ -2876,6 +3002,90 @@ function showLoginWelcomeExperience(authenticatedUser, targetRedirectUrl) {
         }, 350);
     }, 1400);
 }
+
+/**
+ * Displays modal notice when an Educator registers and awaits Super Admin approval
+ */
+function showEducatorPendingApprovalModal(name, email, school) {
+    let overlay = document.getElementById('educatorPendingModalOverlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'educatorPendingModalOverlay';
+        overlay.className = 'fixed inset-0 z-50 bg-purple-950/80 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-300 opacity-0 hidden';
+        overlay.innerHTML = `
+            <div id="educatorPendingModalCard" class="relative w-full max-w-md bg-white rounded-[2.5rem] p-6 sm:p-8 shadow-2xl border-2 border-amber-300 text-center transform scale-95 transition-all duration-300 overflow-hidden">
+                <div class="absolute -top-12 -right-12 w-36 h-36 bg-gradient-to-br from-amber-200/50 via-yellow-100/30 to-transparent rounded-full blur-2xl pointer-events-none"></div>
+                
+                <div class="relative mx-auto w-24 h-24 my-2 flex items-center justify-center">
+                    <div class="absolute inset-0 bg-amber-400/20 rounded-full blur-md animate-pulse"></div>
+                    <div class="relative w-full h-full bg-gradient-to-tr from-amber-100 via-white to-yellow-50 rounded-3xl border-2 border-amber-300 flex items-center justify-center shadow-lg p-2">
+                        <span class="text-4xl">⏳</span>
+                    </div>
+                </div>
+
+                <div class="inline-block bg-amber-50 border border-amber-200 text-amber-900 text-xs font-black px-3.5 py-1.5 rounded-2xl shadow-xs mt-1 mb-2">
+                    <span>🦉 "Permohonan Pendidik Berjaya Diterima!"</span>
+                </div>
+
+                <h3 class="font-heading text-2xl font-black text-brand-purple-deep leading-tight mt-1">
+                    Menunggu Pengesahan Super Admin
+                </h3>
+
+                <p class="text-xs sm:text-sm text-gray-600 font-medium mt-3 leading-relaxed">
+                    Hai <strong id="pendingEducatorNameText" class="text-purple-900">Cikgu</strong>, akaun anda bagi <strong id="pendingEducatorSchoolText" class="text-amber-800">Sekolah</strong> telah berdaftar. Bagi menjamin keselamatan data murid, akaun pendidik memerlukan <span class="font-bold text-purple-700">pengesahan daripada Super Admin</span> sebelum akses diberikan.
+                </p>
+
+                <div class="mt-4 p-3.5 bg-purple-50/80 border border-purple-200 rounded-2xl text-left text-xs space-y-1.5">
+                    <div class="flex items-center gap-2 text-purple-900 font-extrabold">
+                        <i class="fa-solid fa-envelope text-purple-600"></i>
+                        <span>Notifikasi E-mel Pengesahan:</span>
+                    </div>
+                    <p class="text-gray-600 font-semibold text-[11px] pl-5">
+                        E-mel pengesahan akan dihantar ke <strong id="pendingEducatorEmailText" class="text-purple-950 underline">email@domain.com</strong> sebaik sahaja Super Admin meluluskan akaun anda.
+                    </p>
+                </div>
+
+                <button type="button" onclick="closeEducatorPendingModal()" class="mt-6 w-full py-3.5 bg-gradient-to-r from-purple-700 via-indigo-600 to-purple-800 hover:from-purple-800 hover:to-indigo-700 text-white font-black rounded-2xl shadow-lg hover:shadow-xl transition-all text-xs sm:text-sm flex items-center justify-center gap-2">
+                    <span>Faham & Kembali ke Halaman Utama</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+    }
+
+    const nameEl = document.getElementById('pendingEducatorNameText');
+    const schoolEl = document.getElementById('pendingEducatorSchoolText');
+    const emailEl = document.getElementById('pendingEducatorEmailText');
+    const card = document.getElementById('educatorPendingModalCard');
+
+    if (nameEl) nameEl.textContent = name || 'Cikgu';
+    if (schoolEl) schoolEl.textContent = school || 'Sekolah';
+    if (emailEl) emailEl.textContent = email || 'e-mel anda';
+
+    overlay.classList.remove('hidden');
+    requestAnimationFrame(() => {
+        overlay.classList.remove('opacity-0');
+        overlay.classList.add('opacity-100');
+        if (card) {
+            card.classList.remove('scale-95');
+            card.classList.add('scale-100');
+        }
+    });
+}
+
+function closeEducatorPendingModal() {
+    const overlay = document.getElementById('educatorPendingModalOverlay');
+    if (overlay) {
+        overlay.classList.remove('opacity-100');
+        overlay.classList.add('opacity-0');
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+        }, 300);
+    }
+}
+window.showEducatorPendingApprovalModal = showEducatorPendingApprovalModal;
+window.closeEducatorPendingApprovalModal = closeEducatorPendingApprovalModal;
 
 document.addEventListener('DOMContentLoaded', () => {
     initAuthSystem();

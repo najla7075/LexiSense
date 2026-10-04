@@ -35,40 +35,58 @@
         let verifiedProfile = null;
 
         try {
-            // 1. Check Demo Session First
+            // 1. Check Live Supabase Session first if client exists
+            if (client) {
+                try {
+                    const { data: { session } } = await client.auth.getSession();
+                    if (session?.user) {
+                        const { data: profile } = await client
+                            .from('profiles')
+                            .select('*')
+                            .eq('id', session.user.id)
+                            .maybeSingle();
+                        if (profile && profile.is_active) {
+                            verifiedProfile = profile;
+                        }
+                    }
+                } catch (e) {}
+            }
+
+            // 2. Check Demo / Stored Local Session
             const storedUser = JSON.parse(localStorage.getItem('lexisense_user') || 'null');
-            if (storedUser && storedUser.is_demo) {
+
+            // 3. If stored user exists and client exists, try syncing latest profile from Supabase database
+            if (storedUser && client) {
+                try {
+                    let query = client.from('profiles').select('*');
+                    if (storedUser.id && isValidUUID(storedUser.id)) {
+                        query = query.eq('id', storedUser.id);
+                    } else if (storedUser.email) {
+                        query = query.ilike('email', storedUser.email);
+                    } else if (storedUser.username) {
+                        query = query.ilike('username', storedUser.username);
+                    }
+                    const { data: dbProf } = await query.maybeSingle();
+                    if (dbProf) {
+                        verifiedProfile = dbProf;
+                    }
+                } catch(e) {}
+            }
+
+            if (!verifiedProfile && storedUser && storedUser.is_demo) {
                 verifiedProfile = {
                     id: storedUser.id,
                     username: storedUser.username,
-                    full_name: storedUser.name,
+                    full_name: storedUser.name || storedUser.full_name,
                     email: storedUser.email,
                     role: storedUser.role,
                     school_branch: storedUser.school,
-                    is_active: true
+                    is_active: true,
+                    is_demo: true
                 };
             }
 
-            // 2. Check Live Supabase Session if not in demo mode
-            if (!verifiedProfile && client) {
-                const { data: { session }, error: sessionErr } = await client.auth.getSession();
-
-                if (!sessionErr && session && session.user) {
-                    const userId = session.user.id;
-
-                    const { data: profile, error: profileErr } = await client
-                        .from('profiles')
-                        .select('*')
-                        .eq('id', userId)
-                        .single();
-
-                    if (profile && !profileErr) {
-                        verifiedProfile = profile;
-                    }
-                }
-            }
-
-            // 3. Fallback to stored user profile or demo profile if available
+            // 4. Fallback to stored user profile
             if (!verifiedProfile && storedUser && storedUser.id) {
                 verifiedProfile = {
                     id: storedUser.id,
@@ -103,7 +121,7 @@
                 return;
             }
 
-            // 4. Verify Account Active Status
+            // 5. Verify Account Active Status
             if (verifiedProfile.is_active === false) {
                 alert("Your account has been deactivated by an administrator.");
                 failAndRedirect("Account disabled (is_active = false)", "index.html");
@@ -118,20 +136,23 @@
             } catch(e) {}
 
             // Store verified user profile globally for app scripts
+            // Prioritize live database full_name / name over cached customSaved or storedUser!
+            const resolvedName = verifiedProfile.full_name || verifiedProfile.name || customSaved?.name || customSaved?.full_name || storedUser?.name || storedUser?.full_name || 'Parent User';
+
             window.currentUserProfile = verifiedProfile;
             window.loggedInUser = {
                 id: verifiedProfile.id || storedUser?.id || 'usr_' + Date.now(),
                 username: verifiedProfile.username || storedUser?.username || 'user',
-                name: customSaved?.name || customSaved?.full_name || storedUser?.name || storedUser?.full_name || verifiedProfile.full_name || verifiedProfile.name || 'Parent User',
-                full_name: customSaved?.name || customSaved?.full_name || storedUser?.name || storedUser?.full_name || verifiedProfile.full_name || verifiedProfile.name || 'Parent User',
-                email: customSaved?.email || storedUser?.email || verifiedProfile.email || '',
+                name: resolvedName,
+                full_name: resolvedName,
+                email: verifiedProfile.email || customSaved?.email || storedUser?.email || '',
                 role: verifiedProfile.role || storedUser?.role || 'parent',
-                school: customSaved?.school || customSaved?.school_branch || storedUser?.school || storedUser?.school_branch || verifiedProfile.school_branch || null,
-                school_branch: customSaved?.school || customSaved?.school_branch || storedUser?.school || storedUser?.school_branch || verifiedProfile.school_branch || null,
-                phone: customSaved?.phone || customSaved?.phone_number || storedUser?.phone || storedUser?.phone_number || verifiedProfile.phone_number || '',
-                phone_number: customSaved?.phone || customSaved?.phone_number || storedUser?.phone || storedUser?.phone_number || verifiedProfile.phone_number || '',
-                avatar: customSaved?.avatar || storedUser?.avatar || verifiedProfile.avatar_url || '👩',
-                bio: customSaved?.bio || storedUser?.bio || verifiedProfile.bio || '',
+                school: verifiedProfile.school_branch || customSaved?.school || customSaved?.school_branch || storedUser?.school || storedUser?.school_branch || null,
+                school_branch: verifiedProfile.school_branch || customSaved?.school || customSaved?.school_branch || storedUser?.school || storedUser?.school_branch || null,
+                phone: verifiedProfile.phone_number || customSaved?.phone || customSaved?.phone_number || storedUser?.phone || storedUser?.phone_number || '',
+                phone_number: verifiedProfile.phone_number || customSaved?.phone || customSaved?.phone_number || storedUser?.phone || storedUser?.phone_number || '',
+                avatar: verifiedProfile.avatar_url || customSaved?.avatar || storedUser?.avatar || '👩',
+                bio: verifiedProfile.bio || customSaved?.bio || storedUser?.bio || '',
                 is_demo: verifiedProfile.is_demo || storedUser?.is_demo || false
             };
 
